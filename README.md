@@ -1,5 +1,9 @@
 # SGEMM Optimization: From Naive to Tensor Core
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![CUDA](https://img.shields.io/badge/CUDA-11.0+-76B900?logo=nvidia&logoColor=white)
+![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=c%2B%2B&logoColor=white)
+
 从零手写极致优化的矩阵乘法 - HPC 领域的 "Hello World"
 
 ## 项目概述
