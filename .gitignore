@@ -31,6 +31,14 @@ CMakeUserPresets.json
 *.swo
 *~
 
+# Jekyll
+_site/
+.jekyll-cache/
+.jekyll-metadata
+
+# Cache
+.cache/
+
 # OS
 .DS_Store
 Thumbs.db
