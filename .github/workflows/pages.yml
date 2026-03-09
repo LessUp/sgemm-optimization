@@ -4,8 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - '*.md'
-      - 'docs/**'
+      - 'index.md'
+      - 'README.md'
+      - 'README.zh-CN.md'
+      - 'changelog/**'
       - '_config.yml'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -23,14 +25,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (sparse — docs only)
         uses: actions/checkout@v4
         with:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
-            *.md
+            index.md
+            README.md
+            README.zh-CN.md
             _config.yml
-            docs
             changelog
             LICENSE
 

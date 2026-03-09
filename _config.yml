@@ -1,5 +1,33 @@
 title: SGEMM Optimization
-description: From Naive to Tensor Core — Progressive SGEMM Optimization
+description: >-
+  From Naive to Tensor Core — Progressive CUDA SGEMM Optimization.
+  Hand-written matrix multiplication kernels demonstrating core GPU optimization techniques.
+url: "https://lessup.github.io"
+baseurl: "/sgemm-optimization"
+lang: zh-CN
+
 remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-remote-theme
+
+exclude:
+  - build/
+  - cmake-build-*/
+  - src/
+  - tests/
+  - .github/
+  - .kiro/
+  - .vscode/
+  - .editorconfig
+  - .gitignore
+  - .clang-format
+  - CMakeLists.txt
+  - CMakePresets.json
+  - Makefile
+  - CONTRIBUTING.md
+  - LICENSE
+  - "*.csv"
+  - "*.cu"
+  - "*.cuh"
+  - "*.o"
+  - "*.so"
