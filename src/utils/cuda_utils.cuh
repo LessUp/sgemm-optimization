@@ -11,13 +11,20 @@
 // Error Checking Macros
 // ============================================================================
 
+#include <stdexcept>
+#include <string>
+
+// Exception types for proper RAII cleanup on error
+struct CudaError : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 #define CUDA_CHECK(call)                                                       \
     do {                                                                       \
         cudaError_t err = call;                                                \
         if (err != cudaSuccess) {                                              \
-            fprintf(stderr, "CUDA error at %s:%d: %s\n", __FILE__, __LINE__,   \
-                    cudaGetErrorString(err));                                  \
-            exit(EXIT_FAILURE);                                                \
+            throw CudaError(std::string("CUDA error at ") + __FILE__ + ":" +   \
+                std::to_string(__LINE__) + ": " + cudaGetErrorString(err));    \
         }                                                                      \
     } while (0)
 
@@ -25,9 +32,9 @@
     do {                                                                       \
         cublasStatus_t status = call;                                          \
         if (status != CUBLAS_STATUS_SUCCESS) {                                 \
-            fprintf(stderr, "cuBLAS error at %s:%d: %d\n", __FILE__, __LINE__, \
-                    static_cast<int>(status));                                 \
-            exit(EXIT_FAILURE);                                                \
+            throw CudaError(std::string("cuBLAS error at ") + __FILE__ + ":" + \
+                std::to_string(__LINE__) + ": code " +                         \
+                std::to_string(static_cast<int>(status)));                     \
         }                                                                      \
     } while (0)
 
@@ -35,9 +42,9 @@
     do {                                                                       \
         curandStatus_t status = call;                                          \
         if (status != CURAND_STATUS_SUCCESS) {                                 \
-            fprintf(stderr, "cuRAND error at %s:%d: %d\n", __FILE__, __LINE__, \
-                    static_cast<int>(status));                                 \
-            exit(EXIT_FAILURE);                                                \
+            throw CudaError(std::string("cuRAND error at ") + __FILE__ + ":" + \
+                std::to_string(__LINE__) + ": code " +                         \
+                std::to_string(static_cast<int>(status)));                     \
         }                                                                      \
     } while (0)
 

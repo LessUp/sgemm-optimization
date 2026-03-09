@@ -78,41 +78,39 @@ public:
         result.K = K;
         result.N = N;
         
-        // Allocate memory
+        // Allocate memory using RAII (no leaks on error)
         std::vector<float> h_A(M * K), h_B(K * N), h_C(M * N), h_C_ref(M * N);
-        float *d_A, *d_B, *d_C, *d_C_ref;
-        
-        CUDA_CHECK(cudaMalloc(&d_A, M * K * sizeof(float)));
-        CUDA_CHECK(cudaMalloc(&d_B, K * N * sizeof(float)));
-        CUDA_CHECK(cudaMalloc(&d_C, M * N * sizeof(float)));
-        CUDA_CHECK(cudaMalloc(&d_C_ref, M * N * sizeof(float)));
+        DeviceMemory<float> d_A(M * K);
+        DeviceMemory<float> d_B(K * N);
+        DeviceMemory<float> d_C(M * N);
+        DeviceMemory<float> d_C_ref(M * N);
         
         // Initialize with random data
         initRandomMatrix(h_A.data(), M, K, -1.0f, 1.0f, 42);
         initRandomMatrix(h_B.data(), K, N, -1.0f, 1.0f, 123);
         
-        CUDA_CHECK(cudaMemcpy(d_A, h_A.data(), M * K * sizeof(float), cudaMemcpyHostToDevice));
-        CUDA_CHECK(cudaMemcpy(d_B, h_B.data(), K * N * sizeof(float), cudaMemcpyHostToDevice));
+        d_A.copyFromHost(h_A.data(), M * K);
+        d_B.copyFromHost(h_B.data(), K * N);
         
         // Compute reference using cuBLAS
         float alpha = 1.0f, beta = 0.0f;
         CUBLAS_CHECK(cublasSgemm(cublas_handle_,
                                  CUBLAS_OP_N, CUBLAS_OP_N,
                                  N, M, K,
-                                 &alpha, d_B, N, d_A, K,
-                                 &beta, d_C_ref, N));
+                                 &alpha, d_B.get(), N, d_A.get(), K,
+                                 &beta, d_C_ref.get(), N));
         
         // Warm-up runs
         for (int i = 0; i < warmup_runs; ++i) {
-            CUDA_CHECK(cudaMemset(d_C, 0, M * N * sizeof(float)));
-            kernel_func(d_A, d_B, d_C, M, K, N);
+            d_C.zero();
+            kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N);
         }
         CUDA_CHECK(cudaDeviceSynchronize());
         
         // Benchmark runs
         CUDA_CHECK(cudaEventRecord(start_));
         for (int i = 0; i < benchmark_runs; ++i) {
-            kernel_func(d_A, d_B, d_C, M, K, N);
+            kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N);
         }
         CUDA_CHECK(cudaEventRecord(stop_));
         CUDA_CHECK(cudaEventSynchronize(stop_));
@@ -122,28 +120,22 @@ public:
         result.time_ms = total_time_ms / benchmark_runs;
         
         // Calculate GFLOPS
-        // GEMM: 2 * M * N * K FLOPs (multiply + add for each output element)
         double flops = 2.0 * M * N * K;
         result.gflops = (flops / (result.time_ms * 1e-3)) / 1e9;
         
         // Calculate memory bandwidth (approximate)
-        // Read: A (M*K) + B (K*N), Write: C (M*N)
         double bytes = (M * K + K * N + M * N) * sizeof(float);
         result.bandwidth_gb_s = (bytes / (result.time_ms * 1e-3)) / 1e9;
         
         // Verify correctness
-        CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, M * N * sizeof(float), cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(h_C_ref.data(), d_C_ref, M * N * sizeof(float), cudaMemcpyDeviceToHost));
+        d_C.copyToHost(h_C.data(), M * N);
+        d_C_ref.copyToHost(h_C_ref.data(), M * N);
         
         VerifyResult verify_result = compareMatrices(h_C.data(), h_C_ref.data(), M, N, rtol, atol);
         result.correct = verify_result.passed;
         result.max_error = verify_result.max_rel_error;
         
-        // Cleanup
-        cudaFree(d_A);
-        cudaFree(d_B);
-        cudaFree(d_C);
-        cudaFree(d_C_ref);
+        // DeviceMemory RAII handles cleanup automatically
         
         results_.push_back(result);
         return result;

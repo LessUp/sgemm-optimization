@@ -28,7 +28,6 @@
 #include "kernels/bank_conflict_free_sgemm.cuh"
 #include "kernels/double_buffer_sgemm.cuh"
 #include "kernels/tensor_core_sgemm.cuh"
-#include "tensorcraft/kernels/gemm.hpp"
 
 // ============================================================================
 // Configuration
@@ -47,19 +46,11 @@ constexpr int BENCHMARK_RUNS = 20;
 
 // Wrapper functions to match the expected signature for benchmarking
 void naive_kernel(const float* A, const float* B, float* C, int M, int K, int N) {
-    tensorcraft::kernels::launch_gemm(
-        A, B, C,
-        M, N, K,
-        1.0f, 0.0f,
-        tensorcraft::kernels::GemmVersion::Naive);
+    launch_naive_sgemm<32>(A, B, C, M, K, N);
 }
 
 void tiled_kernel(const float* A, const float* B, float* C, int M, int K, int N) {
-    tensorcraft::kernels::launch_gemm(
-        A, B, C,
-        M, N, K,
-        1.0f, 0.0f,
-        tensorcraft::kernels::GemmVersion::Tiled);
+    launch_tiled_sgemm<32>(A, B, C, M, K, N);
 }
 
 void bank_conflict_free_kernel(const float* A, const float* B, float* C, int M, int K, int N) {
@@ -67,11 +58,7 @@ void bank_conflict_free_kernel(const float* A, const float* B, float* C, int M, 
 }
 
 void double_buffer_kernel(const float* A, const float* B, float* C, int M, int K, int N) {
-    tensorcraft::kernels::launch_gemm(
-        A, B, C,
-        M, N, K,
-        1.0f, 0.0f,
-        tensorcraft::kernels::GemmVersion::DoubleBuffer);
+    launch_double_buffer_sgemm<32>(A, B, C, M, K, N);
 }
 
 void tensor_core_kernel(const float* A, const float* B, float* C, int M, int K, int N) {

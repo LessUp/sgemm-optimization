@@ -10,7 +10,7 @@ GPU_ARCH ?= sm_86
 # Compiler flags
 NVCC_FLAGS = -O3 -std=c++17 -arch=$(GPU_ARCH) --use_fast_math
 NVCC_FLAGS += -Xcompiler -Wall,-Wextra
-NVCC_FLAGS += -I./src -I./src/kernels -I./src/utils -I../modern-ai-kernels/include
+NVCC_FLAGS += -I./src -I./src/kernels -I./src/utils
 
 # Libraries
 LIBS = -lcublas -lcurand

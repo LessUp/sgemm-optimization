@@ -229,69 +229,31 @@ void launch_tensor_core_sgemm(
     int M, int K, int N,
     cudaStream_t stream = 0
 ) {
-    // Allocate FP16 buffers
-    half *d_A_fp16, *d_B_fp16;
-    CUDA_CHECK(cudaMalloc(&d_A_fp16, M * K * sizeof(half)));
-    CUDA_CHECK(cudaMalloc(&d_B_fp16, K * N * sizeof(half)));
+    // Use RAII DeviceMemory for FP16 buffers — no leak on error or early return
+    DeviceMemory<half> d_A_fp16(M * K);
+    DeviceMemory<half> d_B_fp16(K * N);
     
     // Convert FP32 to FP16
     int blockSize = 256;
     int gridSizeA = (M * K + blockSize - 1) / blockSize;
     int gridSizeB = (K * N + blockSize - 1) / blockSize;
     
-    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16, M * K);
-    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16, K * N);
+    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(), M * K);
+    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(), K * N);
     
-    // Launch Tensor Core kernel
-    // Each warp handles one 16x16 tile
-    // We need M/16 x N/16 warps total
-    // Organize as blocks of warps
-    
-    // Simple configuration: one warp per 16x16 output tile
-    // Block: 4x4 warps = 16 warps = 512 threads (but we use 2D indexing)
-    dim3 blockDim(16, 16);  // 256 threads = 8 warps
+    // Launch: one warp (32 threads) per 16×16 output tile
+    dim3 blockDim(32, 1);
     dim3 gridDim(
         (N + WMMA_N - 1) / WMMA_N,
         (M + WMMA_M - 1) / WMMA_M
     );
     
-    // Adjust for warp-level indexing
-    // Each "thread" in our grid is actually a warp position
-    gridDim.x = (N + WMMA_N - 1) / WMMA_N;
-    gridDim.y = (M + WMMA_M - 1) / WMMA_M;
-    blockDim.x = 1;
-    blockDim.y = 1;
-    
-    // Actually, let's use a simpler approach with proper warp handling
-    // 4 warps per block (128 threads), each warp handles one 16x16 tile
-    int warpsPerBlockX = 2;
-    int warpsPerBlockY = 2;
-    blockDim.x = warpsPerBlockX * 32;  // 64 threads
-    blockDim.y = warpsPerBlockY;        // 2 rows of warps
-    
-    int tilesX = (N + WMMA_N - 1) / WMMA_N;
-    int tilesY = (M + WMMA_M - 1) / WMMA_M;
-    
-    gridDim.x = (tilesX + warpsPerBlockX - 1) / warpsPerBlockX;
-    gridDim.y = (tilesY + warpsPerBlockY - 1) / warpsPerBlockY;
-    
-    // Use the basic kernel for simplicity
-    // Reset to simple 1 warp = 1 tile approach
-    blockDim = dim3(32, 1);  // One warp
-    gridDim = dim3(
-        (N + WMMA_N - 1) / WMMA_N,
-        (M + WMMA_M - 1) / WMMA_M
-    );
-    
     tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(
-        d_A_fp16, d_B_fp16, C, M, K, N
+        d_A_fp16.get(), d_B_fp16.get(), C, M, K, N
     );
     
     CUDA_CHECK(cudaGetLastError());
-    
-    // Free FP16 buffers
-    CUDA_CHECK(cudaFree(d_A_fp16));
-    CUDA_CHECK(cudaFree(d_B_fp16));
+    // d_A_fp16 and d_B_fp16 automatically freed by RAII destructor
 }
 
 /**
