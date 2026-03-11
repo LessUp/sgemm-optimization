@@ -6,6 +6,7 @@
 #include <mma.h>
 
 using namespace nvcuda;
+using namespace nvcuda::wmma;
 
 /**
  * Tensor Core SGEMM Kernel using WMMA API
