@@ -12,20 +12,26 @@
 
 本项目实现了一个从最简单的三层循环到接近 cuBLAS 性能的 CUDA SGEMM (Single-precision General Matrix Multiply) 优化演进过程。通过渐进式优化，展示 GPU 编程中的核心优化技术。
 
-## 实测性能结果
+## 性能说明
 
-在 NVIDIA GeForce RTX 3060 Laptop GPU (sm_86) 上的 1024×1024×1024 矩阵乘法性能：
+实际 GFLOPS 会受到 GPU 型号、CUDA 版本和问题规模影响。
+当前 benchmark 会报告两种 Tensor Core 口径：
 
-| Kernel | GFLOPS | vs cuBLAS | 状态 |
-|--------|--------|-----------|------|
-| cuBLAS (参考) | 5727 | 100% | ✅ PASS |
-| Tensor Core (WMMA) | 2300 | 40.2% | ✅ PASS |
-| Tiled (32×32) | 753 | 13.1% | ✅ PASS |
-| Double Buffer | 701 | 12.2% | ✅ PASS |
-| Bank Conflict Free | 673 | 11.8% | ✅ PASS |
-| Naive | 604 | 10.6% | ✅ PASS |
+- **Tensor Core (WMMA end-to-end)**：包含 FP32→FP16 转换，以及对非 WMMA 兼容尺寸的安全回退。
+- **Tensor Core (WMMA compute-only)**：仅统计 WMMA 计算路径时间，只会在 `M/K/N` 都是 16 的倍数时显示。
 
-*所有 kernel 均通过与 cuBLAS 的正确性验证*
+项目中的验证容差已统一：
+
+- 标准 FP32 kernel：`rtol=1e-3`, `atol=1e-4`
+- Tensor Core 混合精度路径：`rtol=5e-2`, `atol=1e-2`
+
+默认 benchmark 集合包含：
+
+- 对齐方阵：`512x512x512`、`1024x1024x1024`
+- 一组对齐非方阵：`256x384x640`
+- 一组非对齐边界尺寸：`511x513x1025`，用于验证 Tensor Core 安全回退
+
+> 注意：程序输出中的 theoretical peak 和 roofline 数据都是近似分析值，不是严格硬件峰值。
 
 ## 优化版本
 
@@ -34,7 +40,7 @@
 | Naive | 基础三层循环 | 每线程计算一个输出元素 |
 | Tiled | 共享内存分块 | 数据复用，减少全局内存访问 |
 | Bank Conflict Free | 消除 bank 冲突 | 共享内存 padding (+1) |
-| Double Buffer | 双缓冲流水线 | 计算与访存重叠 |
+| Double Buffer | 双缓冲流水线 | 通过重组 tile staging 降低访存停顿 |
 | Tensor Core | WMMA API | 硬件加速矩阵运算 (FP16→FP32) |
 
 ## 构建与运行
@@ -46,52 +52,36 @@
 - GPU: Volta (sm_70) 或更新架构
 - Google Test (可选，用于属性测试)
 
-### 编译
+### 编译与运行
+
+推荐优先使用 CMake：
 
 ```bash
-# 根据你的 GPU 架构调整 (RTX 30 系列用 sm_86)
-make GPU_ARCH=sm_86
-
-# 或直接使用默认架构
-make
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+./build/bin/sgemm_benchmark
+./build/bin/sgemm_benchmark --dims 256 384 640
+./build/bin/sgemm_benchmark -a
 ```
 
-### 运行
+Makefile 可用于快速本地构建：
 
 ```bash
-# 运行基准测试
-./build/sgemm_benchmark
-
-# 或使用 make
+make GPU_ARCH=sm_86
 make benchmark
-
-# 清理构建
+make test
 make clean
 ```
 
-### 输出示例
+### 输出说明
 
-```
-===============================================================
-   SGEMM Optimization Benchmark Suite
-===============================================================
-GPU Device: NVIDIA GeForce RTX 3060 Laptop GPU
-Compute Capability: 8.6
-SM Count: 30
+程序会根据输入尺寸和 GPU 能力输出不同 kernel 的结果。
+当尺寸满足 WMMA 要求时，会同时显示：
 
-===============================================================
-   Benchmarking 1024 x 1024 x 1024 SGEMM
-===============================================================
+- `Tensor Core (WMMA end-to-end)`：包含 FP32→FP16 转换与安全回退语义
+- `Tensor Core (WMMA compute-only)`：仅统计 WMMA 计算路径
 
-  Kernel              | Dimensions         |    Time |  Performance | Pass
------------------------------------------------------------------------
-  cuBLAS              | 1024 x 1024 x 1024 | 0.375ms | 5726 GFLOPS  | PASS
-  Naive               | 1024 x 1024 x 1024 | 3.553ms |  604 GFLOPS  | PASS
-  Tiled (32x32)       | 1024 x 1024 x 1024 | 2.853ms |  753 GFLOPS  | PASS
-  Bank Conflict Free  | 1024 x 1024 x 1024 | 3.190ms |  673 GFLOPS  | PASS
-  Double Buffer       | 1024 x 1024 x 1024 | 3.064ms |  701 GFLOPS  | PASS
-  Tensor Core (WMMA)  | 1024 x 1024 x 1024 | 0.934ms | 2300 GFLOPS  | PASS
-```
+具体数值会随 GPU、CUDA 版本和尺寸而变化，因此 README 不再固定展示单一机器上的性能表。
 
 ## 目录结构
 
@@ -208,6 +198,9 @@ for (int t = 0; t < numTiles; ++t) {
 
 ### 5. Tensor Core (WMMA API)
 
+当前实现中，Tensor Core 入口在不满足 `sm_70+` 或 `M/K/N` 非 16 对齐时会自动回退到稳定的 FP32 kernel，而不是继续执行不安全的 WMMA 访问。
+
+
 **特点：**
 - 专用矩阵计算单元，执行 D = A×B + C
 - 支持 FP16 输入，FP32 累加 (混合精度)
@@ -270,18 +263,21 @@ bool passed = abs_error <= atol + rtol * fabs(ref_val);
 
 ## 属性测试 (Property-Based Testing)
 
-测试文件 `tests/test_sgemm.cu` 包含以下属性测试：
+测试文件 `tests/test_sgemm.cu` 目前覆盖：
 
-1. **Property 1: Kernel Numerical Correctness** - 所有 kernel 与 cuBLAS 结果一致
-2. **Property 2: Tensor Core Correctness** - Tensor Core 在放宽容差下正确
-3. **Property 3: Error Detection** - 验证系统能正确检测错误
-4. **Property 4: Dimension Invariance** - 所有 kernel 支持任意对齐维度
+1. **标准 kernel 数值正确性** - 方阵与非方阵结果对齐 cuBLAS
+2. **Tensor Core fast path** - 16 对齐尺寸下验证 WMMA 路径
+3. **Tensor Core fallback** - 非对齐尺寸时安全回退到 FP32 kernel
+4. **小尺寸与边界尺寸** - 包含 `1x1x1` 和非对齐 edge case
+5. **Error Detection** - 验证工具与 benchmark 容差保持一致
 
-运行测试需要 Google Test：
+运行测试：
 ```bash
-# 安装 Google Test 后
+cmake --build build --target test_sgemm
+ctest --test-dir build
+
+# 或
 make test
-./build/test_sgemm
 ```
 
 ## 面试要点总结

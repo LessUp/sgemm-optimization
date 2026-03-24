@@ -8,54 +8,60 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC. Five kernel variants demonstrate core GPU optimization techniques, from a naive triple loop to **Tensor Core WMMA reaching 40% of cuBLAS throughput**.
+Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC. Five kernel variants demonstrate core GPU optimization techniques, from a naive triple loop to a guarded Tensor Core WMMA path with explicit mixed-precision benchmarking.
 
-## Performance (RTX 3060 Laptop, 1024×1024×1024)
+## Performance
 
-| Kernel | GFLOPS | vs cuBLAS | Time | Key Technique |
-|--------|-------:|----------:|-----:|---------------|
-| **cuBLAS** (ref) | 5727 | 100% | 0.375 ms | NVIDIA optimized library |
-| **Tensor Core** (WMMA) | 2300 | 40.2% | 0.934 ms | FP16→FP32 mixed precision |
-| **Tiled** (32×32) | 753 | 13.1% | 2.853 ms | Shared memory blocking |
-| **Double Buffer** | 701 | 12.2% | 3.064 ms | Compute-memory overlap |
-| **Bank Conflict Free** | 673 | 11.8% | 3.190 ms | Shared memory padding (+1) |
-| **Naive** | 604 | 10.6% | 3.553 ms | One thread per output element |
+The exact GFLOPS you see will depend on GPU model, CUDA version, and problem size.
+The benchmark now reports two Tensor Core views:
 
-*All kernels verified against cuBLAS (allclose: rtol=1e-3, atol=1e-4; Tensor Core: rtol=5e-2)*
+- **Tensor Core (WMMA end-to-end)**: includes FP32→FP16 conversion and safe fallback for non-WMMA-compatible dimensions.
+- **Tensor Core (WMMA compute-only)**: times only the WMMA compute path and is shown only when `M`, `K`, and `N` are multiples of 16.
+
+Verification tolerances are centralized in code:
+
+- Standard FP32 kernels: `rtol=1e-3`, `atol=1e-4`
+- Tensor Core mixed-precision path: `rtol=5e-2`, `atol=1e-2`
+
+The default benchmark set includes:
+
+- aligned square cases: `512x512x512`, `1024x1024x1024`
+- one aligned non-square case: `256x384x640`
+- one unaligned edge case: `511x513x1025` to exercise safe Tensor Core fallback
+
+> Note: the printed theoretical peak and roofline numbers are approximate analytical references, not exact hardware limits.
 
 ## Optimization Roadmap
 
 ```
-  ┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌───────────────┐
-  │  Naive  │────▶│  Tiled   │────▶│  Bank-Free   │────▶│ Double Buffer │
-  │ 604 GF  │     │ 753 GF   │     │   673 GF     │     │   701 GF      │
-  └─────────┘     └──────────┘     └──────────────┘     └───────┬───────┘
-                                                                │
-                                                                ▼
-                                                    ┌───────────────────┐
-                                                    │   Tensor Core     │
-                                                    │   2300 GF (WMMA)  │
-                                                    └───────────────────┘
+  Naive  ->  Tiled  ->  Bank-Free  ->  Double Buffer  ->  Tensor Core (WMMA)
 ```
 
 | Stage | What Changes | Why It Helps |
 |-------|-------------|--------------|
 | **Naive → Tiled** | Load tiles into shared memory | Data reuse reduces global memory traffic by TILE_SIZE× |
 | **Tiled → Bank-Free** | Pad shared memory `[32][33]` | Eliminates 32-way bank conflicts on column access |
-| **Bank-Free → Double Buffer** | Two shared-memory buffers | Overlaps next-tile load with current-tile compute |
+| **Bank-Free → Double Buffer** | Two shared-memory buffers | Restructures tile staging and buffering to reduce memory stalls |
 | **→ Tensor Core** | WMMA API `mma_sync` | Dedicated matrix units, ~8× peak over CUDA cores |
 
 ## Build & Run
 
-```bash
-# Makefile (adjust GPU arch for your hardware)
-make GPU_ARCH=sm_86
-make benchmark
+Recommended path: CMake
 
-# Or CMake
+```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ./build/bin/sgemm_benchmark
+./build/bin/sgemm_benchmark --dims 256 384 640
+./build/bin/sgemm_benchmark -a
+```
+
+Quick local path: Makefile
+
+```bash
+make GPU_ARCH=sm_86
+make benchmark
+make test
 ```
 
 ## Project Structure
@@ -83,18 +89,22 @@ sgemm-optimization/
 
 ## Testing
 
-Property-based tests with Google Test:
+Google Test coverage includes:
 
 | Property | What It Verifies |
 |----------|-----------------|
-| **Numerical correctness** | All kernels match cuBLAS output (allclose) |
-| **Tensor Core tolerance** | Correct under relaxed FP16 tolerance |
-| **Error detection** | Verification system catches injected errors |
-| **Dimension invariance** | All kernels handle arbitrary aligned sizes |
+| **Numerical correctness** | Standard kernels match cuBLAS across square and non-square cases |
+| **Tensor Core fast path** | WMMA path is validated on `16`-aligned dimensions |
+| **Tensor Core fallback** | Non-aligned dimensions safely fall back to an FP32 kernel |
+| **Small/edge inputs** | Includes `1x1x1` and unaligned edge cases |
+| **Error detection** | Verification helpers stay consistent with benchmark tolerances |
 
 ```bash
+cmake --build build --target test_sgemm
+ctest --test-dir build
+
+# or
 make test
-# Or: cmake --build build --target test_sgemm && ctest --test-dir build
 ```
 
 ## GPU Architecture Reference
@@ -109,10 +119,10 @@ make test
 
 ## Engineering Quality
 
-- **Build**: CMake 3.18+ with `target_include_directories`, `target_compile_options` (generator expressions), FetchContent for GTest v1.14.0
+- **Build**: CMake 3.18+ is the primary build system; Makefile remains available for quick local use
 - **Code style**: clang-format enforced via CI
-- **CI**: GitHub Actions — CUDA container build + format check
-- **Testing**: Google Test property-based verification against cuBLAS
+- **CI**: GitHub Actions runs format checks and a containerized CUDA compile-only build; GPU runtime tests are still local / dedicated-runner only
+- **Testing**: Google Test verification against cuBLAS, including Tensor Core fallback and edge-size coverage
 
 ## References
 

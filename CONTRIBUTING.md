@@ -12,11 +12,25 @@
 
 ## 构建与测试
 
+推荐优先使用 CMake：
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+./build/bin/sgemm_benchmark
+cmake --build build --target test_sgemm
+ctest --test-dir build
+```
+
+Makefile 也可用于快速本地构建：
+
 ```bash
 make GPU_ARCH=sm_86
 make benchmark
 make test
 ```
+
+说明：GitHub Actions 当前执行格式检查和容器化 CUDA compile-only 构建；CUDA 运行时测试仍需在本地或带 GPU 的 runner 上完成。
 
 ## 代码规范
 
