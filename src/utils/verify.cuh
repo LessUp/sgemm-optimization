@@ -6,6 +6,8 @@
 #include <cstdio>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
+#include <limits>
+#include <vector>
 
 // ============================================================================
 // Verification Result Structure
@@ -29,6 +31,24 @@ struct VerifyResult {
     }
   }
 };
+
+struct VerifyTolerance {
+  float rtol;
+  float atol;
+};
+
+inline constexpr VerifyTolerance kStandardVerifyTolerance{1e-3f, 1e-4f};
+inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
+
+inline float toleranceForValue(float ref_val, VerifyTolerance tolerance) {
+  return tolerance.atol + tolerance.rtol * std::fabs(ref_val);
+}
+
+inline bool isWithinTolerance(float test_val, float ref_val,
+                              VerifyTolerance tolerance) {
+  float abs_error = std::fabs(test_val - ref_val);
+  return abs_error <= toleranceForValue(ref_val, tolerance);
+}
 
 // ============================================================================
 // cuBLAS Reference SGEMM
@@ -58,7 +78,7 @@ public:
   // Verify kernel output against reference
   // Uses numpy-style allclose: |test - ref| <= atol + rtol * |ref|
   VerifyResult verify(const float *h_test, const float *h_ref, int M, int N,
-                      float rtol = 1e-4f, float atol = 1e-5f) {
+                      VerifyTolerance tolerance = kStandardVerifyTolerance) {
     VerifyResult result;
     result.max_abs_error = 0.0f;
     result.max_rel_error = 0.0f;
@@ -69,27 +89,32 @@ public:
       float ref_val = h_ref[i];
       float test_val = h_test[i];
 
+      if (std::isnan(test_val) || std::isinf(test_val)) {
+        result.error_count++;
+        result.max_abs_error = std::numeric_limits<float>::infinity();
+        result.max_rel_error = std::numeric_limits<float>::infinity();
+        continue;
+      }
+
       float abs_error = std::fabs(test_val - ref_val);
       float rel_error = abs_error / (std::fabs(ref_val) + 1e-8f);
 
       result.max_abs_error = std::max(result.max_abs_error, abs_error);
       result.max_rel_error = std::max(result.max_rel_error, rel_error);
 
-      // numpy-style allclose: |test - ref| <= atol + rtol * |ref|
-      float tolerance = atol + rtol * std::fabs(ref_val);
-      if (abs_error > tolerance) {
+      if (!isWithinTolerance(test_val, ref_val, tolerance)) {
         result.error_count++;
       }
     }
 
     result.passed = (result.error_count == 0);
-
     return result;
   }
 
   // Verify with device pointers (copies to host internally)
   VerifyResult verifyDevice(const float *d_test, const float *d_ref, int M,
-                            int N, float rtol = 1e-4f, float atol = 1e-5f) {
+                            int N,
+                            VerifyTolerance tolerance = kStandardVerifyTolerance) {
     std::vector<float> h_test(M * N);
     std::vector<float> h_ref(M * N);
 
@@ -98,13 +123,12 @@ public:
     CUDA_CHECK(cudaMemcpy(h_ref.data(), d_ref, M * N * sizeof(float),
                           cudaMemcpyDeviceToHost));
 
-    return verify(h_test.data(), h_ref.data(), M, N, rtol, atol);
+    return verify(h_test.data(), h_ref.data(), M, N, tolerance);
   }
 
-  // Check if result should be flagged as incorrect based on threshold
-  static bool shouldFlagAsIncorrect(float max_rel_error, bool is_tensor_core) {
-    float threshold = is_tensor_core ? 1e-3f : 1e-4f;
-    return max_rel_error > threshold;
+  // Keep error flagging semantics aligned with compareMatrices/verify.
+  static bool shouldFlagAsIncorrect(const VerifyResult &result) {
+    return !result.passed;
   }
 
   cublasHandle_t getHandle() { return handle_; }
@@ -119,9 +143,9 @@ private:
 
 // Compare two matrices and return verification result
 // Uses numpy-style allclose: |test - ref| <= atol + rtol * |ref|
-inline VerifyResult compareMatrices(const float *h_test, const float *h_ref,
-                                    int M, int N, float rtol = 1e-4f,
-                                    float atol = 1e-5f) {
+inline VerifyResult compareMatrices(
+    const float *h_test, const float *h_ref, int M, int N,
+    VerifyTolerance tolerance = kStandardVerifyTolerance) {
   VerifyResult result;
   result.max_abs_error = 0.0f;
   result.max_rel_error = 0.0f;
@@ -146,27 +170,21 @@ inline VerifyResult compareMatrices(const float *h_test, const float *h_ref,
     result.max_abs_error = std::max(result.max_abs_error, abs_error);
     result.max_rel_error = std::max(result.max_rel_error, rel_error);
 
-    // numpy-style allclose: |test - ref| <= atol + rtol * |ref|
-    float tolerance = atol + rtol * std::fabs(ref_val);
-    if (abs_error > tolerance) {
+    if (!isWithinTolerance(test_val, ref_val, tolerance)) {
       result.error_count++;
     }
   }
 
-  // Pass if no elements exceed tolerance
   result.passed = (result.error_count == 0);
-
   return result;
 }
 
 // Quick check if matrices are approximately equal
-inline bool matricesApproxEqual(const float *h_test, const float *h_ref, int M,
-                                int N, float rtol = 1e-4f, float atol = 1e-5f) {
+inline bool matricesApproxEqual(
+    const float *h_test, const float *h_ref, int M, int N,
+    VerifyTolerance tolerance = kStandardVerifyTolerance) {
   for (int i = 0; i < M * N; ++i) {
-    float abs_error = std::fabs(h_test[i] - h_ref[i]);
-    float rel_error = abs_error / (std::fabs(h_ref[i]) + 1e-8f);
-
-    if (abs_error > atol && rel_error > rtol) {
+    if (!isWithinTolerance(h_test[i], h_ref[i], tolerance)) {
       return false;
     }
   }
@@ -174,13 +192,11 @@ inline bool matricesApproxEqual(const float *h_test, const float *h_ref, int M,
 }
 
 // Find first mismatch location (for debugging)
-inline int findFirstMismatch(const float *h_test, const float *h_ref, int M,
-                             int N, float rtol = 1e-4f, float atol = 1e-5f) {
+inline int findFirstMismatch(
+    const float *h_test, const float *h_ref, int M, int N,
+    VerifyTolerance tolerance = kStandardVerifyTolerance) {
   for (int i = 0; i < M * N; ++i) {
-    float abs_error = std::fabs(h_test[i] - h_ref[i]);
-    float rel_error = abs_error / (std::fabs(h_ref[i]) + 1e-8f);
-
-    if (abs_error > atol && rel_error > rtol) {
+    if (!isWithinTolerance(h_test[i], h_ref[i], tolerance)) {
       return i;
     }
   }

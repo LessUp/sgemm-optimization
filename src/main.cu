@@ -4,19 +4,12 @@
  * This program benchmarks various SGEMM implementations from naive to
  * Tensor Core optimized, demonstrating the performance evolution of
  * GPU matrix multiplication optimization techniques.
- *
- * Implementations:
- * 1. Naive - Basic three-loop implementation
- * 2. Tiled - Shared memory tiling
- * 3. Bank Conflict Free - Tiled with padding to avoid bank conflicts
- * 4. Double Buffer - Software pipelining with double buffering
- * 5. Tensor Core - WMMA API for Tensor Core acceleration
- * 6. cuBLAS - Reference implementation (performance ceiling)
  */
 
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "utils/benchmark.cuh"
@@ -29,22 +22,18 @@
 #include "kernels/tensor_core_sgemm.cuh"
 #include "kernels/tiled_sgemm.cuh"
 
-// ============================================================================
-// Configuration
-// ============================================================================
-
-// Default matrix sizes to benchmark
-std::vector<int> DEFAULT_SIZES = {512, 1024, 2048, 4096};
-
-// Benchmark configuration
+namespace {
 constexpr int WARMUP_RUNS = 5;
 constexpr int BENCHMARK_RUNS = 20;
 
-// ============================================================================
-// Kernel Wrappers
-// ============================================================================
+const std::vector<std::tuple<int, int, int>> DEFAULT_CASES = {
+    {512, 512, 512},
+    {1024, 1024, 1024},
+    {256, 384, 640},
+    {511, 513, 1025},
+};
+}
 
-// Wrapper functions to match the expected signature for benchmarking
 void naive_kernel(const float *A, const float *B, float *C, int M, int K,
                   int N) {
   launch_naive_sgemm<32>(A, B, C, M, K, N);
@@ -70,13 +59,7 @@ void tensor_core_kernel(const float *A, const float *B, float *C, int M, int K,
   launch_tensor_core_sgemm(A, B, C, M, K, N);
 }
 
-// ============================================================================
-// Main Benchmark Function
-// ============================================================================
-
-void runBenchmarks(int size) {
-  int M = size, K = size, N = size;
-
+void runBenchmarks(int M, int K, int N) {
   printf("\n");
   printf("====================================================================="
          "===========\n");
@@ -86,80 +69,75 @@ void runBenchmarks(int size) {
 
   SGEMMBenchmark benchmark;
 
-  // Run cuBLAS first as reference
   printf("\nRunning cuBLAS (reference)...\n");
   BenchmarkResult cublas_result =
       benchmark.runCublas(M, K, N, WARMUP_RUNS, BENCHMARK_RUNS);
   float cublas_gflops = cublas_result.gflops;
 
-  // Run each kernel implementation
   printf("Running Naive SGEMM...\n");
-  // Use slightly relaxed tolerance to account for floating-point accumulation
-  // order differences
   benchmark.run("Naive", naive_kernel, M, K, N, WARMUP_RUNS, BENCHMARK_RUNS,
-                1e-3f, 1e-4f);
+                kStandardVerifyTolerance);
 
   printf("Running Tiled SGEMM...\n");
   benchmark.run("Tiled (32x32)", tiled_kernel, M, K, N, WARMUP_RUNS,
-                BENCHMARK_RUNS, 1e-3f, 1e-4f);
+                BENCHMARK_RUNS, kStandardVerifyTolerance);
 
   printf("Running Bank Conflict Free SGEMM...\n");
   benchmark.run("Bank Conflict Free", bank_conflict_free_kernel, M, K, N,
-                WARMUP_RUNS, BENCHMARK_RUNS, 1e-3f, 1e-4f);
+                WARMUP_RUNS, BENCHMARK_RUNS, kStandardVerifyTolerance);
 
   printf("Running Double Buffer SGEMM...\n");
   benchmark.run("Double Buffer", double_buffer_kernel, M, K, N, WARMUP_RUNS,
-                BENCHMARK_RUNS, 1e-3f, 1e-4f);
+                BENCHMARK_RUNS, kStandardVerifyTolerance);
 
-  // Check if Tensor Cores are available
-  int device;
-  cudaGetDevice(&device);
-  cudaDeviceProp prop;
-  cudaGetDeviceProperties(&prop, device);
+  if (tensorCoresAvailable()) {
+    printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
+           "conversion/fallback)...\n");
+    benchmark.run("Tensor Core (WMMA end-to-end)", tensor_core_kernel, M, K, N,
+                  WARMUP_RUNS, BENCHMARK_RUNS, kTensorCoreVerifyTolerance);
 
-  if (prop.major >= 7) {
-    printf("Running Tensor Core SGEMM...\n");
-    // Tensor Core uses FP16 intermediate precision, needs relaxed tolerance
-    // For K=512, expect ~sqrt(K) * FP16_epsilon ≈ 0.01 error
-    benchmark.run("Tensor Core (WMMA)", tensor_core_kernel, M, K, N,
-                  WARMUP_RUNS, BENCHMARK_RUNS, 5e-2f, 1e-2f);
+    if (tensorCoreDimensionsSupported(M, K, N)) {
+      printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
+      benchmark.runTensorCoreComputeOnly(M, K, N, WARMUP_RUNS,
+                                         BENCHMARK_RUNS,
+                                         kTensorCoreVerifyTolerance);
+    } else {
+      printf("Skipping Tensor Core compute-only benchmark (requires positive "
+             "dimensions aligned to 16).\n");
+    }
   } else {
-    printf("Skipping Tensor Core (requires sm_70+, current: sm_%d%d)\n",
+    int device;
+    CUDA_CHECK(cudaGetDevice(&device));
+    cudaDeviceProp prop;
+    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+    printf("Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n",
            prop.major, prop.minor);
   }
 
-  // Print results
   benchmark.printSummary();
-
-  // Print performance comparison
   printPerformanceComparison(benchmark.getResults(), cublas_gflops);
 
-  // Export roofline data
   char filename[256];
-  snprintf(filename, sizeof(filename), "roofline_data_%d.csv", size);
+  snprintf(filename, sizeof(filename), "roofline_data_%d_%d_%d.csv", M, K, N);
   benchmark.exportRooflineData(filename);
 }
-
-// ============================================================================
-// Print Usage
-// ============================================================================
 
 void printUsage(const char *program) {
   printf("Usage: %s [options]\n", program);
   printf("\nOptions:\n");
-  printf(
-      "  -s, --size SIZE    Matrix size (default: run all standard sizes)\n");
-  printf(
-      "  -a, --all          Run all standard sizes (512, 1024, 2048, 4096)\n");
-  printf("  -h, --help         Show this help message\n");
+  printf("  -s, --size SIZE          Benchmark one square SIZE x SIZE x SIZE case\n");
+  printf("  --dims M K N            Benchmark one explicit M x K x N case\n");
+  printf("  -a, --all               Run the default benchmark set\n");
+  printf("  -h, --help              Show this help message\n");
+  printf("\nDefault benchmark set includes:\n");
+  printf("  - aligned square cases (512, 1024)\n");
+  printf("  - one aligned non-square case (256 x 384 x 640)\n");
+  printf("  - one unaligned edge case (511 x 513 x 1025) to exercise safe Tensor Core fallback\n");
   printf("\nExamples:\n");
-  printf("  %s -s 1024         Benchmark 1024x1024 matrices\n", program);
-  printf("  %s -a              Benchmark all standard sizes\n", program);
+  printf("  %s -s 1024\n", program);
+  printf("  %s --dims 256 384 640\n", program);
+  printf("  %s -a\n", program);
 }
-
-// ============================================================================
-// Main
-// ============================================================================
 
 int main(int argc, char **argv) {
   printf("\n");
@@ -169,18 +147,15 @@ int main(int argc, char **argv) {
   printf("====================================================================="
          "===========\n");
 
-  // Print GPU information
   printGPUInfo();
 
-  // Print theoretical peaks
   float peakGflops = getTheoreticalPeakGflops();
   float peakBandwidth = getTheoreticalPeakBandwidth();
-  printf("Theoretical Peak FP32: %.2f GFLOPS\n", peakGflops);
-  printf("Theoretical Peak Bandwidth: %.2f GB/s\n", peakBandwidth);
+  printf("Approximate theoretical peak FP32: %.2f GFLOPS\n", peakGflops);
+  printf("Approximate theoretical peak bandwidth: %.2f GB/s\n", peakBandwidth);
   printf("\n");
 
-  // Parse command line arguments
-  std::vector<int> sizes;
+  std::vector<std::tuple<int, int, int>> cases;
 
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -188,36 +163,58 @@ int main(int argc, char **argv) {
     if (arg == "-h" || arg == "--help") {
       printUsage(argv[0]);
       return 0;
-    } else if (arg == "-s" || arg == "--size") {
-      if (i + 1 < argc) {
-        int size = atoi(argv[++i]);
-        if (size > 0 && size % 32 == 0) {
-          sizes.push_back(size);
-        } else {
-          fprintf(stderr, "Error: Size must be positive and multiple of 32\n");
-          return 1;
-        }
-      } else {
+    }
+
+    if (arg == "-s" || arg == "--size") {
+      if (i + 1 >= argc) {
         fprintf(stderr, "Error: -s requires a size argument\n");
         return 1;
       }
-    } else if (arg == "-a" || arg == "--all") {
-      sizes = DEFAULT_SIZES;
-    } else {
-      fprintf(stderr, "Unknown argument: %s\n", arg.c_str());
-      printUsage(argv[0]);
-      return 1;
+
+      int size = atoi(argv[++i]);
+      if (size <= 0) {
+        fprintf(stderr, "Error: Size must be positive\n");
+        return 1;
+      }
+
+      cases.emplace_back(size, size, size);
+      continue;
     }
+
+    if (arg == "--dims") {
+      if (i + 3 >= argc) {
+        fprintf(stderr, "Error: --dims requires M K N arguments\n");
+        return 1;
+      }
+
+      int M = atoi(argv[++i]);
+      int K = atoi(argv[++i]);
+      int N = atoi(argv[++i]);
+      if (M <= 0 || K <= 0 || N <= 0) {
+        fprintf(stderr, "Error: Dimensions must be positive\n");
+        return 1;
+      }
+
+      cases.emplace_back(M, K, N);
+      continue;
+    }
+
+    if (arg == "-a" || arg == "--all") {
+      cases = DEFAULT_CASES;
+      continue;
+    }
+
+    fprintf(stderr, "Unknown argument: %s\n", arg.c_str());
+    printUsage(argv[0]);
+    return 1;
   }
 
-  // Default: run 1024x1024 if no size specified
-  if (sizes.empty()) {
-    sizes.push_back(1024);
+  if (cases.empty()) {
+    cases.emplace_back(1024, 1024, 1024);
   }
 
-  // Run benchmarks for each size
-  for (int size : sizes) {
-    runBenchmarks(size);
+  for (const auto &[M, K, N] : cases) {
+    runBenchmarks(M, K, N);
   }
 
   printf("\n");
@@ -227,27 +224,11 @@ int main(int argc, char **argv) {
   printf("====================================================================="
          "===========\n");
   printf("\n");
-  printf("Performance Evolution Summary:\n");
-  printf("  1. Naive:              Baseline - memory bound, non-coalesced "
-         "access\n");
-  printf("  2. Tiled:              ~2-5x speedup - shared memory reduces "
-         "global access\n");
-  printf("  3. Bank Conflict Free: ~1.1-1.3x over Tiled - eliminates bank "
-         "conflicts\n");
-  printf(
-      "  4. Double Buffer:      ~1.1-1.2x over BCF - hides memory latency\n");
-  printf("  5. Tensor Core:        ~2-4x over Double Buffer - hardware "
-         "acceleration\n");
-  printf("  6. cuBLAS:             Reference - highly optimized library\n");
-  printf("\n");
-  printf("Key Optimization Concepts:\n");
-  printf(
-      "  - Coalescing: Ensure threads access consecutive memory addresses\n");
-  printf("  - Tiling: Load data into shared memory for reuse\n");
-  printf("  - Bank Conflicts: Avoid multiple threads accessing same memory "
-         "bank\n");
-  printf("  - Latency Hiding: Overlap computation with memory access\n");
-  printf("  - Tensor Cores: Use specialized hardware for matrix operations\n");
+  printf("Notes:\n");
+  printf("  - Standard kernels are verified with shared FP32 tolerances.\n");
+  printf("  - Tensor Core verification uses relaxed mixed-precision tolerances.\n");
+  printf("  - The end-to-end Tensor Core result includes FP32->FP16 conversion and safe fallback behavior.\n");
+  printf("  - The compute-only Tensor Core result is only shown for WMMA-compatible dimensions.\n");
   printf("\n");
 
   return 0;
