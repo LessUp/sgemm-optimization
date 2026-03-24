@@ -29,3 +29,26 @@ jobs:
           check-path: '.'
           exclude-regex: '(^|/)(build|third_party|external|vendor|\.git)(/|$)'
           fallback-style: 'LLVM'
+
+  cuda-build:
+    name: CUDA Build (compile only)
+    runs-on: ubuntu-latest
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+    steps:
+      - name: Install build tools
+        run: apt-get update && apt-get install -y cmake git build-essential
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+
+      - name: Build benchmark target
+        run: cmake --build build --target sgemm_benchmark -j2
+
+      - name: Document runtime limitation
+        run: |
+          echo "This workflow validates CUDA compilation in a containerized toolkit environment."
+          echo "GPU runtime tests still require a CUDA-capable local machine or dedicated GPU runner."

@@ -27,8 +27,9 @@ MAIN_SRC = $(SRC_DIR)/main.cu
 TEST_SRC = $(TEST_DIR)/test_sgemm.cu
 
 # Targets
-MAIN_TARGET = $(BUILD_DIR)/sgemm_benchmark
-TEST_TARGET = $(BUILD_DIR)/test_sgemm
+BIN_DIR = $(BUILD_DIR)/bin
+MAIN_TARGET = $(BIN_DIR)/sgemm_benchmark
+TEST_TARGET = $(BIN_DIR)/test_sgemm
 
 # Header files (for dependency tracking)
 HEADERS = $(wildcard $(KERNEL_DIR)/*.cuh) $(wildcard $(UTILS_DIR)/*.cuh)
@@ -39,6 +40,7 @@ all: dirs $(MAIN_TARGET)
 
 dirs:
 	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(KERNEL_DIR)
 	@mkdir -p $(UTILS_DIR)
 	@mkdir -p $(TEST_DIR)
@@ -79,7 +81,7 @@ help:
 	@echo "  profile   - Build with profiling info"
 	@echo ""
 	@echo "Variables:"
-	@echo "  GPU_ARCH  - GPU architecture (default: sm_70)"
+	@echo "  GPU_ARCH  - GPU architecture (default: sm_86)"
 	@echo ""
 	@echo "Example:"
 	@echo "  make GPU_ARCH=sm_80 benchmark"
