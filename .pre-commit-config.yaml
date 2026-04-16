@@ -1,0 +1,31 @@
+# Pre-commit hooks for SGEMM Optimization
+# Run `pre-commit install` to set up the git hooks
+
+repos:
+  # Clang-format for C++/CUDA code formatting
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v18.1.1
+    hooks:
+      - id: clang-format
+        types_or: [c++, c, cuda]
+        args: ['-style=file', '-i']
+
+  # Remove trailing whitespace
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        types_or: [c++, c, cuda, markdown, yaml]
+      - id: end-of-file-fixer
+        types_or: [c++, c, cuda, markdown, yaml]
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+
+  # Spell checking for documentation
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        types_or: [markdown]
+        args: ['--skip=*.csv,*.json,README.zh-CN.md']
