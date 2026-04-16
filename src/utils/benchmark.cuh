@@ -331,22 +331,23 @@ inline float getTheoreticalPeakGflops() {
   cudaDeviceProp prop;
   CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
 
+  // Cores per SM based on architecture
+  // See: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
   int coresPerSM;
-  switch (prop.major) {
-  case 7:
-    coresPerSM = 64;
-    break;
-  case 8:
-    coresPerSM = 64;
-    break;
-  case 9:
-    coresPerSM = 128;
-    break;
-  default:
-    coresPerSM = 64;
+  if (prop.major == 7) {
+    coresPerSM = (prop.minor == 0 || prop.minor == 2) ? 64 : 64; // Volta, Turing
+  } else if (prop.major == 8) {
+    coresPerSM = (prop.minor == 0 || prop.minor == 6) ? 64 : 128; // Ampere
+  } else if (prop.major == 9) {
+    coresPerSM = 128; // Hopper
+  } else {
+    coresPerSM = 64; // Default fallback
   }
 
-  float clockGHz = 1.5f;
+  // Use actual GPU clock rate (convert from kHz to GHz)
+  float clockGHz = static_cast<float>(prop.clockRate) / 1e6f;
+
+  // Peak GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
   float peakGflops =
       prop.multiProcessorCount * coresPerSM * 2 * clockGHz * 1000;
 
@@ -360,8 +361,31 @@ inline float getTheoreticalPeakBandwidth() {
   cudaDeviceProp prop;
   CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
 
-  float memorySpeedGbps = 14.0f;
-  float peakBandwidth = memorySpeedGbps * (prop.memoryBusWidth / 8);
+  // Calculate peak bandwidth using memory clock rate and bus width
+  // Note: memoryClockRate may be 0 on some platforms/drivers
+  float memoryClockMHz = static_cast<float>(prop.memoryClockRate) / 1000.0f;
 
-  return peakBandwidth;
+  // If memoryClockRate is not available, use a reasonable default based on GPU generation
+  if (memoryClockMHz <= 0) {
+    // Fallback: estimate based on typical values for the architecture
+    // This is a rough approximation; actual values vary significantly
+    switch (prop.major) {
+    case 7:
+      memoryClockMHz = (prop.minor == 5) ? 1750.0f : 877.0f; // Turing vs Volta
+      break;
+    case 8:
+      memoryClockMHz = (prop.minor == 6) ? 1215.0f : 1593.0f; // A100 vs RTX 30
+      break;
+    case 9:
+      memoryClockMHz = 2619.0f; // H100 HBM3
+      break;
+    default:
+      memoryClockMHz = 1000.0f; // Conservative default
+    }
+  }
+
+  // Peak bandwidth = 2 (DDR) * clock (MHz) * bus width (bits) / 8 (bytes)
+  float peakBandwidth = 2 * memoryClockMHz * (prop.memoryBusWidth / 8) / 1000.0f;
+
+  return peakBandwidth; // GB/s
 }
