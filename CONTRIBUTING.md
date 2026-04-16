@@ -1,18 +1,35 @@
 # Contributing
 
-感谢你对本项目的关注！欢迎通过 Issue 和 Pull Request 参与贡献。
+Thank you for your interest in this project! Contributions via Issues and Pull Requests are welcome.
 
-## 开发流程
+## Spec-Driven Development
 
-1. Fork 本仓库
-2. 创建特性分支：`git checkout -b feature/your-feature`
-3. 提交更改：`git commit -m "feat: add your feature"`
-4. 推送分支：`git push origin feature/your-feature`
-5. 创建 Pull Request
+This project follows **Spec-Driven Development (SDD)**. All technical specifications are maintained in `/specs`:
 
-## 构建与测试
+- 📋 [Product Requirements](specs/product/sgemm-kernel-requirements.md)
+- 🏗️ [Core Architecture RFC](specs/rfc/0001-core-architecture.md)
+- 🗺️ [Implementation Roadmap RFC](specs/rfc/0002-implementation-roadmap.md)
+- 🧪 [Test Specifications](specs/testing/kernel-verification.md)
 
-推荐优先使用 CMake：
+**When contributing new features or changes:**
+1. **Review** the relevant spec documents in `/specs` first.
+2. **Update** specs if your changes affect interfaces, requirements, or behavior.
+3. **Implement** code that 100% adheres to the spec definitions.
+4. **Verify** against spec-defined test criteria.
+
+For detailed AI and human contributor workflow, see [`AGENTS.md`](AGENTS.md).
+
+## Development Workflow
+
+1. Fork this repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit changes: `git commit -m "feat: add your feature"`
+4. Push branch: `git push origin feature/your-feature`
+5. Create a Pull Request
+
+## Build & Test
+
+Recommended: CMake (primary build system):
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -22,7 +39,7 @@ cmake --build build --target test_sgemm
 ctest --test-dir build
 ```
 
-Makefile 也可用于快速本地构建：
+Quick local builds with Make:
 
 ```bash
 make GPU_ARCH=sm_86
@@ -30,21 +47,21 @@ make benchmark
 make test
 ```
 
-说明：GitHub Actions 当前执行格式检查和容器化 CUDA compile-only 构建；CUDA 运行时测试仍需在本地或带 GPU 的 runner 上完成。
+Note: GitHub Actions currently runs format checks and containerized CUDA compile-only builds. CUDA runtime tests must be executed locally or on a GPU-enabled runner.
 
-## 代码规范
+## Code Style
 
-- CUDA 代码遵循项目现有风格
-- 使用 `.editorconfig` 中定义的缩进和格式规则
-- 新增 kernel 版本请附带正确性验证（vs cuBLAS）
-- 确保所有现有测试通过
+- CUDA code follows project conventions (clang-format enforced)
+- Use indentation and formatting rules defined in `.editorconfig`
+- New kernel variants must include correctness verification against cuBLAS
+- Ensure all existing tests pass
 
-## 提交信息格式
+## Commit Message Format
 
-推荐使用 [Conventional Commits](https://www.conventionalcommits.org/)：
+Use [Conventional Commits](https://www.conventionalcommits.org/):
 
-- `feat:` 新功能 / 新 kernel 版本
-- `fix:` 修复 Bug
-- `perf:` 性能优化
-- `docs:` 文档更新
-- `test:` 测试相关
+- `feat:` New feature or kernel variant
+- `fix:` Bug fix
+- `perf:` Performance optimization
+- `docs:` Documentation update
+- `test:` Test-related changes
