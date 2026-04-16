@@ -1,3 +1,6 @@
+# GitHub Pages Deployment
+# Builds and deploys the project documentation site to GitHub Pages
+
 name: Deploy to GitHub Pages
 
 on:
@@ -7,7 +10,7 @@ on:
       - 'index.md'
       - 'README.md'
       - 'README.zh-CN.md'
-      - 'changelog/**'
+      - 'CHANGELOG.md'
       - '_config.yml'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -18,14 +21,14 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (sparse — docs only)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           sparse-checkout-cone-mode: false
@@ -34,7 +37,7 @@ jobs:
             README.md
             README.zh-CN.md
             _config.yml
-            changelog
+            CHANGELOG.md
             LICENSE
 
       - name: Setup Pages

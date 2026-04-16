@@ -1,3 +1,6 @@
+# Continuous Integration
+# Validates code formatting and CUDA compilation
+
 name: CI
 
 on:
@@ -11,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,33 +25,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check C/C++/CUDA formatting
+      - name: Check formatting
         uses: jidicula/clang-format-action@v4.13.0
         with:
           clang-format-version: '17'
           check-path: '.'
-          exclude-regex: '(^|/)(build|third_party|external|vendor|\.git)(/|$)'
+          exclude-regex: '(^|/)(build|third_party|external|vendor|\.git|\.kiro)(/|$)'
           fallback-style: 'LLVM'
 
   cuda-build:
-    name: CUDA Build (compile only)
+    name: CUDA Build
     runs-on: ubuntu-latest
     container:
       image: nvidia/cuda:12.4.1-devel-ubuntu22.04
     steps:
-      - name: Install build tools
+      - name: Install dependencies
         run: apt-get update && apt-get install -y cmake git build-essential
 
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure CMake
+      - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
 
-      - name: Build benchmark target
+      - name: Build
         run: cmake --build build --target sgemm_benchmark -j2
 
-      - name: Document runtime limitation
+      - name: Info
         run: |
-          echo "This workflow validates CUDA compilation in a containerized toolkit environment."
-          echo "GPU runtime tests still require a CUDA-capable local machine or dedicated GPU runner."
+          echo "✅ CUDA compilation successful"
+          echo "ℹ️  GPU runtime tests require a CUDA-capable machine"
