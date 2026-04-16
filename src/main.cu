@@ -23,8 +23,8 @@
 #include "kernels/tiled_sgemm.cuh"
 
 namespace {
-constexpr int WARMUP_RUNS = 5;
-constexpr int BENCHMARK_RUNS = 20;
+int warmup_runs = 5;
+int benchmark_runs = 20;
 
 const std::vector<std::tuple<int, int, int>> DEFAULT_CASES = {
     {512, 512, 512},
@@ -71,35 +71,35 @@ void runBenchmarks(int M, int K, int N) {
 
   printf("\nRunning cuBLAS (reference)...\n");
   BenchmarkResult cublas_result =
-      benchmark.runCublas(M, K, N, WARMUP_RUNS, BENCHMARK_RUNS);
+      benchmark.runCublas(M, K, N, warmup_runs, benchmark_runs);
   float cublas_gflops = cublas_result.gflops;
 
   printf("Running Naive SGEMM...\n");
-  benchmark.run("Naive", naive_kernel, M, K, N, WARMUP_RUNS, BENCHMARK_RUNS,
+  benchmark.run("Naive", naive_kernel, M, K, N, warmup_runs, benchmark_runs,
                 kStandardVerifyTolerance);
 
   printf("Running Tiled SGEMM...\n");
-  benchmark.run("Tiled (32x32)", tiled_kernel, M, K, N, WARMUP_RUNS,
-                BENCHMARK_RUNS, kStandardVerifyTolerance);
+  benchmark.run("Tiled (32x32)", tiled_kernel, M, K, N, warmup_runs,
+                benchmark_runs, kStandardVerifyTolerance);
 
   printf("Running Bank Conflict Free SGEMM...\n");
   benchmark.run("Bank Conflict Free", bank_conflict_free_kernel, M, K, N,
-                WARMUP_RUNS, BENCHMARK_RUNS, kStandardVerifyTolerance);
+                warmup_runs, benchmark_runs, kStandardVerifyTolerance);
 
   printf("Running Double Buffer SGEMM...\n");
-  benchmark.run("Double Buffer", double_buffer_kernel, M, K, N, WARMUP_RUNS,
-                BENCHMARK_RUNS, kStandardVerifyTolerance);
+  benchmark.run("Double Buffer", double_buffer_kernel, M, K, N, warmup_runs,
+                benchmark_runs, kStandardVerifyTolerance);
 
   if (tensorCoresAvailable()) {
     printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
            "conversion/fallback)...\n");
     benchmark.run("Tensor Core (WMMA end-to-end)", tensor_core_kernel, M, K, N,
-                  WARMUP_RUNS, BENCHMARK_RUNS, kTensorCoreVerifyTolerance);
+                  warmup_runs, benchmark_runs, kTensorCoreVerifyTolerance);
 
     if (tensorCoreDimensionsSupported(M, K, N)) {
       printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
-      benchmark.runTensorCoreComputeOnly(M, K, N, WARMUP_RUNS,
-                                         BENCHMARK_RUNS,
+      benchmark.runTensorCoreComputeOnly(M, K, N, warmup_runs,
+                                         benchmark_runs,
                                          kTensorCoreVerifyTolerance);
     } else {
       printf("Skipping Tensor Core compute-only benchmark (requires positive "
@@ -128,6 +128,8 @@ void printUsage(const char *program) {
   printf("  -s, --size SIZE          Benchmark one square SIZE x SIZE x SIZE case\n");
   printf("  --dims M K N            Benchmark one explicit M x K x N case\n");
   printf("  -a, --all               Run the default benchmark set\n");
+  printf("  --warmup N              Number of warmup runs (default: 5)\n");
+  printf("  --benchmark N           Number of benchmark runs (default: 20)\n");
   printf("  -h, --help              Show this help message\n");
   printf("\nDefault benchmark set includes:\n");
   printf("  - aligned square cases (512, 1024)\n");
@@ -136,7 +138,7 @@ void printUsage(const char *program) {
   printf("\nExamples:\n");
   printf("  %s -s 1024\n", program);
   printf("  %s --dims 256 384 640\n", program);
-  printf("  %s -a\n", program);
+  printf("  %s -a --warmup 10 --benchmark 50\n", program);
 }
 
 int main(int argc, char **argv) {
@@ -201,6 +203,38 @@ int main(int argc, char **argv) {
 
     if (arg == "-a" || arg == "--all") {
       cases = DEFAULT_CASES;
+      continue;
+    }
+
+    if (arg == "--warmup") {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "Error: --warmup requires a number argument\n");
+        return 1;
+      }
+
+      int warmup = atoi(argv[++i]);
+      if (warmup < 0) {
+        fprintf(stderr, "Error: Warmup runs must be non-negative\n");
+        return 1;
+      }
+
+      warmup_runs = warmup;
+      continue;
+    }
+
+    if (arg == "--benchmark") {
+      if (i + 1 >= argc) {
+        fprintf(stderr, "Error: --benchmark requires a number argument\n");
+        return 1;
+      }
+
+      int bench = atoi(argv[++i]);
+      if (bench <= 0) {
+        fprintf(stderr, "Error: Benchmark runs must be positive\n");
+        return 1;
+      }
+
+      benchmark_runs = bench;
       continue;
     }
 

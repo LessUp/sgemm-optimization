@@ -7,11 +7,15 @@
 #include <cuda_runtime.h>
 #include <mma.h>
 
-namespace {
-constexpr int WMMA_M = 16;
-constexpr int WMMA_N = 16;
-constexpr int WMMA_K = 16;
-}
+namespace tensor_core {
+inline constexpr int WMMA_M = 16;
+inline constexpr int WMMA_N = 16;
+inline constexpr int WMMA_K = 16;
+} // namespace tensor_core
+
+using tensor_core::WMMA_K;
+using tensor_core::WMMA_M;
+using tensor_core::WMMA_N;
 
 inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
   return M > 0 && K > 0 && N > 0 && M % WMMA_M == 0 && K % WMMA_K == 0 &&
@@ -81,92 +85,6 @@ __global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
 
   nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N,
                                   nvcuda::wmma::mem_row_major);
-}
-
-/**
- * Optimized Tensor Core SGEMM with shared memory staging
- */
-template <int BLOCK_TILES_M = 4, int BLOCK_TILES_N = 4>
-__global__ void tensor_core_sgemm_kernel_optimized(const half *__restrict__ A,
-                                                   const half *__restrict__ B,
-                                                   float *__restrict__ C, int M,
-                                                   int K, int N) {
-  constexpr int BLOCK_M = BLOCK_TILES_M * WMMA_M;
-  constexpr int BLOCK_N = BLOCK_TILES_N * WMMA_N;
-  constexpr int BLOCK_K = WMMA_K;
-
-  __shared__ half As[BLOCK_M][BLOCK_K];
-  __shared__ half Bs[BLOCK_K][BLOCK_N];
-
-  int warpId = (threadIdx.y * blockDim.x + threadIdx.x) / 32;
-  int warpsPerBlockX = BLOCK_TILES_N;
-  int warpX = warpId % warpsPerBlockX;
-  int warpY = warpId / warpsPerBlockX;
-
-  int blockRowStart = blockIdx.y * BLOCK_M;
-  int blockColStart = blockIdx.x * BLOCK_N;
-
-  nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half,
-                         nvcuda::wmma::row_major>
-      a_frag;
-  nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half,
-                         nvcuda::wmma::row_major>
-      b_frag;
-  nvcuda::wmma::fragment<nvcuda::wmma::accumulator, WMMA_M, WMMA_N, WMMA_K,
-                         float>
-      c_frag;
-
-  nvcuda::wmma::fill_fragment(c_frag, 0.0f);
-
-  for (int k = 0; k < K; k += BLOCK_K) {
-    int tid = threadIdx.y * blockDim.x + threadIdx.x;
-    int numThreads = blockDim.x * blockDim.y;
-
-    for (int i = tid; i < BLOCK_M * BLOCK_K; i += numThreads) {
-      int row = i / BLOCK_K;
-      int col = i % BLOCK_K;
-      int globalRow = blockRowStart + row;
-      int globalCol = k + col;
-
-      if (globalRow < M && globalCol < K) {
-        As[row][col] = A[globalRow * K + globalCol];
-      } else {
-        As[row][col] = __float2half(0.0f);
-      }
-    }
-
-    for (int i = tid; i < BLOCK_K * BLOCK_N; i += numThreads) {
-      int row = i / BLOCK_N;
-      int col = i % BLOCK_N;
-      int globalRow = k + row;
-      int globalCol = blockColStart + col;
-
-      if (globalRow < K && globalCol < N) {
-        Bs[row][col] = B[globalRow * N + globalCol];
-      } else {
-        Bs[row][col] = __float2half(0.0f);
-      }
-    }
-
-    __syncthreads();
-
-    int warpRow = warpY * WMMA_M;
-    int warpCol = warpX * WMMA_N;
-
-    nvcuda::wmma::load_matrix_sync(a_frag, &As[warpRow][0], BLOCK_K);
-    nvcuda::wmma::load_matrix_sync(b_frag, &Bs[0][warpCol], BLOCK_N);
-    nvcuda::wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
-
-    __syncthreads();
-  }
-
-  int cRow = blockRowStart + warpY * WMMA_M;
-  int cCol = blockColStart + warpX * WMMA_N;
-
-  if (cRow < M && cCol < N) {
-    nvcuda::wmma::store_matrix_sync(C + cRow * N + cCol, c_frag, N,
-                                    nvcuda::wmma::mem_row_major);
-  }
 }
 
 inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B,

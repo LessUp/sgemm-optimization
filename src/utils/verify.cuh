@@ -178,27 +178,3 @@ inline VerifyResult compareMatrices(
   result.passed = (result.error_count == 0);
   return result;
 }
-
-// Quick check if matrices are approximately equal
-inline bool matricesApproxEqual(
-    const float *h_test, const float *h_ref, int M, int N,
-    VerifyTolerance tolerance = kStandardVerifyTolerance) {
-  for (int i = 0; i < M * N; ++i) {
-    if (!isWithinTolerance(h_test[i], h_ref[i], tolerance)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-// Find first mismatch location (for debugging)
-inline int findFirstMismatch(
-    const float *h_test, const float *h_ref, int M, int N,
-    VerifyTolerance tolerance = kStandardVerifyTolerance) {
-  for (int i = 0; i < M * N; ++i) {
-    if (!isWithinTolerance(h_test[i], h_ref[i], tolerance)) {
-      return i;
-    }
-  }
-  return -1; // No mismatch found
-}
