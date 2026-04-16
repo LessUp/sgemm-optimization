@@ -10,6 +10,15 @@ English | [简体中文](README.zh-CN.md)
 
 Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC. Five kernel variants demonstrate core GPU optimization techniques, from a naive triple loop to a guarded Tensor Core WMMA path with explicit mixed-precision benchmarking.
 
+## Specifications
+
+This project follows **Spec-Driven Development (SDD)**. All technical specifications are maintained in `/specs`:
+
+- 📋 [Product Requirements](specs/product/sgemm-kernel-requirements.md) — Functional and non-functional requirements
+- 🏗️ [Core Architecture RFC](specs/rfc/0001-core-architecture.md) — System architecture and design decisions
+- 🗺️ [Implementation Roadmap RFC](specs/rfc/0002-implementation-roadmap.md) — Implementation phases and milestones
+- 🧪 [Test Specifications](specs/testing/kernel-verification.md) — Verification scenarios and tolerance definitions
+
 ## Performance
 
 The exact GFLOPS you see will depend on GPU model, CUDA version, and problem size.
@@ -54,6 +63,7 @@ cmake --build build -j$(nproc)
 ./build/bin/sgemm_benchmark
 ./build/bin/sgemm_benchmark --dims 256 384 640
 ./build/bin/sgemm_benchmark -a
+./build/bin/sgemm_benchmark -a --warmup 10 --benchmark 50
 ```
 
 Quick local path: Makefile
@@ -76,13 +86,14 @@ sgemm-optimization/
 │   │   ├── double_buffer_sgemm.cuh      # Double buffer pipeline
 │   │   └── tensor_core_sgemm.cuh        # Tensor Core (WMMA API)
 │   ├── utils/
-│   │   ├── cuda_utils.cuh               # CUDA error checking & utilities
+│   │   ├── cuda_utils.cuh               # CUDA error checking, RAII, utilities
 │   │   ├── benchmark.cuh                # Benchmark framework (CUDA Events)
 │   │   └── verify.cuh                   # Correctness verification (vs cuBLAS)
 │   └── main.cu                          # Entry point
 ├── tests/
 │   └── test_sgemm.cu                    # Google Test property tests
 ├── roofline_data_*.csv                  # Roofline analysis data
+├── CHANGELOG.md                         # Version history
 ├── CMakeLists.txt                       # CMake build (recommended)
 └── Makefile                             # Make build (quick start)
 ```

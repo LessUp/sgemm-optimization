@@ -1,10 +1,12 @@
 # SGEMM Optimization: From Naive to Tensor Core
 
-[English](README.md) | 简体中文
-
+[![CI](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml)
+[![Pages](https://github.com/LessUp/sgemm-optimization/actions/workflows/pages.yml/badge.svg)](https://lessup.github.io/sgemm-optimization/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![CUDA](https://img.shields.io/badge/CUDA-11.0+-76B900?logo=nvidia&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=c%2B%2B&logoColor=white)
+
+[English](README.md) | 简体中文
 
 从零手写极致优化的矩阵乘法 - HPC 领域的 "Hello World"
 
@@ -95,19 +97,16 @@ sgemm-optimization/
 │   │   ├── double_buffer_sgemm.cuh   # 双缓冲流水线
 │   │   └── tensor_core_sgemm.cuh     # Tensor Core (WMMA API)
 │   ├── utils/
-│   │   ├── cuda_utils.cuh            # CUDA 工具函数和错误检查
+│   │   ├── cuda_utils.cuh            # CUDA 错误检查、RAII、工具函数
 │   │   ├── benchmark.cuh             # 性能测试框架 (CUDA Events)
 │   │   └── verify.cuh                # 正确性验证 (vs cuBLAS)
 │   └── main.cu                       # 主程序入口
 ├── tests/
 │   └── test_sgemm.cu                 # Google Test 属性测试
-├── .kiro/specs/sgemm-optimization/   # 设计规范文档
-│   ├── requirements.md               # 需求文档
-│   ├── design.md                     # 设计文档
-│   └── tasks.md                      # 实现任务清单
 ├── roofline_data_*.csv               # Roofline 分析数据
-├── Makefile
-└── README.md
+├── CHANGELOG.md                      # 版本更新历史
+├── CMakeLists.txt                    # CMake 构建 (推荐)
+└── Makefile                          # Make 构建 (快速上手)
 ```
 
 ## 核心优化技术详解

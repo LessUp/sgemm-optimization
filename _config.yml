@@ -1,39 +1,48 @@
-title: SGEMM Optimization
-description: >-
-  From Naive to Tensor Core — Progressive CUDA SGEMM Optimization.
-  Hand-written matrix multiplication kernels demonstrating core GPU optimization techniques.
+# SGEMM Optimization - GitHub Pages Configuration
+#
+# Project: CUDA SGEMM Optimization from Naive to Tensor Core
+# Repository: https://github.com/LessUp/sgemm-optimization
+# Pages URL: https://lessup.github.io/sgemm-optimization
+
+# Theme
 remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
-repository: LessUp/sgemm-optimization
-show_downloads: false
 
-# SEO & metadata
+# Site info
+title: SGEMM Optimization
+description: >-
+  从零手写极致优化的 CUDA 矩阵乘法 — HPC 领域的 "Hello World"。
+  五个渐进式优化的 kernel 变体，展示 GPU 核心优化技术。
+repository: LessUp/sgemm-optimization
+
+# URLs
 url: https://lessup.github.io
 baseurl: /sgemm-optimization
+
+# Localization
 lang: zh-CN
 author: LessUp
 
-# Markdown rendering
+# Navigation
+show_downloads: false
+
+# Markdown
 markdown: kramdown
 kramdown:
   input: GFM
   hard_wrap: false
   syntax_highlighter: rouge
 
-# Default layout for all pages
+# Defaults
 defaults:
   - scope:
       path: ""
     values:
       layout: default
-  - scope:
-      path: "changelog"
-    values:
-      layout: default
 
-# Exclude irrelevant files from Jekyll build
+# Exclude from build
 exclude:
   - build/
   - cmake-build-*/
@@ -42,16 +51,12 @@ exclude:
   - .github/
   - .kiro/
   - .vscode/
-  - .editorconfig
-  - .gitignore
-  - .clang-format
-  - CMakeLists.txt
-  - CMakePresets.json
-  - Makefile
-  - CONTRIBUTING.md
-  - LICENSE
-  - "*.csv"
   - "*.cu"
   - "*.cuh"
+  - "*.csv"
   - "*.o"
   - "*.so"
+  - .editorconfig
+  - .gitignore
+  - CMakeLists.txt
+  - Makefile
