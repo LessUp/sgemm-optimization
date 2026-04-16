@@ -32,7 +32,7 @@ const std::vector<std::tuple<int, int, int>> DEFAULT_CASES = {
     {256, 384, 640},
     {511, 513, 1025},
 };
-}
+} // namespace
 
 void naive_kernel(const float *A, const float *B, float *C, int M, int K,
                   int N) {
@@ -98,8 +98,7 @@ void runBenchmarks(int M, int K, int N) {
 
     if (tensorCoreDimensionsSupported(M, K, N)) {
       printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
-      benchmark.runTensorCoreComputeOnly(M, K, N, warmup_runs,
-                                         benchmark_runs,
+      benchmark.runTensorCoreComputeOnly(M, K, N, warmup_runs, benchmark_runs,
                                          kTensorCoreVerifyTolerance);
     } else {
       printf("Skipping Tensor Core compute-only benchmark (requires positive "
@@ -110,8 +109,9 @@ void runBenchmarks(int M, int K, int N) {
     CUDA_CHECK(cudaGetDevice(&device));
     cudaDeviceProp prop;
     CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-    printf("Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n",
-           prop.major, prop.minor);
+    printf(
+        "Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n",
+        prop.major, prop.minor);
   }
 
   benchmark.printSummary();
@@ -125,7 +125,8 @@ void runBenchmarks(int M, int K, int N) {
 void printUsage(const char *program) {
   printf("Usage: %s [options]\n", program);
   printf("\nOptions:\n");
-  printf("  -s, --size SIZE          Benchmark one square SIZE x SIZE x SIZE case\n");
+  printf("  -s, --size SIZE          Benchmark one square SIZE x SIZE x SIZE "
+         "case\n");
   printf("  --dims M K N            Benchmark one explicit M x K x N case\n");
   printf("  -a, --all               Run the default benchmark set\n");
   printf("  --warmup N              Number of warmup runs (default: 5)\n");
@@ -134,7 +135,8 @@ void printUsage(const char *program) {
   printf("\nDefault benchmark set includes:\n");
   printf("  - aligned square cases (512, 1024)\n");
   printf("  - one aligned non-square case (256 x 384 x 640)\n");
-  printf("  - one unaligned edge case (511 x 513 x 1025) to exercise safe Tensor Core fallback\n");
+  printf("  - one unaligned edge case (511 x 513 x 1025) to exercise safe "
+         "Tensor Core fallback\n");
   printf("\nExamples:\n");
   printf("  %s -s 1024\n", program);
   printf("  %s --dims 256 384 640\n", program);
@@ -260,9 +262,12 @@ int main(int argc, char **argv) {
   printf("\n");
   printf("Notes:\n");
   printf("  - Standard kernels are verified with shared FP32 tolerances.\n");
-  printf("  - Tensor Core verification uses relaxed mixed-precision tolerances.\n");
-  printf("  - The end-to-end Tensor Core result includes FP32->FP16 conversion and safe fallback behavior.\n");
-  printf("  - The compute-only Tensor Core result is only shown for WMMA-compatible dimensions.\n");
+  printf("  - Tensor Core verification uses relaxed mixed-precision "
+         "tolerances.\n");
+  printf("  - The end-to-end Tensor Core result includes FP32->FP16 conversion "
+         "and safe fallback behavior.\n");
+  printf("  - The compute-only Tensor Core result is only shown for "
+         "WMMA-compatible dimensions.\n");
   printf("\n");
 
   return 0;
