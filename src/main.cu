@@ -34,28 +34,23 @@ const std::vector<std::tuple<int, int, int>> DEFAULT_CASES = {
 };
 } // namespace
 
-void naive_kernel(const float *A, const float *B, float *C, int M, int K,
-                  int N) {
+void naive_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
   launch_naive_sgemm<32>(A, B, C, M, K, N);
 }
 
-void tiled_kernel(const float *A, const float *B, float *C, int M, int K,
-                  int N) {
+void tiled_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
   launch_tiled_sgemm<32>(A, B, C, M, K, N);
 }
 
-void bank_conflict_free_kernel(const float *A, const float *B, float *C, int M,
-                               int K, int N) {
+void bank_conflict_free_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
   launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N);
 }
 
-void double_buffer_kernel(const float *A, const float *B, float *C, int M,
-                          int K, int N) {
+void double_buffer_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
   launch_double_buffer_sgemm<32>(A, B, C, M, K, N);
 }
 
-void tensor_core_kernel(const float *A, const float *B, float *C, int M, int K,
-                        int N) {
+void tensor_core_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
   launch_tensor_core_sgemm(A, B, C, M, K, N);
 }
 
@@ -70,8 +65,7 @@ void runBenchmarks(int M, int K, int N) {
   SGEMMBenchmark benchmark;
 
   printf("\nRunning cuBLAS (reference)...\n");
-  BenchmarkResult cublas_result =
-      benchmark.runCublas(M, K, N, warmup_runs, benchmark_runs);
+  BenchmarkResult cublas_result = benchmark.runCublas(M, K, N, warmup_runs, benchmark_runs);
   float cublas_gflops = cublas_result.gflops;
 
   printf("Running Naive SGEMM...\n");
@@ -79,22 +73,22 @@ void runBenchmarks(int M, int K, int N) {
                 kStandardVerifyTolerance);
 
   printf("Running Tiled SGEMM...\n");
-  benchmark.run("Tiled (32x32)", tiled_kernel, M, K, N, warmup_runs,
-                benchmark_runs, kStandardVerifyTolerance);
+  benchmark.run("Tiled (32x32)", tiled_kernel, M, K, N, warmup_runs, benchmark_runs,
+                kStandardVerifyTolerance);
 
   printf("Running Bank Conflict Free SGEMM...\n");
-  benchmark.run("Bank Conflict Free", bank_conflict_free_kernel, M, K, N,
-                warmup_runs, benchmark_runs, kStandardVerifyTolerance);
+  benchmark.run("Bank Conflict Free", bank_conflict_free_kernel, M, K, N, warmup_runs,
+                benchmark_runs, kStandardVerifyTolerance);
 
   printf("Running Double Buffer SGEMM...\n");
-  benchmark.run("Double Buffer", double_buffer_kernel, M, K, N, warmup_runs,
-                benchmark_runs, kStandardVerifyTolerance);
+  benchmark.run("Double Buffer", double_buffer_kernel, M, K, N, warmup_runs, benchmark_runs,
+                kStandardVerifyTolerance);
 
   if (tensorCoresAvailable()) {
     printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
            "conversion/fallback)...\n");
-    benchmark.run("Tensor Core (WMMA end-to-end)", tensor_core_kernel, M, K, N,
-                  warmup_runs, benchmark_runs, kTensorCoreVerifyTolerance);
+    benchmark.run("Tensor Core (WMMA end-to-end)", tensor_core_kernel, M, K, N, warmup_runs,
+                  benchmark_runs, kTensorCoreVerifyTolerance);
 
     if (tensorCoreDimensionsSupported(M, K, N)) {
       printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
@@ -109,9 +103,8 @@ void runBenchmarks(int M, int K, int N) {
     CUDA_CHECK(cudaGetDevice(&device));
     cudaDeviceProp prop;
     CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-    printf(
-        "Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n",
-        prop.major, prop.minor);
+    printf("Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n", prop.major,
+           prop.minor);
   }
 
   benchmark.printSummary();

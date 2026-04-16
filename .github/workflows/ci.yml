@@ -49,7 +49,7 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;89;90"
 
       - name: Build
-        run: cmake --build build --target sgemm_benchmark -j2
+        run: cmake --build build --target sgemm_benchmark -j2 --verbose
 
       - name: Info
         run: |
