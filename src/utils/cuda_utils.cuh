@@ -19,34 +19,33 @@ struct CudaError : std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
-#define CUDA_CHECK(call)                                                       \
-  do {                                                                         \
-    cudaError_t err = call;                                                    \
-    if (err != cudaSuccess) {                                                  \
-      throw CudaError(std::string("CUDA error at ") + __FILE__ + ":" +         \
-                      std::to_string(__LINE__) + ": " +                        \
-                      cudaGetErrorString(err));                                \
-    }                                                                          \
+#define CUDA_CHECK(call)                                                                           \
+  do {                                                                                             \
+    cudaError_t err = call;                                                                        \
+    if (err != cudaSuccess) {                                                                      \
+      throw CudaError(std::string("CUDA error at ") + __FILE__ + ":" + std::to_string(__LINE__) +  \
+                      ": " + cudaGetErrorString(err));                                             \
+    }                                                                                              \
   } while (0)
 
-#define CUBLAS_CHECK(call)                                                     \
-  do {                                                                         \
-    cublasStatus_t status = call;                                              \
-    if (status != CUBLAS_STATUS_SUCCESS) {                                     \
-      throw CudaError(std::string("cuBLAS error at ") + __FILE__ + ":" +       \
-                      std::to_string(__LINE__) + ": code " +                   \
-                      std::to_string(static_cast<int>(status)));               \
-    }                                                                          \
+#define CUBLAS_CHECK(call)                                                                         \
+  do {                                                                                             \
+    cublasStatus_t status = call;                                                                  \
+    if (status != CUBLAS_STATUS_SUCCESS) {                                                         \
+      throw CudaError(std::string("cuBLAS error at ") + __FILE__ + ":" +                           \
+                      std::to_string(__LINE__) + ": code " +                                       \
+                      std::to_string(static_cast<int>(status)));                                   \
+    }                                                                                              \
   } while (0)
 
-#define CURAND_CHECK(call)                                                     \
-  do {                                                                         \
-    curandStatus_t status = call;                                              \
-    if (status != CURAND_STATUS_SUCCESS) {                                     \
-      throw CudaError(std::string("cuRAND error at ") + __FILE__ + ":" +       \
-                      std::to_string(__LINE__) + ": code " +                   \
-                      std::to_string(static_cast<int>(status)));               \
-    }                                                                          \
+#define CURAND_CHECK(call)                                                                         \
+  do {                                                                                             \
+    curandStatus_t status = call;                                                                  \
+    if (status != CURAND_STATUS_SUCCESS) {                                                         \
+      throw CudaError(std::string("cuRAND error at ") + __FILE__ + ":" +                           \
+                      std::to_string(__LINE__) + ": code " +                                       \
+                      std::to_string(static_cast<int>(status)));                                   \
+    }                                                                                              \
   } while (0)
 
 // ============================================================================
@@ -68,8 +67,7 @@ public:
   }
 
   // Move semantics
-  DeviceMemory(DeviceMemory &&other) noexcept
-      : ptr_(other.ptr_), size_(other.size_) {
+  DeviceMemory(DeviceMemory &&other) noexcept : ptr_(other.ptr_), size_(other.size_) {
     other.ptr_ = nullptr;
     other.size_ = 0;
   }
@@ -95,13 +93,11 @@ public:
   size_t size() const { return size_; }
 
   void copyFromHost(const T *host_ptr, size_t count) {
-    CUDA_CHECK(
-        cudaMemcpy(ptr_, host_ptr, count * sizeof(T), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(ptr_, host_ptr, count * sizeof(T), cudaMemcpyHostToDevice));
   }
 
   void copyToHost(T *host_ptr, size_t count) const {
-    CUDA_CHECK(
-        cudaMemcpy(host_ptr, ptr_, count * sizeof(T), cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(host_ptr, ptr_, count * sizeof(T), cudaMemcpyDeviceToHost));
   }
 
   void zero() { CUDA_CHECK(cudaMemset(ptr_, 0, size_ * sizeof(T))); }
@@ -139,9 +135,8 @@ private:
 // ============================================================================
 
 // Initialize matrix with random values on host
-inline void initRandomMatrix(float *data, int rows, int cols,
-                             float min_val = -1.0f, float max_val = 1.0f,
-                             unsigned int seed = 42) {
+inline void initRandomMatrix(float *data, int rows, int cols, float min_val = -1.0f,
+                             float max_val = 1.0f, unsigned int seed = 42) {
   std::mt19937 gen(seed);
   std::uniform_real_distribution<float> dist(min_val, max_val);
 
@@ -167,8 +162,7 @@ inline void printGPUInfo() {
   printf("  SM Count: %d\n", prop.multiProcessorCount);
   printf("  Max Threads per Block: %d\n", prop.maxThreadsPerBlock);
   printf("  Shared Memory per Block: %zu KB\n", prop.sharedMemPerBlock / 1024);
-  printf("  Global Memory: %.2f GB\n",
-         prop.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
+  printf("  Global Memory: %.2f GB\n", prop.totalGlobalMem / (1024.0 * 1024.0 * 1024.0));
   printf("  Memory Bus Width: %d bits\n", prop.memoryBusWidth);
   // Note: memoryClockRate is deprecated in newer CUDA versions
   // Peak bandwidth calculation uses bus width only as approximation

@@ -25,8 +25,7 @@
  * C: M x N (row-major)
  */
 template <int TILE_SIZE>
-__global__ void tiled_sgemm_kernel(const float *__restrict__ A,
-                                   const float *__restrict__ B,
+__global__ void tiled_sgemm_kernel(const float *__restrict__ A, const float *__restrict__ B,
                                    float *__restrict__ C, int M, int K, int N) {
   // Shared memory for tiles of A and B
   __shared__ float As[TILE_SIZE][TILE_SIZE];
@@ -102,18 +101,16 @@ __global__ void tiled_sgemm_kernel(const float *__restrict__ A,
  * @param stream CUDA stream (default: 0)
  */
 template <int TILE_SIZE = 32>
-void launch_tiled_sgemm(const float *A, const float *B, float *C, int M, int K,
-                        int N, cudaStream_t stream = 0) {
+void launch_tiled_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
+                        cudaStream_t stream = 0) {
   // Block size matches tile size
   dim3 blockDim(TILE_SIZE, TILE_SIZE);
 
   // Grid covers the output matrix
-  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE,
-               (M + TILE_SIZE - 1) / TILE_SIZE);
+  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
   // Launch kernel
-  tiled_sgemm_kernel<TILE_SIZE>
-      <<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+  tiled_sgemm_kernel<TILE_SIZE><<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
   CUDA_CHECK(cudaGetLastError());
 }

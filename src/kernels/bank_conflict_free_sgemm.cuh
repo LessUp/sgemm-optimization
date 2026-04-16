@@ -40,9 +40,8 @@
  */
 template <int TILE_SIZE>
 __global__ void bank_conflict_free_sgemm_kernel(const float *__restrict__ A,
-                                                const float *__restrict__ B,
-                                                float *__restrict__ C, int M,
-                                                int K, int N) {
+                                                const float *__restrict__ B, float *__restrict__ C,
+                                                int M, int K, int N) {
   // Shared memory with padding to avoid bank conflicts
   // Adding 1 to the second dimension shifts each row by 1 bank
   // This ensures column accesses hit different banks
@@ -99,15 +98,12 @@ __global__ void bank_conflict_free_sgemm_kernel(const float *__restrict__ A,
  * Launch wrapper for bank conflict free SGEMM kernel
  */
 template <int TILE_SIZE = 32>
-void launch_bank_conflict_free_sgemm(const float *A, const float *B, float *C,
-                                     int M, int K, int N,
+void launch_bank_conflict_free_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
                                      cudaStream_t stream = 0) {
   dim3 blockDim(TILE_SIZE, TILE_SIZE);
-  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE,
-               (M + TILE_SIZE - 1) / TILE_SIZE);
+  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
-  bank_conflict_free_sgemm_kernel<TILE_SIZE>
-      <<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+  bank_conflict_free_sgemm_kernel<TILE_SIZE><<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
   CUDA_CHECK(cudaGetLastError());
 }
