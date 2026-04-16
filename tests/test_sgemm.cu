@@ -25,29 +25,16 @@ constexpr int PBT_ITERATIONS = 100;
 
 std::vector<std::tuple<int, int, int>> getStandardDimensions() {
   return {
-      {1, 1, 1},
-      {16, 16, 16},
-      {32, 32, 32},
-      {64, 64, 64},
-      {128, 128, 128},
-      {256, 256, 256},
-      {512, 512, 512},
-      {64, 128, 256},
-      {256, 64, 128},
-      {128, 256, 64},
-      {511, 513, 1025},
+      {1, 1, 1},       {16, 16, 16},    {32, 32, 32},     {64, 64, 64},
+      {128, 128, 128}, {256, 256, 256}, {512, 512, 512},  {64, 128, 256},
+      {256, 64, 128},  {128, 256, 64},  {511, 513, 1025},
   };
 }
 
 std::vector<std::tuple<int, int, int>> getTensorCoreFastPathDimensions() {
   return {
-      {16, 16, 16},
-      {32, 32, 32},
-      {64, 64, 64},
-      {128, 128, 128},
-      {256, 256, 256},
-      {64, 128, 256},
-      {256, 64, 128},
+      {16, 16, 16},    {32, 32, 32},   {64, 64, 64},   {128, 128, 128},
+      {256, 256, 256}, {64, 128, 256}, {256, 64, 128},
   };
 }
 
@@ -96,9 +83,8 @@ TEST_F(ErrorDetectionTest, StandardKernelErrorDetection) {
       h_test_[i] = h_ref_[i] + error_magnitude * (dist(gen) > 0 ? 1 : -1);
     }
 
-    VerifyResult result =
-        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                        kStandardVerifyTolerance);
+    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
+                                          kStandardVerifyTolerance);
 
     EXPECT_TRUE(SGEMMVerifier::shouldFlagAsIncorrect(result))
         << "Iteration " << iter << ": error above tolerance should be flagged";
@@ -119,9 +105,8 @@ TEST_F(ErrorDetectionTest, StandardKernelPassesWithinTolerance) {
       h_test_[i] = h_ref_[i] + error_magnitude * dist(gen);
     }
 
-    VerifyResult result =
-        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                        kStandardVerifyTolerance);
+    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
+                                          kStandardVerifyTolerance);
 
     EXPECT_TRUE(result.passed)
         << "Iteration " << iter << ": error within tolerance should pass";
@@ -142,9 +127,8 @@ TEST_F(ErrorDetectionTest, TensorCoreErrorDetection) {
       h_test_[i] = h_ref_[i] + error_magnitude * (dist(gen) > 0 ? 1 : -1);
     }
 
-    VerifyResult result =
-        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                        kTensorCoreVerifyTolerance);
+    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
+                                          kTensorCoreVerifyTolerance);
 
     EXPECT_TRUE(SGEMMVerifier::shouldFlagAsIncorrect(result))
         << "Iteration " << iter
@@ -193,9 +177,9 @@ protected:
   }
 
   template <typename LaunchFn>
-  VerifyResult runKernelAndCompare(LaunchFn launch_fn,
-                                   VerifyTolerance tolerance =
-                                       kStandardVerifyTolerance) {
+  VerifyResult
+  runKernelAndCompare(LaunchFn launch_fn,
+                      VerifyTolerance tolerance = kStandardVerifyTolerance) {
     CUDA_CHECK(cudaMemset(d_C_, 0, M_ * N_ * sizeof(float)));
     launch_fn();
     CUDA_CHECK(cudaDeviceSynchronize());
@@ -244,8 +228,9 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, TiledSGEMMTest,
 class BankConflictFreeSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(BankConflictFreeSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare(
-      [&] { launch_bank_conflict_free_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+  VerifyResult result = runKernelAndCompare([&] {
+    launch_bank_conflict_free_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_);
+  });
 
   EXPECT_TRUE(result.passed)
       << "BankConflictFree SGEMM failed for dimensions " << M_ << "x" << K_
@@ -287,8 +272,9 @@ TEST_P(TensorCoreSGEMMTest, FastPathCorrectnessProperty) {
       << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
-INSTANTIATE_TEST_SUITE_P(TensorCoreFastPathDimensions, TensorCoreSGEMMTest,
-                         ::testing::ValuesIn(getTensorCoreFastPathDimensions()));
+INSTANTIATE_TEST_SUITE_P(
+    TensorCoreFastPathDimensions, TensorCoreSGEMMTest,
+    ::testing::ValuesIn(getTensorCoreFastPathDimensions()));
 
 class TensorCoreFallbackTest : public SGEMMKernelTest {};
 
@@ -302,13 +288,17 @@ TEST_P(TensorCoreFallbackTest, NonAlignedInputsFallbackSafely) {
       << N_ << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
-INSTANTIATE_TEST_SUITE_P(TensorCoreFallbackDimensions, TensorCoreFallbackTest,
-                         ::testing::ValuesIn(getTensorCoreFallbackDimensions()));
+INSTANTIATE_TEST_SUITE_P(
+    TensorCoreFallbackDimensions, TensorCoreFallbackTest,
+    ::testing::ValuesIn(getTensorCoreFallbackDimensions()));
 
 TEST(TensorCoreWrapperTest, ZeroSizeInputsReturnSafely) {
-  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 0, 16, 16));
-  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 0, 16));
-  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 16, 0));
+  EXPECT_NO_THROW(
+      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 0, 16, 16));
+  EXPECT_NO_THROW(
+      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 0, 16));
+  EXPECT_NO_THROW(
+      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 16, 0));
 }
 
 class DimensionInvarianceTest : public ::testing::Test {
@@ -358,9 +348,8 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
       CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, M * N * sizeof(float),
                             cudaMemcpyDeviceToHost));
 
-      VerifyResult result =
-          compareMatrices(h_C.data(), h_ref.data(), M, N,
-                          kStandardVerifyTolerance);
+      VerifyResult result = compareMatrices(h_C.data(), h_ref.data(), M, N,
+                                            kStandardVerifyTolerance);
       EXPECT_TRUE(result.passed)
           << name << " failed at iteration " << iter << " with dimensions " << M
           << "x" << K << "x" << N;
