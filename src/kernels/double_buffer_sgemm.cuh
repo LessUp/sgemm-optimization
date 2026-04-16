@@ -43,10 +43,8 @@
  * C: M x N (row-major)
  */
 template <int TILE_SIZE>
-__global__ void double_buffer_sgemm_kernel(const float *__restrict__ A,
-                                           const float *__restrict__ B,
-                                           float *__restrict__ C, int M, int K,
-                                           int N) {
+__global__ void double_buffer_sgemm_kernel(const float *__restrict__ A, const float *__restrict__ B,
+                                           float *__restrict__ C, int M, int K, int N) {
   // Double buffers with padding to avoid bank conflicts
   __shared__ float As[2][TILE_SIZE][TILE_SIZE + 1];
   __shared__ float Bs[2][TILE_SIZE][TILE_SIZE + 1];
@@ -132,14 +130,12 @@ __global__ void double_buffer_sgemm_kernel(const float *__restrict__ A,
  * Launch wrapper for double buffer SGEMM kernel
  */
 template <int TILE_SIZE = 32>
-void launch_double_buffer_sgemm(const float *A, const float *B, float *C, int M,
-                                int K, int N, cudaStream_t stream = 0) {
+void launch_double_buffer_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
+                                cudaStream_t stream = 0) {
   dim3 blockDim(TILE_SIZE, TILE_SIZE);
-  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE,
-               (M + TILE_SIZE - 1) / TILE_SIZE);
+  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
-  double_buffer_sgemm_kernel<TILE_SIZE>
-      <<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+  double_buffer_sgemm_kernel<TILE_SIZE><<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
   CUDA_CHECK(cudaGetLastError());
 }

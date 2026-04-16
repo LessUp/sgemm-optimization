@@ -47,12 +47,12 @@ std::vector<std::tuple<int, int, int>> getTensorCoreFallbackDimensions() {
   };
 }
 
-void computeReference(cublasHandle_t handle, const float *d_A, const float *d_B,
-                      float *d_C, int M, int K, int N) {
+void computeReference(cublasHandle_t handle, const float *d_A, const float *d_B, float *d_C, int M,
+                      int K, int N) {
   float alpha = 1.0f;
   float beta = 0.0f;
-  CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
-                           d_B, N, d_A, K, &beta, d_C, N));
+  CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta,
+                           d_C, N));
 }
 } // namespace
 
@@ -83,8 +83,8 @@ TEST_F(ErrorDetectionTest, StandardKernelErrorDetection) {
       h_test_[i] = h_ref_[i] + error_magnitude * (dist(gen) > 0 ? 1 : -1);
     }
 
-    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                                          kStandardVerifyTolerance);
+    VerifyResult result =
+        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64, kStandardVerifyTolerance);
 
     EXPECT_TRUE(SGEMMVerifier::shouldFlagAsIncorrect(result))
         << "Iteration " << iter << ": error above tolerance should be flagged";
@@ -105,11 +105,10 @@ TEST_F(ErrorDetectionTest, StandardKernelPassesWithinTolerance) {
       h_test_[i] = h_ref_[i] + error_magnitude * dist(gen);
     }
 
-    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                                          kStandardVerifyTolerance);
+    VerifyResult result =
+        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64, kStandardVerifyTolerance);
 
-    EXPECT_TRUE(result.passed)
-        << "Iteration " << iter << ": error within tolerance should pass";
+    EXPECT_TRUE(result.passed) << "Iteration " << iter << ": error within tolerance should pass";
   }
 }
 
@@ -127,17 +126,15 @@ TEST_F(ErrorDetectionTest, TensorCoreErrorDetection) {
       h_test_[i] = h_ref_[i] + error_magnitude * (dist(gen) > 0 ? 1 : -1);
     }
 
-    VerifyResult result = compareMatrices(h_test_.data(), h_ref_.data(), 64, 64,
-                                          kTensorCoreVerifyTolerance);
+    VerifyResult result =
+        compareMatrices(h_test_.data(), h_ref_.data(), 64, 64, kTensorCoreVerifyTolerance);
 
     EXPECT_TRUE(SGEMMVerifier::shouldFlagAsIncorrect(result))
-        << "Iteration " << iter
-        << ": Tensor Core error above tolerance should be flagged";
+        << "Iteration " << iter << ": Tensor Core error above tolerance should be flagged";
   }
 }
 
-class SGEMMKernelTest
-    : public ::testing::TestWithParam<std::tuple<int, int, int>> {
+class SGEMMKernelTest : public ::testing::TestWithParam<std::tuple<int, int, int>> {
 protected:
   void SetUp() override {
     std::tie(M_, K_, N_) = GetParam();
@@ -155,14 +152,12 @@ protected:
     CUDA_CHECK(cudaMalloc(&d_C_, M_ * N_ * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_C_ref_, M_ * N_ * sizeof(float)));
 
-    CUDA_CHECK(cudaMemcpy(d_A_, h_A_.data(), M_ * K_ * sizeof(float),
-                          cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_B_, h_B_.data(), K_ * N_ * sizeof(float),
-                          cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_A_, h_A_.data(), M_ * K_ * sizeof(float), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_B_, h_B_.data(), K_ * N_ * sizeof(float), cudaMemcpyHostToDevice));
 
     verifier_.computeReference(d_A_, d_B_, d_C_ref_, M_, K_, N_);
-    CUDA_CHECK(cudaMemcpy(h_C_ref_.data(), d_C_ref_, M_ * N_ * sizeof(float),
-                          cudaMemcpyDeviceToHost));
+    CUDA_CHECK(
+        cudaMemcpy(h_C_ref_.data(), d_C_ref_, M_ * N_ * sizeof(float), cudaMemcpyDeviceToHost));
   }
 
   void TearDown() override {
@@ -177,14 +172,12 @@ protected:
   }
 
   template <typename LaunchFn>
-  VerifyResult
-  runKernelAndCompare(LaunchFn launch_fn,
-                      VerifyTolerance tolerance = kStandardVerifyTolerance) {
+  VerifyResult runKernelAndCompare(LaunchFn launch_fn,
+                                   VerifyTolerance tolerance = kStandardVerifyTolerance) {
     CUDA_CHECK(cudaMemset(d_C_, 0, M_ * N_ * sizeof(float)));
     launch_fn();
     CUDA_CHECK(cudaDeviceSynchronize());
-    CUDA_CHECK(cudaMemcpy(h_C_.data(), d_C_, M_ * N_ * sizeof(float),
-                          cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(h_C_.data(), d_C_, M_ * N_ * sizeof(float), cudaMemcpyDeviceToHost));
     return compareMatrices(h_C_.data(), h_C_ref_.data(), M_, N_, tolerance);
   }
 
@@ -200,12 +193,11 @@ protected:
 class NaiveSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(NaiveSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare(
-      [&] { launch_naive_sgemm<>(d_A_, d_B_, d_C_, M_, K_, N_); });
+  VerifyResult result =
+      runKernelAndCompare([&] { launch_naive_sgemm<>(d_A_, d_B_, d_C_, M_, K_, N_); });
 
-  EXPECT_TRUE(result.passed)
-      << "Naive SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
-      << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "Naive SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
+                             << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
 INSTANTIATE_TEST_SUITE_P(StandardDimensions, NaiveSGEMMTest,
@@ -214,12 +206,11 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, NaiveSGEMMTest,
 class TiledSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(TiledSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare(
-      [&] { launch_tiled_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+  VerifyResult result =
+      runKernelAndCompare([&] { launch_tiled_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
 
-  EXPECT_TRUE(result.passed)
-      << "Tiled SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
-      << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "Tiled SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
+                             << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
 INSTANTIATE_TEST_SUITE_P(StandardDimensions, TiledSGEMMTest,
@@ -228,13 +219,11 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, TiledSGEMMTest,
 class BankConflictFreeSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(BankConflictFreeSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare([&] {
-    launch_bank_conflict_free_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_);
-  });
+  VerifyResult result = runKernelAndCompare(
+      [&] { launch_bank_conflict_free_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
 
-  EXPECT_TRUE(result.passed)
-      << "BankConflictFree SGEMM failed for dimensions " << M_ << "x" << K_
-      << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "BankConflictFree SGEMM failed for dimensions " << M_ << "x" << K_
+                             << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
 INSTANTIATE_TEST_SUITE_P(StandardDimensions, BankConflictFreeSGEMMTest,
@@ -243,12 +232,11 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, BankConflictFreeSGEMMTest,
 class DoubleBufferSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(DoubleBufferSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare(
-      [&] { launch_double_buffer_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+  VerifyResult result =
+      runKernelAndCompare([&] { launch_double_buffer_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
 
-  EXPECT_TRUE(result.passed)
-      << "DoubleBuffer SGEMM failed for dimensions " << M_ << "x" << K_ << "x"
-      << N_ << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "DoubleBuffer SGEMM failed for dimensions " << M_ << "x" << K_
+                             << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
 INSTANTIATE_TEST_SUITE_P(StandardDimensions, DoubleBufferSGEMMTest,
@@ -264,41 +252,33 @@ TEST_P(TensorCoreSGEMMTest, FastPathCorrectnessProperty) {
   ASSERT_TRUE(tensorCoreDimensionsSupported(M_, K_, N_));
 
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); },
-      kTensorCoreVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); }, kTensorCoreVerifyTolerance);
 
-  EXPECT_TRUE(result.passed)
-      << "TensorCore SGEMM fast path failed for dimensions " << M_ << "x" << K_
-      << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "TensorCore SGEMM fast path failed for dimensions " << M_ << "x"
+                             << K_ << "x" << N_ << " (max_rel_error: " << result.max_rel_error
+                             << ")";
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TensorCoreFastPathDimensions, TensorCoreSGEMMTest,
-    ::testing::ValuesIn(getTensorCoreFastPathDimensions()));
+INSTANTIATE_TEST_SUITE_P(TensorCoreFastPathDimensions, TensorCoreSGEMMTest,
+                         ::testing::ValuesIn(getTensorCoreFastPathDimensions()));
 
 class TensorCoreFallbackTest : public SGEMMKernelTest {};
 
 TEST_P(TensorCoreFallbackTest, NonAlignedInputsFallbackSafely) {
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); },
-      kStandardVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); }, kStandardVerifyTolerance);
 
-  EXPECT_TRUE(result.passed)
-      << "TensorCore fallback failed for dimensions " << M_ << "x" << K_ << "x"
-      << N_ << " (max_rel_error: " << result.max_rel_error << ")";
+  EXPECT_TRUE(result.passed) << "TensorCore fallback failed for dimensions " << M_ << "x" << K_
+                             << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    TensorCoreFallbackDimensions, TensorCoreFallbackTest,
-    ::testing::ValuesIn(getTensorCoreFallbackDimensions()));
+INSTANTIATE_TEST_SUITE_P(TensorCoreFallbackDimensions, TensorCoreFallbackTest,
+                         ::testing::ValuesIn(getTensorCoreFallbackDimensions()));
 
 TEST(TensorCoreWrapperTest, ZeroSizeInputsReturnSafely) {
-  EXPECT_NO_THROW(
-      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 0, 16, 16));
-  EXPECT_NO_THROW(
-      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 0, 16));
-  EXPECT_NO_THROW(
-      launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 16, 0));
+  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 0, 16, 16));
+  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 0, 16));
+  EXPECT_NO_THROW(launch_tensor_core_sgemm(nullptr, nullptr, nullptr, 16, 16, 0));
 }
 
 class DimensionInvarianceTest : public ::testing::Test {
@@ -332,27 +312,22 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
     CUDA_CHECK(cudaMalloc(&d_C, M * N * sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_ref, M * N * sizeof(float)));
 
-    CUDA_CHECK(cudaMemcpy(d_A, h_A.data(), M * K * sizeof(float),
-                          cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_B, h_B.data(), K * N * sizeof(float),
-                          cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_A, h_A.data(), M * K * sizeof(float), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_B, h_B.data(), K * N * sizeof(float), cudaMemcpyHostToDevice));
 
     computeReference(handle_, d_A, d_B, d_ref, M, K, N);
-    CUDA_CHECK(cudaMemcpy(h_ref.data(), d_ref, M * N * sizeof(float),
-                          cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(h_ref.data(), d_ref, M * N * sizeof(float), cudaMemcpyDeviceToHost));
 
     auto testKernel = [&](const char *name, auto kernel_func) {
       CUDA_CHECK(cudaMemset(d_C, 0, M * N * sizeof(float)));
       kernel_func(d_A, d_B, d_C, M, K, N);
       CUDA_CHECK(cudaDeviceSynchronize());
-      CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, M * N * sizeof(float),
-                            cudaMemcpyDeviceToHost));
+      CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, M * N * sizeof(float), cudaMemcpyDeviceToHost));
 
-      VerifyResult result = compareMatrices(h_C.data(), h_ref.data(), M, N,
-                                            kStandardVerifyTolerance);
-      EXPECT_TRUE(result.passed)
-          << name << " failed at iteration " << iter << " with dimensions " << M
-          << "x" << K << "x" << N;
+      VerifyResult result =
+          compareMatrices(h_C.data(), h_ref.data(), M, N, kStandardVerifyTolerance);
+      EXPECT_TRUE(result.passed) << name << " failed at iteration " << iter << " with dimensions "
+                                 << M << "x" << K << "x" << N;
     };
 
     testKernel("Naive", launch_naive_sgemm<>);

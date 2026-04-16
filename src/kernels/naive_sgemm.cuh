@@ -26,8 +26,7 @@
  * B: K x N (row-major)
  * C: M x N (row-major)
  */
-__global__ void naive_sgemm_kernel(const float *__restrict__ A,
-                                   const float *__restrict__ B,
+__global__ void naive_sgemm_kernel(const float *__restrict__ A, const float *__restrict__ B,
                                    float *__restrict__ C, int M, int K, int N) {
   // Calculate global row and column indices
   int row = blockIdx.y * blockDim.y + threadIdx.y;
@@ -62,13 +61,12 @@ __global__ void naive_sgemm_kernel(const float *__restrict__ A,
  * @param stream CUDA stream (default: 0)
  */
 template <int BLOCK_SIZE = 32>
-void launch_naive_sgemm(const float *A, const float *B, float *C, int M, int K,
-                        int N, cudaStream_t stream = 0) {
+void launch_naive_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
+                        cudaStream_t stream = 0) {
   // Configure grid and block dimensions
   // Each thread computes one element of C
   dim3 blockDim(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 gridDim((N + BLOCK_SIZE - 1) / BLOCK_SIZE,
-               (M + BLOCK_SIZE - 1) / BLOCK_SIZE);
+  dim3 gridDim((N + BLOCK_SIZE - 1) / BLOCK_SIZE, (M + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
   // Launch kernel
   naive_sgemm_kernel<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
