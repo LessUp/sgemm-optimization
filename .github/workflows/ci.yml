@@ -29,8 +29,6 @@ jobs:
         uses: jidicula/clang-format-action@v4.14.0
         with:
           clang-format-version: '17'
-          check-path: '.'
-          exclude-regex: '(^|/)(build|third_party|external|vendor|node_modules|\.git|\.kiro)(/|$)'
           fallback-style: 'LLVM'
 
   cuda-build:
@@ -49,7 +47,11 @@ jobs:
           rm -rf /var/lib/apt/lists/*
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86"
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTS=OFF
+          -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86"
 
       - name: Build
         run: cmake --build build --target sgemm_benchmark -j$(nproc)
