@@ -26,11 +26,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check formatting
-        uses: jidicula/clang-format-action@v4.13.0
+        uses: jidicula/clang-format-action@v4.14.0
         with:
           clang-format-version: '17'
           check-path: '.'
-          exclude-regex: '(^|/)(build|third_party|external|vendor|\.git|\.kiro)(/|$)'
+          exclude-regex: '(^|/)(build|third_party|external|vendor|node_modules|\.git|\.kiro)(/|$)'
           fallback-style: 'LLVM'
 
   cuda-build:
@@ -39,17 +39,20 @@ jobs:
     container:
       image: nvidia/cuda:12.4.1-devel-ubuntu22.04
     steps:
-      - name: Install dependencies
-        run: apt-get update && apt-get install -y cmake git build-essential
-
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends cmake git build-essential
+          rm -rf /var/lib/apt/lists/*
+
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;89;90"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86"
 
       - name: Build
-        run: cmake --build build --target sgemm_benchmark -j2 --verbose
+        run: cmake --build build --target sgemm_benchmark -j$(nproc)
 
       - name: Info
         run: |
