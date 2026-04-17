@@ -45,6 +45,3 @@ _site/
 # OS
 .DS_Store
 Thumbs.db
-
-# Separate git repository
-docs/
