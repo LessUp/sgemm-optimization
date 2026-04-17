@@ -1,0 +1,23 @@
+---
+layout: default
+title: Navigation
+nav_order: 1
+---
+
+# Navigation
+
+This file provides navigation structure for the documentation site.
+
+## Main Sections
+
+1. [Home](../index.md) - Project landing page
+2. [Getting Started](getting-started.md) - Quick start guide
+3. Architecture & Implementation
+   - [Architecture Guide](architecture.md)
+   - [Kernel Details](kernel-details.md)
+   - [Benchmark Results](benchmark-results.md)
+4. Specifications
+   - [Product Requirements](../specs/product/sgemm-kernel-requirements.md)
+   - [Core Architecture RFC](../specs/rfc/0001-core-architecture.md)
+   - [Test Specifications](../specs/testing/kernel-verification.md)
+5. [CHANGELOG](../CHANGELOG.md)

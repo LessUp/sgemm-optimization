@@ -12,6 +12,8 @@ on:
       - 'README.zh-CN.md'
       - 'CHANGELOG.md'
       - '_config.yml'
+      - 'docs/**'
+      - 'specs/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -38,7 +40,11 @@ jobs:
             README.zh-CN.md
             _config.yml
             CHANGELOG.md
+            CONTRIBUTING.md
             LICENSE
+            docs/
+            specs/
+            assets/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
