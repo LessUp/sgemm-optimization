@@ -24,6 +24,9 @@ CMakeUserPresets.json
 *.ncu-rep
 *.sqlite
 
+# Benchmark data (generated outputs)
+benchmarks/data/*.csv
+
 # IDE
 .vscode/
 .idea/
