@@ -8,6 +8,7 @@
 
 #include <cuda_runtime.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <random>
 #include <tuple>
 #include <vector>
@@ -147,46 +148,34 @@ protected:
     initRandomMatrix(h_A_.data(), M_, K_, -1.0f, 1.0f, 42);
     initRandomMatrix(h_B_.data(), K_, N_, -1.0f, 1.0f, 123);
 
-    CUDA_CHECK(cudaMalloc(&d_A_, M_ * K_ * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_B_, K_ * N_ * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_C_, M_ * N_ * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_C_ref_, M_ * N_ * sizeof(float)));
+    d_A_ = std::make_unique<DeviceMemory<float>>(M_ * K_);
+    d_B_ = std::make_unique<DeviceMemory<float>>(K_ * N_);
+    d_C_ = std::make_unique<DeviceMemory<float>>(M_ * N_);
+    d_C_ref_ = std::make_unique<DeviceMemory<float>>(M_ * N_);
 
-    CUDA_CHECK(cudaMemcpy(d_A_, h_A_.data(), M_ * K_ * sizeof(float), cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_B_, h_B_.data(), K_ * N_ * sizeof(float), cudaMemcpyHostToDevice));
+    d_A_->copyFromHost(h_A_.data(), M_ * K_);
+    d_B_->copyFromHost(h_B_.data(), K_ * N_);
 
-    verifier_.computeReference(d_A_, d_B_, d_C_ref_, M_, K_, N_);
-    CUDA_CHECK(
-        cudaMemcpy(h_C_ref_.data(), d_C_ref_, M_ * N_ * sizeof(float), cudaMemcpyDeviceToHost));
-  }
-
-  void TearDown() override {
-    if (d_A_)
-      cudaFree(d_A_);
-    if (d_B_)
-      cudaFree(d_B_);
-    if (d_C_)
-      cudaFree(d_C_);
-    if (d_C_ref_)
-      cudaFree(d_C_ref_);
+    verifier_.computeReference(d_A_->get(), d_B_->get(), d_C_ref_->get(), M_, K_, N_);
+    d_C_ref_->copyToHost(h_C_ref_.data(), M_ * N_);
   }
 
   template <typename LaunchFn>
   VerifyResult runKernelAndCompare(LaunchFn launch_fn,
                                    VerifyTolerance tolerance = kStandardVerifyTolerance) {
-    CUDA_CHECK(cudaMemset(d_C_, 0, M_ * N_ * sizeof(float)));
+    d_C_->zero();
     launch_fn();
     CUDA_CHECK(cudaDeviceSynchronize());
-    CUDA_CHECK(cudaMemcpy(h_C_.data(), d_C_, M_ * N_ * sizeof(float), cudaMemcpyDeviceToHost));
+    d_C_->copyToHost(h_C_.data(), M_ * N_);
     return compareMatrices(h_C_.data(), h_C_ref_.data(), M_, N_, tolerance);
   }
 
   int M_, K_, N_;
   std::vector<float> h_A_, h_B_, h_C_, h_C_ref_;
-  float *d_A_ = nullptr;
-  float *d_B_ = nullptr;
-  float *d_C_ = nullptr;
-  float *d_C_ref_ = nullptr;
+  std::unique_ptr<DeviceMemory<float>> d_A_;
+  std::unique_ptr<DeviceMemory<float>> d_B_;
+  std::unique_ptr<DeviceMemory<float>> d_C_;
+  std::unique_ptr<DeviceMemory<float>> d_C_ref_;
   SGEMMVerifier verifier_;
 };
 
@@ -194,7 +183,7 @@ class NaiveSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(NaiveSGEMMTest, CorrectnessProperty) {
   VerifyResult result =
-      runKernelAndCompare([&] { launch_naive_sgemm<>(d_A_, d_B_, d_C_, M_, K_, N_); });
+      runKernelAndCompare([&] { launch_naive_sgemm<>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "Naive SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
                              << " (max_rel_error: " << result.max_rel_error << ")";
@@ -207,7 +196,7 @@ class TiledSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(TiledSGEMMTest, CorrectnessProperty) {
   VerifyResult result =
-      runKernelAndCompare([&] { launch_tiled_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+      runKernelAndCompare([&] { launch_tiled_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "Tiled SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
                              << " (max_rel_error: " << result.max_rel_error << ")";
@@ -220,7 +209,7 @@ class BankConflictFreeSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(BankConflictFreeSGEMMTest, CorrectnessProperty) {
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_bank_conflict_free_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+      [&] { launch_bank_conflict_free_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "BankConflictFree SGEMM failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
@@ -233,7 +222,7 @@ class DoubleBufferSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(DoubleBufferSGEMMTest, CorrectnessProperty) {
   VerifyResult result =
-      runKernelAndCompare([&] { launch_double_buffer_sgemm<32>(d_A_, d_B_, d_C_, M_, K_, N_); });
+      runKernelAndCompare([&] { launch_double_buffer_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "DoubleBuffer SGEMM failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
@@ -252,7 +241,7 @@ TEST_P(TensorCoreSGEMMTest, FastPathCorrectnessProperty) {
   ASSERT_TRUE(tensorCoreDimensionsSupported(M_, K_, N_));
 
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); }, kTensorCoreVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); }, kTensorCoreVerifyTolerance);
 
   EXPECT_TRUE(result.passed) << "TensorCore SGEMM fast path failed for dimensions " << M_ << "x"
                              << K_ << "x" << N_ << " (max_rel_error: " << result.max_rel_error
@@ -266,7 +255,7 @@ class TensorCoreFallbackTest : public SGEMMKernelTest {};
 
 TEST_P(TensorCoreFallbackTest, NonAlignedInputsFallbackSafely) {
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_, d_B_, d_C_, M_, K_, N_); }, kStandardVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); }, kStandardVerifyTolerance);
 
   EXPECT_TRUE(result.passed) << "TensorCore fallback failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
@@ -303,26 +292,22 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
     initRandomMatrix(h_A.data(), M, K, -1.0f, 1.0f, iter);
     initRandomMatrix(h_B.data(), K, N, -1.0f, 1.0f, iter + 1000);
 
-    float *d_A = nullptr;
-    float *d_B = nullptr;
-    float *d_C = nullptr;
-    float *d_ref = nullptr;
-    CUDA_CHECK(cudaMalloc(&d_A, M * K * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_B, K * N * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_C, M * N * sizeof(float)));
-    CUDA_CHECK(cudaMalloc(&d_ref, M * N * sizeof(float)));
+    DeviceMemory<float> d_A(M * K);
+    DeviceMemory<float> d_B(K * N);
+    DeviceMemory<float> d_C(M * N);
+    DeviceMemory<float> d_ref(M * N);
 
-    CUDA_CHECK(cudaMemcpy(d_A, h_A.data(), M * K * sizeof(float), cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_B, h_B.data(), K * N * sizeof(float), cudaMemcpyHostToDevice));
+    d_A.copyFromHost(h_A.data(), M * K);
+    d_B.copyFromHost(h_B.data(), K * N);
 
-    computeReference(handle_, d_A, d_B, d_ref, M, K, N);
-    CUDA_CHECK(cudaMemcpy(h_ref.data(), d_ref, M * N * sizeof(float), cudaMemcpyDeviceToHost));
+    computeReference(handle_, d_A.get(), d_B.get(), d_ref.get(), M, K, N);
+    d_ref.copyToHost(h_ref.data(), M * N);
 
     auto testKernel = [&](const char *name, auto kernel_func) {
-      CUDA_CHECK(cudaMemset(d_C, 0, M * N * sizeof(float)));
-      kernel_func(d_A, d_B, d_C, M, K, N);
+      d_C.zero();
+      kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N);
       CUDA_CHECK(cudaDeviceSynchronize());
-      CUDA_CHECK(cudaMemcpy(h_C.data(), d_C, M * N * sizeof(float), cudaMemcpyDeviceToHost));
+      d_C.copyToHost(h_C.data(), M * N);
 
       VerifyResult result =
           compareMatrices(h_C.data(), h_ref.data(), M, N, kStandardVerifyTolerance);
@@ -334,11 +319,6 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
     testKernel("Tiled", launch_tiled_sgemm<32>);
     testKernel("BankConflictFree", launch_bank_conflict_free_sgemm<32>);
     testKernel("DoubleBuffer", launch_double_buffer_sgemm<32>);
-
-    cudaFree(d_A);
-    cudaFree(d_B);
-    cudaFree(d_C);
-    cudaFree(d_ref);
   }
 }
 
