@@ -18,6 +18,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `AGENTS.md` for AI agent workflow instructions
   - Updated `README.md` and `CONTRIBUTING.md` to reference new spec structure
 
+### Fixed
+- **Config Bug**: Fixed duplicate `defaults` section in `_config.yml` causing Jekyll configuration conflict
+- **Config Bug**: Removed reference to non-existent `og-image.png` in `_config.yml`
+- **Code Comment**: Improved clarity in `getTheoreticalPeakGflops()` architecture detection comments
+
+### Improved
+- **GitHub Topics**: Optimized repository topics (removed `deep-learning`, `cuda-kernel`, `nvidia-gpu`; added `cuda-kernels`, `shared-memory`, `bank-conflict`)
+- **CI Workflow**: Added sm_89 and sm_90 architecture support in CUDA build matrix
+- **GitHub Pages**: Added `jekyll-default-layout` plugin, improved performance table formatting
+
 ---
 
 ## [2.1.0] - 2026-04-16
