@@ -51,7 +51,7 @@ jobs:
           cmake -S . -B build
           -DCMAKE_BUILD_TYPE=Release
           -DBUILD_TESTS=OFF
-          -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86"
+          -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;89;90"
 
       - name: Build
         run: cmake --build build --target sgemm_benchmark -j$(nproc)
@@ -59,4 +59,5 @@ jobs:
       - name: Info
         run: |
           echo "✅ CUDA compilation successful"
+          echo "ℹ️  Supported architectures: sm_70, sm_75, sm_80, sm_86, sm_89, sm_90"
           echo "ℹ️  GPU runtime tests require a CUDA-capable machine"

@@ -1,6 +1,8 @@
 ---
 layout: default
 title: SGEMM Optimization
+nav_exclude: false
+description: Progressive CUDA SGEMM optimization with 5 kernel variants demonstrating GPU programming techniques including WMMA, shared memory tiling, bank conflict elimination, and double buffering.
 ---
 
 # SGEMM Optimization: From Naive to Tensor Core
@@ -11,6 +13,7 @@ title: SGEMM Optimization
 ![CUDA](https://img.shields.io/badge/CUDA-11.0+-76B900?logo=nvidia&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=c%2B%2B&logoColor=white)
 [![GitHub stars](https://img.shields.io/github/stars/LessUp/sgemm-optimization?style=social)](https://github.com/LessUp/sgemm-optimization/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/LessUp/sgemm-optimization?style=social)](https://github.com/LessUp/sgemm-optimization/network/members)
 
 **Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC**
 
@@ -39,18 +42,18 @@ cmake --build build -j$(nproc)
 
 ## 📊 Performance Summary
 
-NVIDIA RTX 3060 Laptop (Ampere, sm_86), 1024×1024×1024:
+Tested on NVIDIA RTX 3060 Laptop (Ampere, sm_86), Matrix Size: 1024×1024×1024
 
 | Kernel | GFLOPS | vs cuBLAS | Time | Key Technique |
 |--------|-------:|----------:|------:|---------------|
-| **cuBLAS** | 5727 | 100% | 0.375 ms | NVIDIA library |
-| **Tensor Core** | 2300 | 40.2% | 0.934 ms | WMMA API, FP16 |
-| **Tiled** | 753 | 13.1% | 2.853 ms | Shared memory |
-| **Double Buffer** | 701 | 12.2% | 3.064 ms | Pipeline overlap |
-| **Bank-Free** | 673 | 11.8% | 3.190 ms | Padding |
-| **Naive** | 604 | 10.6% | 3.553 ms | Baseline |
+| **cuBLAS** | 5727 | 100% | 0.375 ms | NVIDIA optimized library |
+| **Tensor Core** | 2300 | 40.2% | 0.934 ms | WMMA API, FP16 compute |
+| **Tiled** | 753 | 13.1% | 2.853 ms | Shared memory blocking |
+| **Double Buffer** | 701 | 12.2% | 3.064 ms | Latency hiding pipeline |
+| **Bank-Free** | 673 | 11.8% | 3.190 ms | Bank conflict elimination |
+| **Naive** | 604 | 10.6% | 3.553 ms | Baseline implementation |
 
-> Performance varies by GPU, CUDA version, and matrix size. [See full benchmarks](docs/benchmark-results.md).
+> ⚠️ Performance varies by GPU model, CUDA version, and matrix size. [See full benchmark analysis](docs/benchmark-results.md).
 
 ---
 

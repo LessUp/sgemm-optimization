@@ -10,13 +10,23 @@ plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
   - jekyll-sitemap
+  - jekyll-default-layout
 
 # Site info
 title: SGEMM Optimization
+tagline: From Naive to Tensor Core
 description: >-
-  Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC.
-  Five kernel variants from naive triple-loop to Tensor Core WMMA.
+  Progressive CUDA SGEMM optimization with 5 kernel variants demonstrating
+  GPU programming techniques including WMMA, shared memory tiling,
+  bank conflict elimination, and double buffering.
 repository: LessUp/sgemm-optimization
+author: LessUp
+
+# SEO and Social
+social:
+  name: LessUp
+  links:
+    - https://github.com/LessUp
 
 # URLs
 url: "https://lessup.github.io"
@@ -24,10 +34,14 @@ baseurl: /sgemm-optimization
 
 # Localization
 lang: en
-author: LessUp
 
 # Navigation
 show_downloads: true
+github:
+  is_project_page: true
+  repository_url: https://github.com/LessUp/sgemm-optimization
+  zip_url: https://github.com/LessUp/sgemm-optimization/zipball/master
+  tar_url: https://github.com/LessUp/sgemm-optimization/tarball/master
 
 # Markdown
 markdown: kramdown

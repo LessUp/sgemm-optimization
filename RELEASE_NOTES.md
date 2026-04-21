@@ -37,7 +37,7 @@
     - 🚀 快速开始指南
     - 📖 GPU 架构支持表
   - 优化 `_config.yml` Jekyll 配置
-  - **GitHub Workflows**: 简化并优化工你流
+  - **GitHub Workflows**: 简化并优化工作流
     - `ci.yml`: 清晰的步骤命名
     - `pages.yml`: 修复 paths 过滤，改进并发配置
 

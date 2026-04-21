@@ -319,13 +319,13 @@ inline float getTheoreticalPeakGflops() {
   // See: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
   int coresPerSM;
   if (prop.major == 7) {
-    coresPerSM = (prop.minor == 0 || prop.minor == 2) ? 64 : 64; // Volta, Turing
+    coresPerSM = 64; // Volta (sm_70, sm_72), Turing (sm_75)
   } else if (prop.major == 8) {
-    coresPerSM = (prop.minor == 0 || prop.minor == 6) ? 64 : 128; // Ampere
+    coresPerSM = (prop.minor == 0 || prop.minor == 6) ? 64 : 128; // A100/sm_80, A10G/sm_86: 64, others: 128
   } else if (prop.major == 9) {
-    coresPerSM = 128; // Hopper
+    coresPerSM = 128; // Hopper (sm_90), Ada (sm_89 is major=8)
   } else {
-    coresPerSM = 64; // Default fallback
+    coresPerSM = 64; // Default fallback for older architectures
   }
 
   // Use actual GPU clock rate (convert from kHz to GHz)
