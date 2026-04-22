@@ -182,8 +182,8 @@ protected:
 class NaiveSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(NaiveSGEMMTest, CorrectnessProperty) {
-  VerifyResult result =
-      runKernelAndCompare([&] { launch_naive_sgemm<>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
+  VerifyResult result = runKernelAndCompare(
+      [&] { launch_naive_sgemm<>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "Naive SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
                              << " (max_rel_error: " << result.max_rel_error << ")";
@@ -195,8 +195,8 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, NaiveSGEMMTest,
 class TiledSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(TiledSGEMMTest, CorrectnessProperty) {
-  VerifyResult result =
-      runKernelAndCompare([&] { launch_tiled_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
+  VerifyResult result = runKernelAndCompare(
+      [&] { launch_tiled_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "Tiled SGEMM failed for dimensions " << M_ << "x" << K_ << "x" << N_
                              << " (max_rel_error: " << result.max_rel_error << ")";
@@ -208,8 +208,9 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, TiledSGEMMTest,
 class BankConflictFreeSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(BankConflictFreeSGEMMTest, CorrectnessProperty) {
-  VerifyResult result = runKernelAndCompare(
-      [&] { launch_bank_conflict_free_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
+  VerifyResult result = runKernelAndCompare([&] {
+    launch_bank_conflict_free_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_);
+  });
 
   EXPECT_TRUE(result.passed) << "BankConflictFree SGEMM failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
@@ -221,8 +222,8 @@ INSTANTIATE_TEST_SUITE_P(StandardDimensions, BankConflictFreeSGEMMTest,
 class DoubleBufferSGEMMTest : public SGEMMKernelTest {};
 
 TEST_P(DoubleBufferSGEMMTest, CorrectnessProperty) {
-  VerifyResult result =
-      runKernelAndCompare([&] { launch_double_buffer_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
+  VerifyResult result = runKernelAndCompare(
+      [&] { launch_double_buffer_sgemm<32>(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); });
 
   EXPECT_TRUE(result.passed) << "DoubleBuffer SGEMM failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
@@ -241,7 +242,8 @@ TEST_P(TensorCoreSGEMMTest, FastPathCorrectnessProperty) {
   ASSERT_TRUE(tensorCoreDimensionsSupported(M_, K_, N_));
 
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); }, kTensorCoreVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); },
+      kTensorCoreVerifyTolerance);
 
   EXPECT_TRUE(result.passed) << "TensorCore SGEMM fast path failed for dimensions " << M_ << "x"
                              << K_ << "x" << N_ << " (max_rel_error: " << result.max_rel_error
@@ -255,7 +257,8 @@ class TensorCoreFallbackTest : public SGEMMKernelTest {};
 
 TEST_P(TensorCoreFallbackTest, NonAlignedInputsFallbackSafely) {
   VerifyResult result = runKernelAndCompare(
-      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); }, kStandardVerifyTolerance);
+      [&] { launch_tensor_core_sgemm(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_, N_); },
+      kStandardVerifyTolerance);
 
   EXPECT_TRUE(result.passed) << "TensorCore fallback failed for dimensions " << M_ << "x" << K_
                              << "x" << N_ << " (max_rel_error: " << result.max_rel_error << ")";
