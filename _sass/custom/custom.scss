@@ -1,0 +1,524 @@
+// ============================================
+// SGEMM Optimization - Custom Styles
+// Theme: NVIDIA GPU / Tech aesthetic
+// ============================================
+
+// ============================================
+// COLOR VARIABLES (NVIDIA + Dark Tech Theme)
+// ============================================
+:root {
+  // Primary brand color - NVIDIA Green
+  --nvidia-green: #76B900;
+  --nvidia-green-light: #8FD917;
+  --nvidia-green-dark: #5A8F00;
+  
+  // Accent colors
+  --tech-teal: #00D4AA;
+  --tech-blue: #00A8E8;
+  --tech-purple: #9D4EDD;
+  --tech-orange: #FF8500;
+  
+  // Dark theme backgrounds
+  --bg-primary: #0D1117;
+  --bg-secondary: #161B22;
+  --bg-tertiary: #21262D;
+  --bg-elevated: #1C2128;
+  
+  // Text colors
+  --text-primary: #E6EDF3;
+  --text-secondary: #8B949E;
+  --text-muted: #6E7681;
+  
+  // Border colors
+  --border-subtle: #30363D;
+  --border-default: #21262D;
+}
+
+// ============================================
+// BASE THEME OVERRIDES
+// ============================================
+
+// Override just-the-docs dark theme colors
+.site-header {
+  background-color: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.site-title {
+  color: var(--nvidia-green) !important;
+  font-weight: 700 !important;
+  
+  &:hover {
+    color: var(--nvidia-green-light) !important;
+  }
+}
+
+// Navigation sidebar
+.side-bar {
+  background-color: var(--bg-primary) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+}
+
+.nav-list .nav-list-item {
+  .nav-list-link {
+    color: var(--text-secondary) !important;
+    
+    &:hover {
+      color: var(--nvidia-green) !important;
+      background-color: var(--bg-tertiary) !important;
+    }
+    
+    &.active {
+      color: var(--nvidia-green) !important;
+      background-color: rgba(118, 185, 0, 0.1) !important;
+      font-weight: 600;
+    }
+  }
+}
+
+// Navigation category headers
+.nav-category {
+  color: var(--text-muted) !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-weight: 600 !important;
+}
+
+// Main content area
+.main {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+// ============================================
+// TYPOGRAPHY
+// ============================================
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+h2 {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+  margin-top: 2.5rem !important;
+}
+
+// Link styling
+a {
+  color: var(--tech-teal) !important;
+  
+  &:hover {
+    color: var(--nvidia-green) !important;
+    text-decoration: none;
+  }
+}
+
+// ============================================
+// CODE BLOCKS (CUDA Optimized)
+// ============================================
+
+// Code block container
+div.highlighter-rouge {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+  margin: 1.5rem 0 !important;
+  
+  // Add NVIDIA-style top border accent
+  border-top: 2px solid var(--nvidia-green) !important;
+}
+
+div.highlight {
+  background-color: var(--bg-secondary) !important;
+  border-radius: 8px !important;
+}
+
+pre.highlight {
+  background-color: var(--bg-secondary) !important;
+  padding: 1rem !important;
+  margin: 0 !important;
+}
+
+// Inline code
+code {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--tech-teal) !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 4px !important;
+  font-size: 0.9em !important;
+}
+
+// Line numbers (if enabled)
+.lineno {
+  color: var(--text-muted) !important;
+  border-right: 1px solid var(--border-subtle) !important;
+  padding-right: 1rem !important;
+  margin-right: 1rem !important;
+}
+
+// Syntax highlighting - customized for CUDA
+.highlight {
+  .c, .cm, .c1, .cp { color: #6A9955; }  // Comments
+  .k, .kc, .kd, .kn, .kr { color: #569CD6; }  // Keywords
+  .s, .sb, .sc, .sd, .s2 { color: #CE9178; }  // Strings
+  .mi, .mf, .mh, .il { color: #B5CEA8; }  // Numbers
+  .n, .nf, .fm { color: #DCDCAA; }  // Functions
+  .p { color: #D4D4D4; }  // Punctuation
+  .o { color: #D4D4D4; }  // Operators
+  .cpp, .cpf { color: #9CDCFE; }  // Preprocessor
+  .kt, .nc { color: #4EC9B0; }  // Types/Classes
+  .nv { color: #9CDCFE; }  // Variables
+}
+
+// Copy code button
+.btn-copy {
+  background-color: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 4px !important;
+  
+  &:hover {
+    background-color: var(--nvidia-green) !important;
+    color: #000 !important;
+  }
+}
+
+// ============================================
+// TABLES (Performance Data)
+// ============================================
+
+table {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  margin: 1.5rem 0 !important;
+  
+  th {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--nvidia-green) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.02em !important;
+    border-bottom: 2px solid var(--nvidia-green) !important;
+    padding: 0.75rem 1rem !important;
+  }
+  
+  td {
+    border-bottom: 1px solid var(--border-subtle) !important;
+    padding: 0.75rem 1rem !important;
+    color: var(--text-primary) !important;
+  }
+  
+  tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+  }
+  
+  tr:hover {
+    background-color: rgba(118, 185, 0, 0.05) !important;
+  }
+}
+
+// ============================================
+// CUSTOM COMPONENTS
+// ============================================
+
+// Hero section (homepage)
+.hero-section {
+  text-align: center;
+  padding: 3rem 1rem;
+  margin: -1rem -1rem 2rem -1rem;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border-bottom: 1px solid var(--border-subtle);
+  
+  .hero-title {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(90deg, var(--nvidia-green), var(--tech-teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem !important;
+  }
+  
+  .hero-subtitle {
+    color: var(--text-secondary) !important;
+    font-size: 1.25rem !important;
+    max-width: 700px;
+    margin: 0 auto 2rem auto !important;
+  }
+}
+
+// Performance cards grid
+.perf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.perf-card {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--nvidia-green);
+  }
+  
+  .perf-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--nvidia-green);
+    margin: 0.5rem 0;
+  }
+  
+  .perf-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .perf-vs {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+  }
+}
+
+// Highlight box
+.highlight-box {
+  background: linear-gradient(135deg, rgba(118, 185, 0, 0.1), rgba(0, 212, 170, 0.05));
+  border-left: 4px solid var(--nvidia-green);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  
+  &.warning {
+    background: linear-gradient(135deg, rgba(255, 133, 0, 0.1), rgba(255, 193, 7, 0.05));
+    border-left-color: var(--tech-orange);
+  }
+  
+  &.info {
+    background: linear-gradient(135deg, rgba(0, 168, 232, 0.1), rgba(0, 212, 170, 0.05));
+    border-left-color: var(--tech-blue);
+  }
+}
+
+// Step/progress indicator (horizontal layout for component display)
+.steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2rem 0;
+  padding: 1rem 0;
+  
+  .step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    
+    &:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--nvidia-green);
+      font-size: 1.5rem;
+    }
+    
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-tertiary);
+      border: 2px solid var(--border-subtle);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem;
+      font-weight: 600;
+    }
+    
+    &.active .step-number {
+      background: var(--nvidia-green);
+      border-color: var(--nvidia-green);
+      color: #000;
+    }
+    
+    .step-title {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// Steps table (alternate table styling for learning steps)
+.steps-table {
+  + table {
+    th {
+      background-color: var(--bg-secondary);
+      color: var(--nvidia-green);
+      font-weight: 700;
+    }
+    
+    td:first-child {
+      font-weight: 600;
+      color: var(--nvidia-green);
+      text-align: center;
+    }
+    
+    tr:hover {
+      background-color: rgba(118, 185, 0, 0.05);
+    }
+  }
+}
+
+// Performance grid tables (homepage)
+.perf-grid {
+  + table {
+    td:nth-child(2),
+    td:nth-child(3) {
+      text-align: right;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    tr:first-child td {
+      color: var(--nvidia-green);
+      font-weight: 600;
+    }
+  }
+}
+
+// Button styling
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, var(--nvidia-green), var(--nvidia-green-dark));
+  color: #000 !important;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(118, 185, 0, 0.3);
+    color: #000 !important;
+  }
+  
+  &.btn-outline {
+    background: transparent;
+    border: 2px solid var(--nvidia-green);
+    color: var(--nvidia-green) !important;
+    
+    &:hover {
+      background: var(--nvidia-green);
+      color: #000 !important;
+    }
+  }
+}
+
+// ============================================
+// MERMAID DIAGRAMS
+// ============================================
+
+.mermaid {
+  background: var(--bg-secondary) !important;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+// ============================================
+// SEARCH & UI ELEMENTS
+// ============================================
+
+.search-input {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+  
+  &:focus {
+    border-color: var(--nvidia-green) !important;
+    box-shadow: 0 0 0 2px rgba(118, 185, 0, 0.2) !important;
+  }
+}
+
+.search-result-highlight {
+  background-color: rgba(118, 185, 0, 0.3) !important;
+  color: var(--nvidia-green) !important;
+}
+
+// Footer
+.site-footer {
+  background-color: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  color: var(--text-secondary) !important;
+}
+
+// Aux links
+div.aux-nav {
+  .aux-nav-list-item {
+    a {
+      color: var(--text-secondary) !important;
+      
+      &:hover {
+        color: var(--nvidia-green) !important;
+      }
+    }
+  }
+}
+
+// ============================================
+// RESPONSIVE ADJUSTMENTS
+// ============================================
+
+@media (max-width: 800px) {
+  .hero-section {
+    padding: 2rem 1rem;
+    
+    .hero-title {
+      font-size: 1.75rem !important;
+    }
+    
+    .hero-subtitle {
+      font-size: 1rem !important;
+    }
+  }
+  
+  .perf-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .steps {
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    .step:not(:last-child)::after {
+      content: "↓";
+      right: 50%;
+      top: 100%;
+      transform: translateX(50%);
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .perf-grid {
+    grid-template-columns: 1fr;
+  }
+}
