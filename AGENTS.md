@@ -1,100 +1,85 @@
-# AGENTS.md — AI Agent Workflow Instructions
+# AGENTS.md
 
-## Project Philosophy: Spec-Driven Development (SDD)
+Repository-wide guidance for AI agents and automated contributors.
 
-This project strictly follows the **Spec-Driven Development (SDD)** paradigm. All code implementations must use the `/specs` directory as the Single Source of Truth.
+## Project Posture
 
-## Directory Context
+This repository is in a **closeout-oriented** stage.
 
-| Directory | Purpose |
-|-----------|---------|
-| `/specs/product/` | Product feature definitions and acceptance criteria |
-| `/specs/rfc/` | Technical design documents and architecture decisions |
-| `/specs/api/` | API interface definitions (if applicable) |
-| `/specs/testing/` | Test specifications and BDD scenarios |
-| `/docs/` | User-facing documentation, tutorials, and guides |
-| `/src/` | Source code implementations |
-| `/tests/` | Test implementations |
+- Prefer **consolidation over expansion**
+- Prefer **one authoritative source** over duplicate explanations
+- Prefer **deleting or merging** low-value files over keeping placeholders
+- Prefer **one longer apply/autopilot session** over frequent `/fleet` fan-out
 
-## AI Agent Workflow Instructions
+## Authoritative Sources
 
-When you (the AI) are asked to develop a new feature, modify existing functionality, or fix a bug, **you must strictly follow this workflow without skipping any steps**:
+| Need | Source |
+|------|--------|
+| Stable requirements and governance | `openspec/specs/*` |
+| Active implementation plan | `openspec/changes/<change>/` |
+| OpenSpec workflow details | `openspec/README.md`, `openspec/AGENTS.md` |
+| Repository entry point | `README.md` |
+| Public landing/documentation entry | `index.md` + `docs/` |
 
-### Step 1: Review Specs
+If two files say the same thing, keep one and remove the other.
 
-- **First**, read the relevant documents in `/specs` (product requirements, RFCs, API definitions, test specs).
-- **If** the user's request conflicts with existing specs, **stop immediately** and point out the conflict. Ask the user whether to update the specs first.
-- **Never** start coding without understanding the spec context.
+## Default Workflow
 
-### Step 2: Spec-First Update
+1. `/opsx:explore` when scope or trade-offs are unclear
+2. `/opsx:propose "description"` for repo-wide or behavior-affecting changes
+3. `/opsx:apply` to execute the task list
+4. `/review` before large deletions, workflow changes, or archive
+5. `/opsx:archive` only after specs, docs, workflows, and validation agree
 
-- **If** this is a new feature, or if existing interfaces/database structures need to change, **you must first propose modifications to the appropriate spec documents** (e.g., `specs/product/*.md`, `specs/rfc/*.md`, or `specs/testing/*.md`).
-- **Wait** for user confirmation on the spec changes before entering the code implementation phase.
-- **Never** implement code changes that would invalidate existing specs without updating the specs first.
+## Repository Boundaries
 
-### Step 3: Code Implementation
+### Code
 
-- When writing code, **100% adhere to the spec definitions** (including variable naming, API paths, data types, status codes, etc.).
-- **No gold-plating**: Do not add features in code that are not defined in the specs.
-- Follow the architectural patterns and design decisions documented in `/specs/rfc/`.
-- Use the project's established coding conventions (clang-format, RAII, exception-based error handling).
+- CUDA kernels live in `src/kernels/`
+- Shared utilities live in `src/utils/`
+- Entry point lives in `src/main.cu`
+- Tests live in `tests/test_sgemm.cu`
 
-### Step 4: Test Against Specs
+### Documentation
 
-- Write unit tests and integration tests based on the acceptance criteria in `/specs`.
-- Ensure test cases cover all boundary conditions described in the specs.
-- Verify that implementations match the verification tolerances and performance expectations defined in the specs.
+- `README.md`: concise repo entry and quick-start
+- `index.md` + `docs/`: public project presentation and deeper learning content
+- `CHANGELOG.md`: meaningful release history only
+- `CONTRIBUTING.md`: compact collaboration instructions
+- `openspec/*`: normative process and requirements
 
-## Code Generation Rules
+Do not duplicate the same explanation across these surfaces.
 
-1. **Spec Compliance**: Any code that exposes API changes or behavioral changes must be justified by corresponding spec documents.
-2. **No Spec Violations**: Do not implement patterns that contradict spec definitions (e.g., using `exit()` when specs require exception-based error handling).
-3. **Reference Existing RFCs**: When uncertain about technical details, consult `/specs/rfc/` for architectural conventions. Do not invent design patterns independently.
-4. **Test Coverage**: All new code must have corresponding tests that verify spec compliance.
-5. **Documentation Sync**: When adding new features, update relevant spec documents and user-facing documentation (`/docs/`, `README.md`) accordingly.
-
-## Project-Specific Guidelines
-
-### SGEMM Kernel Development
-
-When working on kernel implementations:
-
-1. **Review** `specs/product/sgemm-kernel-requirements.md` for functional requirements.
-2. **Review** `specs/rfc/0001-core-architecture.md` for interface design and error handling strategy.
-3. **Review** `specs/testing/kernel-verification.md` for test scenarios and tolerance specifications.
-4. **Implement** code that matches the unified kernel interface template.
-5. **Verify** against cuBLAS with spec-defined tolerances (`rtol=1e-3, atol=1e-4` for standard, `rtol=5e-2, atol=1e-2` for Tensor Core).
-
-### Build & Test Commands
+## Validation Baseline
 
 ```bash
-# Build (CMake - recommended)
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
-
-# Run benchmark
-./build/bin/sgemm_benchmark
-./build/bin/sgemm_benchmark -a  # all dimensions
-
-# Run tests
-cmake --build build --target test_sgemm
 ctest --test-dir build
-
-# Build & test (Make - quick local)
-make GPU_ARCH=sm_86
-make benchmark
-make test
+openspec validate --all
 ```
 
-### Code Style
+- Hosted CI is compile-time and structure validation only
+- GPU runtime verification and benchmarking are local-only
 
-- **CUDA C++17** with clang-format enforcement
-- **RAII** for all resource management (no raw `cudaFree`, use wrappers)
-- **Exceptions** for error handling (no `exit()` in library code)
-- **Template-based** kernel interfaces with default `TILE_SIZE=32`
+## Tooling Preferences
 
-## Why This Matters
+- Use `gh` for repository metadata, workflow inspection, and GitHub-side operations
+- Treat CMake-generated `compile_commands.json` plus `clangd` as the shared LSP baseline
+- Keep hooks minimal and project-specific
+- Prefer native CLI tools, OpenSpec skills, and focused reviews over heavy MCP usage
 
-1. **Prevents AI Hallucinations**: Forcing the AI to read `/specs` first anchors its reasoning to documented requirements and designs.
-2. **Enforces Modification Path**: "Specs before code" ensures documentation and code stay synchronized (Document-Code Synchronization).
-3. **Improves PR Quality**: When the AI generates Pull Requests, implementations align closely with business logic because they are derived from spec-defined acceptance criteria.
+## Tool Routing
+
+- Use `/review` before major deletions, workflow topology changes, or OpenSpec archive.
+- Use subagents for bounded research, log inspection, or clearly separable analysis.
+- Use native CLI plus `gh` for repository metadata, workflows, and GitHub maintenance.
+- Treat Claude, Copilot, OpenCode, and similar tools as sharing the same OpenSpec and clangd baseline; avoid tool-specific drift.
+- Add MCP or plugins only when built-in tools or skills leave a concrete gap.
+
+## Quality Rules
+
+- Keep kernel interfaces consistent with the existing template launcher pattern
+- Preserve RAII-based CUDA resource handling and exception-based error reporting
+- Avoid generic governance boilerplate; write instructions that are specific to this repository
+- When cleaning up docs or workflows, ensure retained files have a single obvious responsibility
