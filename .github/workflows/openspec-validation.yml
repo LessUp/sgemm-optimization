@@ -1,0 +1,92 @@
+name: Repository Governance
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/copilot-instructions.md'
+      - '.github/workflows/openspec-validation.yml'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
+      - 'README.md'
+      - 'README.zh-CN.md'
+      - '_config.yml'
+      - 'docs/**'
+      - 'openspec/**'
+      - 'specs.md'
+  push:
+    branches: [master]
+    paths:
+      - '.github/copilot-instructions.md'
+      - '.github/workflows/openspec-validation.yml'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
+      - 'README.md'
+      - 'README.zh-CN.md'
+      - '_config.yml'
+      - 'docs/**'
+      - 'openspec/**'
+      - 'specs.md'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install OpenSpec CLI
+        run: npm install -g @fission-ai/openspec@latest
+
+      - name: Validate required governance files
+        run: |
+          test -f AGENTS.md
+          test -f CLAUDE.md
+          test -f .github/copilot-instructions.md
+          test -f openspec/config.yaml
+          test -f specs.md
+          test -f openspec/specs/kernel/spec.md
+          test -f openspec/specs/architecture/spec.md
+          test -f openspec/specs/testing/spec.md
+
+      - name: Validate OpenSpec
+        run: openspec validate --all
+
+      - name: Check for active changes on master
+        run: |
+          changes=$(find openspec/changes -mindepth 1 -maxdepth 1 -type d ! -name "archive" 2>/dev/null || true)
+          if [ -n "$changes" ]; then
+            echo "Active change proposals found:"
+            echo "$changes"
+            echo "::warning::Unarchived changes on master"
+          fi
+
+      - name: Validate ID uniqueness
+        run: |
+          req_dups=$(grep -rh "REQ-" openspec/specs/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+" | sort | uniq -d)
+          dec_dups=$(grep -rh "DEC-" openspec/specs/ 2>/dev/null | grep -oE "DEC-[A-Z]+-[0-9]+" | sort | uniq -d)
+          con_dups=$(grep -rh "CON-" openspec/specs/ 2>/dev/null | grep -oE "CON-[A-Z]+-[0-9]+" | sort | uniq -d)
+
+          test -z "$req_dups" || (echo "::error::Duplicate REQ IDs found: $req_dups" && exit 1)
+          test -z "$dec_dups" || (echo "::error::Duplicate DEC IDs found: $dec_dups" && exit 1)
+          test -z "$con_dups" || (echo "::error::Duplicate CON IDs found: $con_dups" && exit 1)
+
+      - name: Reject legacy spec path references
+        run: |
+          legacy_files=$(grep -RInE '(^|[[:space:]`(])specs/(product|rfc|testing)/' \
+            AGENTS.md CLAUDE.md CHANGELOG.md CONTRIBUTING.md README.md README.zh-CN.md \
+            specs.md openspec/README.md openspec/AGENTS.md docs .github/workflows 2>/dev/null || true)
+          if [ -n "$legacy_files" ]; then
+            echo "::error::Legacy spec path references found:"
+            echo "$legacy_files"
+            exit 1
+          fi
