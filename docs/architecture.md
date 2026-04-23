@@ -1,164 +1,101 @@
 ---
 layout: default
-title: Architecture Guide
-nav_order: 2
+title: Architecture
+nav_order: 4
+permalink: /docs/architecture
 ---
 
-# Architecture Guide
+# Architecture
+{: .fs-8 }
 
-This document describes the system architecture and design decisions for the SGEMM Optimization project.
+What the repository contains, and where validation responsibility lives
+{: .fs-6 .fw-300 }
 
-## System Overview
+---
 
-The project implements five progressively optimized CUDA SGEMM (Single-precision General Matrix Multiply) kernels, demonstrating core GPU optimization techniques from a naive triple-loop to Tensor Core WMMA API usage.
+## System shape
 
-### Design Principles
+```text
+main.cu
+  ├── benchmark orchestration
+  ├── verification flow
+  └── CLI argument handling
 
-1. **Single Source of Truth**: All implementations follow specifications in `/specs/`
-2. **Spec-Driven Development (SDD)**: Specs before code, documentation synchronized with implementation
-3. **RAII Resource Management**: No raw `cudaFree()` calls, all resources use wrapper classes
-4. **Exception-Based Error Handling**: No `exit()` in library code
-5. **Header-Only Kernels**: All kernels are `.cuh` files for easy integration
+src/kernels/
+  ├── naive
+  ├── tiled
+  ├── bank-conflict-free
+  ├── double-buffer
+  └── tensor-core
 
-## Architecture Layers
+src/utils/
+  ├── CUDA RAII and error handling
+  ├── benchmark helpers
+  └── verification helpers
 
-```
-┌─────────────────────────────────────────────┐
-│           Application Layer                  │
-│  main.cu - Entry point & benchmark runner   │
-├─────────────────────────────────────────────┤
-│           Framework Layer                    │
-│  utils/benchmark.cuh - Benchmark framework   │
-│  utils/verify.cuh   - Correctness checks     │
-│  utils/cuda_utils.cuh - RAII wrappers        │
-├─────────────────────────────────────────────┤
-│           Kernel Layer                       │
-│  kernels/naive_sgemm.cuh                     │
-│  kernels/tiled_sgemm.cuh                     │
-│  kernels/bank_conflict_free_sgemm.cuh        │
-│  kernels/double_buffer_sgemm.cuh             │
-│  kernels/tensor_core_sgemm.cuh               │
-├─────────────────────────────────────────────┤
-│           CUDA Runtime Layer                 │
-│  cuBLAS, CUDA Runtime API, WMMA API         │
-└─────────────────────────────────────────────┘
+tests/
+  └── Google Test coverage against cuBLAS
 ```
 
-## Unified Kernel Interface
+---
 
-All kernels implement the same interface template:
+## Repository surfaces
+
+| Surface | Role |
+|---------|------|
+| `README.md` | Repository entry point and quick-start |
+| `index.md` + `docs/` | Public landing page and learning-oriented documentation |
+| `openspec/specs/` | Stable authoritative requirements and governance |
+| `openspec/changes/` | Active implementation plans and delta specs |
+| `.github/workflows/` | CI-safe validation and Pages deployment |
+
+The repository intentionally separates **public explanation** from **normative process**. OpenSpec governs; docs teach; README introduces.
+
+---
+
+## Kernel contract
+
+All kernel launchers follow the same shape:
 
 ```cpp
 template<int TILE_SIZE = 32>
-void sgemm_naive(const float* A, const float* B, float* C,
-                 int M, int N, int K, cudaStream_t stream = 0);
-
-template<int TILE_SIZE = 32>
-void sgemm_tiled(const float* A, const float* B, float* C,
-                 int M, int N, int K, cudaStream_t stream = 0);
-
-// ... and so on for each variant
+void launch_xxx_sgemm(
+    const float* A, const float* B, float* C,
+    int M, int K, int N,
+    cudaStream_t stream = 0
+);
 ```
 
-### Interface Contract
+That shared launcher contract makes it easy to benchmark, swap, and verify kernels without changing the surrounding harness.
 
-| Parameter | Description | Constraints |
-|-----------|-------------|-------------|
-| `A` | Input matrix A (M×K), row-major | Device pointer, valid |
-| `B` | Input matrix B (K×N), row-major | Device pointer, valid |
-| `C` | Output matrix C (M×N), row-major | Device pointer, allocated |
-| `M` | Rows of A and C | M > 0 |
-| `N` | Columns of B and C | N > 0 |
-| `K` | Columns of A / Rows of B | K > 0 |
-| `stream` | CUDA stream (optional) | Default: 0 |
+---
 
-### Grid-Block Configuration
+## Validation boundaries
 
-```cpp
-dim3 block(TILE_SIZE, TILE_SIZE);
-dim3 grid((N + TILE_SIZE - 1) / TILE_SIZE,
-          (M + TILE_SIZE - 1) / TILE_SIZE);
-```
+| Area | Local GPU machine | Hosted CI |
+|------|-------------------|-----------|
+| CUDA compilation | Yes | Yes |
+| Runtime correctness | Yes | No |
+| Benchmarking | Yes | No |
+| OpenSpec/repository checks | Yes | Yes |
+| GitHub Pages buildability | Optional | Yes |
 
-## Tensor Core Architecture
+This split is deliberate. The repository does not pretend CI can replace a real CUDA runtime environment.
 
-The Tensor Core kernel uses NVIDIA's WMMA (Warp Matrix Multiply Accumulate) API:
+---
 
-### Architecture-Specific Guards
+## Repository-level design choices
 
-```cpp
-#if __CUDA_ARCH__ >= 700
-    // WMMA code for Volta and newer
-    #include <mma.h>
-#else
-    // Fallback to FP32 tiled kernel
-#endif
-```
+1. **Progressive kernels** keep optimization steps readable.
+2. **RAII wrappers and exception-style error propagation** keep CUDA resource handling predictable.
+3. **OpenSpec governs repo-wide changes** so docs, workflows, and validation stay aligned.
+4. **Docs stay role-based**: README introduces, Pages teach, OpenSpec defines rules.
 
-### Alignment Requirements
+---
 
-| Requirement | Detail |
-|-------------|--------|
-| M, K, N | Must be multiples of 16 for WMMA fast path |
-| Fallback | Automatic FP32 kernel for non-aligned sizes |
-| Precision | FP16 input, FP32 accumulation |
-| Verification | Relaxed tolerances: `rtol=5e-2, atol=1e-2` |
+## Related references
 
-## Error Handling Strategy
-
-All errors are handled via exceptions, not `exit()`:
-
-```cpp
-#define CUDA_CHECK(call) \
-    do { \
-        cudaError_t err = call; \
-        if (err != cudaSuccess) { \
-            throw std::runtime_error( \
-                std::string("CUDA error: ") + \
-                cudaGetErrorString(err)); \
-        } \
-    } while(0)
-```
-
-## Memory Management
-
-RAII wrappers ensure no memory leaks:
-
-```cpp
-struct DeviceBuffer {
-    float* ptr;
-    DeviceBuffer(size_t bytes) {
-        CUDA_CHECK(cudaMalloc(&ptr, bytes));
-    }
-    ~DeviceBuffer() {
-        CUDA_CHECK(cudaFree(ptr));
-    }
-    // Deleted copy/move constructors prevent misuse
-};
-```
-
-## Build System
-
-### CMake (Recommended)
-
-```cmake
-add_executable(sgemm_benchmark src/main.cu)
-target_link_libraries(sgemm_benchmark PRIVATE cublas)
-set_target_properties(sgemm_benchmark PROPERTIES
-    CUDA_ARCHITECTURES ${GPU_ARCH})
-```
-
-### GPU Architecture Support
-
-| GPU | Architecture | Flag |
-|-----|-------------|------|
-| V100 | Volta | `sm_70` |
-| RTX 3090/A100 | Ampere | `sm_86` |
-| RTX 4090 | Ada | `sm_89` |
-| H100 | Hopper | `sm_90` |
-
-## References
-
-- [RFC 0001: Core Architecture](../specs/rfc/0001-core-architecture.md)
-- [RFC 0002: Implementation Roadmap](../specs/rfc/0002-implementation-roadmap.md)
-- [CUDA Programming Guide](https://docs.nvidia.com/cuda/)
+- [Learning Path](learning-path)
+- [Getting Started](getting-started)
+- [Specifications Index](../specs)
+- [Stable architecture spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

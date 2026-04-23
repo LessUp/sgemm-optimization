@@ -1,49 +1,48 @@
-# SGEMM Optimization - GitHub Pages Configuration
-#
-# Project: CUDA SGEMM Optimization from Naive to Tensor Core
-# Repository: https://github.com/LessUp/sgemm-optimization
-# Pages URL: https://lessup.github.io/sgemm-optimization
+remote_theme: just-the-docs/just-the-docs@v0.8.2
 
-# Theme
-remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-default-layout
 
-# Site info
 title: SGEMM Optimization
-tagline: From Naive to Tensor Core
 description: >-
-  Progressive CUDA SGEMM optimization with 5 kernel variants demonstrating
-  GPU programming techniques including WMMA, shared memory tiling,
-  bank conflict elimination, and double buffering.
+  Learn CUDA SGEMM optimization from a readable baseline to Tensor Core WMMA,
+  with verification, benchmarks, and compact engineering guidance.
 repository: LessUp/sgemm-optimization
 author: LessUp
-
-# SEO and Social
-social:
-  name: LessUp
-  links:
-    - https://github.com/LessUp
-
-# URLs
-url: "https://lessup.github.io"
-baseurl: /sgemm-optimization
-
-# Localization
 lang: en
 
-# Navigation
-show_downloads: true
-github:
-  is_project_page: true
-  repository_url: https://github.com/LessUp/sgemm-optimization
-  zip_url: https://github.com/LessUp/sgemm-optimization/zipball/master
-  tar_url: https://github.com/LessUp/sgemm-optimization/tarball/master
+url: "https://lessup.github.io"
+baseurl: "/sgemm-optimization"
 
-# Markdown
+search_enabled: true
+heading_anchors: true
+nav_sort: case_insensitive
+back_to_top: true
+back_to_top_text: "Back to top"
+aux_links_new_tab: true
+
+aux_links:
+  "GitHub":
+    - "//github.com/LessUp/sgemm-optimization"
+  "README (中文)":
+    - "//github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md"
+
+nav_external_links:
+  - title: OpenSpec in repo
+    url: https://github.com/LessUp/sgemm-optimization/tree/master/openspec
+    hide_icon: false
+
+copy_code:
+  enabled: true
+  text: "Copy"
+  success_text: "Copied!"
+
+mermaid:
+  version: "10.9.0"
+
 markdown: kramdown
 kramdown:
   input: GFM
@@ -57,31 +56,28 @@ kramdown:
       line_numbers: true
       start_line: 1
 
-# Collections
-collections:
-  docs:
-    output: true
-    permalink: /:collection/:path/
-
-# Defaults
 defaults:
   - scope:
       path: ""
+      type: "pages"
     values:
       layout: default
+      nav_exclude: false
   - scope:
       path: "docs"
       type: "pages"
     values:
       layout: default
-      nav_order: 1
   - scope:
       path: "specs"
       type: "pages"
     values:
       layout: default
 
-# Exclude from build
+footer_content: >-
+  Copyright &copy; 2026 LessUp.
+  Distributed under <a href="https://github.com/LessUp/sgemm-optimization/blob/master/LICENSE">MIT License</a>.
+
 exclude:
   - build/
   - cmake-build-*/
@@ -89,7 +85,6 @@ exclude:
   - tests/
   - benchmarks/data/
   - .github/
-  - .kiro/
   - .vscode/
   - node_modules/
   - vendor/
@@ -105,3 +100,9 @@ exclude:
   - Makefile
   - Gemfile
   - Gemfile.lock
+  - assets/README.md
+  - assets/images/README.md
+  - AGENTS.md
+  - CLAUDE.md
+  - README.zh-CN.md
+  - "*.gemspec"
