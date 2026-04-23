@@ -1,0 +1,55 @@
+schema: spec-driven
+
+project:
+  name: SGEMM Optimization
+  description: Closeout-stage CUDA SGEMM tutorial and optimization reference
+  version: 2.1.0
+
+spec_dirs:
+  stable: openspec/specs/
+  delta: openspec/changes/
+
+conventions:
+  id_prefixes:
+    requirement: "REQ-"
+    decision: "DEC-"
+    constraint: "CON-"
+  change_naming:
+    style: kebab-case
+  workflow:
+    prefer_single_long_apply: true
+    avoid_fleet_by_default: true
+
+context: |
+  Language: English (primary), Chinese (secondary)
+  Tech Stack: CUDA C++17, CMake, Google Test, GitHub Actions, Jekyll Pages
+  GPU Architectures: sm_70, sm_75, sm_80, sm_86, sm_89, sm_90
+
+  Project posture:
+  - Closeout-oriented: prefer consolidation over feature expansion
+  - OpenSpec is the authoritative governance and requirements system
+  - README is the repository entry point
+  - GitHub Pages is the public landing page plus documentation entry
+  - OpenSpec files define normative engineering and process rules
+
+  Code and validation:
+  - clang-format enforced
+  - RAII for all resource management
+  - Exception-based error handling (no exit() in library code)
+  - Template-based kernel interfaces with default TILE_SIZE=32
+  - Standard FP32 tolerance: rtol=1e-3, atol=1e-4
+  - Tensor Core tolerance: rtol=5e-2, atol=1e-2
+
+rules:
+  proposal:
+    - Keep proposals tightly scoped to one coherent outcome.
+    - Describe repository-facing impact and cleanup intent, not implementation detail.
+  specs:
+    - Use ADDED, MODIFIED, REMOVED, or RENAMED sections exactly.
+    - Treat openspec/specs/<capability>/spec.md as the stable authoritative location.
+  design:
+    - Explain cross-cutting technical choices and alternatives.
+    - Prefer repository architecture, process, and validation rationale over file-by-file detail.
+  tasks:
+    - Order tasks by dependency and validation path.
+    - Prefer longer serial apply sessions over fleet fan-out unless the work is naturally parallel.
