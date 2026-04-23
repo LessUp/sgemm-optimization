@@ -49,3 +49,6 @@ Thumbs.db
 # BMad Method V6
 _bmad/
 _bmad-output/
+
+# oh-my-claudecode (local tool config)
+.omc/
