@@ -1,67 +1,55 @@
+---
+layout: default
+title: Contributing
+nav_order: 11
+permalink: /CONTRIBUTING
+---
+
 # Contributing
 
-Thank you for your interest in this project! Contributions via Issues and Pull Requests are welcome.
+Focused improvements are welcome. For this repository, the goal is clarity, correctness, and compactness rather than feature sprawl.
 
-## Spec-Driven Development
+## When to use OpenSpec
 
-This project follows **Spec-Driven Development (SDD)**. All technical specifications are maintained in `/specs`:
+Use the OpenSpec workflow for any non-trivial change that affects:
 
-- 📋 [Product Requirements](specs/product/sgemm-kernel-requirements.md)
-- 🏗️ [Core Architecture RFC](specs/rfc/0001-core-architecture.md)
-- 🗺️ [Implementation Roadmap RFC](specs/rfc/0002-implementation-roadmap.md)
-- 🧪 [Test Specifications](specs/testing/kernel-verification.md)
+- repository structure
+- documentation roles or public positioning
+- validation rules or workflows
+- kernel behavior or engineering requirements
 
-**When contributing new features or changes:**
-1. **Review** the relevant spec documents in `/specs` first.
-2. **Update** specs if your changes affect interfaces, requirements, or behavior.
-3. **Implement** code that 100% adheres to the spec definitions.
-4. **Verify** against spec-defined test criteria.
+Stable specs live under `openspec/specs/`. Active changes live under `openspec/changes/<change>/`.
 
-For detailed AI and human contributor workflow, see [`AGENTS.md`](AGENTS.md).
+## Recommended flow
 
-## Development Workflow
+1. `/opsx:explore` for scope and trade-offs
+2. `/opsx:propose "description"` for the actual change
+3. `/opsx:apply` to execute the task list
+4. `/review` before major deletions, workflow changes, or archive
+5. `/opsx:archive` once tasks, docs, specs, and validation all agree
 
-1. Fork this repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m "feat: add your feature"`
-4. Push branch: `git push origin feature/your-feature`
-5. Create a Pull Request
-
-## Build & Test
-
-Recommended: CMake (primary build system):
+## Validation
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
-./build/bin/sgemm_benchmark
-cmake --build build --target test_sgemm
 ctest --test-dir build
+openspec validate --all
 ```
 
-Quick local builds with Make:
+- Hosted CI covers formatting, CUDA compile validation, OpenSpec/repository checks, and Pages.
+- Runtime verification and benchmarking still require a local GPU-capable machine.
 
-```bash
-make GPU_ARCH=sm_86
-make benchmark
-make test
-```
+## Code and doc expectations
 
-Note: GitHub Actions currently runs format checks and containerized CUDA compile-only builds. CUDA runtime tests must be executed locally or on a GPU-enabled runner.
+- Keep the existing kernel launcher interface shape intact unless the specs require a change.
+- Preserve RAII-based CUDA resource management and exception-style error handling.
+- Avoid adding generic governance boilerplate or duplicate docs.
+- If two files serve the same purpose, prefer one authoritative file over two partially-overlapping ones.
 
-## Code Style
+## Tooling notes
 
-- CUDA code follows project conventions (clang-format enforced)
-- Use indentation and formatting rules defined in `.editorconfig`
-- New kernel variants must include correctness verification against cuBLAS
-- Ensure all existing tests pass
-
-## Commit Message Format
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
-
-- `feat:` New feature or kernel variant
-- `fix:` Bug fix
-- `perf:` Performance optimization
-- `docs:` Documentation update
-- `test:` Test-related changes
+- CMake is the primary build path.
+- `clangd` plus `compile_commands.json` is the shared LSP baseline.
+- Use `gh` for repository metadata, Actions, issues, and PR operations.
+- Install the lightweight local hooks with `scripts/install-hooks.sh` if you want repository-specific guardrails before commit.

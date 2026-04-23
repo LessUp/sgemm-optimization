@@ -1,21 +1,21 @@
 # GitHub Pages Deployment
 # Builds and deploys the project documentation site to GitHub Pages
+# Uses Jekyll with just-the-docs theme
 
 name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master, main]
+    branches: [master]
     paths:
-      - 'index.md'
-      - 'README.md'
-      - 'README.zh-CN.md'
       - 'CHANGELOG.md'
       - 'CONTRIBUTING.md'
+      - 'index.md'
       - '_config.yml'
       - 'docs/**'
-      - 'specs/**'
+      - 'specs.md'
       - 'assets/**'
+      - '_sass/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -38,6 +38,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Cache Jekyll build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .jekyll-cache
+            _site
+          key: ${{ runner.os }}-jekyll-${{ hashFiles('**/*.md', '**/*.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-jekyll-
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
@@ -46,6 +56,8 @@ jobs:
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
 
   deploy:
     environment:

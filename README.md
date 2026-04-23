@@ -1,4 +1,4 @@
-# SGEMM Optimization: From Naive to Tensor Core
+# SGEMM Optimization
 
 [![CI](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml)
 [![Pages](https://github.com/LessUp/sgemm-optimization/actions/workflows/pages.yml/badge.svg)](https://lessup.github.io/sgemm-optimization/)
@@ -8,141 +8,86 @@
 
 English | [简体中文](README.zh-CN.md)
 
-Hand-written, progressively optimized CUDA matrix multiplication — the "Hello World" of HPC. Five kernel variants demonstrate core GPU optimization techniques, from a naive triple loop to a guarded Tensor Core WMMA path with explicit mixed-precision benchmarking.
+Progressive CUDA SGEMM tutorial and reference implementation. The repository contains five hand-written kernel variants, cuBLAS-backed verification, a benchmark harness, and OpenSpec-governed repository rules for keeping the project compact and trustworthy.
 
-## Specifications
+## Why this repository exists
 
-This project follows **Spec-Driven Development (SDD)**. All technical specifications are maintained in `/specs`:
+- **Show the optimization ladder clearly**: naive -> tiled -> bank-conflict-free -> double-buffered -> Tensor Core WMMA
+- **Stay readable**: each optimization lives in its own kernel file and keeps a consistent launch interface
+- **Stay verifiable**: kernels are checked against cuBLAS, with separate tolerances for FP32 and Tensor Core paths
+- **Stay maintainable**: the repository uses OpenSpec to keep docs, workflow, and validation rules aligned
 
-- 📋 [Product Requirements](specs/product/sgemm-kernel-requirements.md) — Functional and non-functional requirements
-- 🏗️ [Core Architecture RFC](specs/rfc/0001-core-architecture.md) — System architecture and design decisions
-- 🗺️ [Implementation Roadmap RFC](specs/rfc/0002-implementation-roadmap.md) — Implementation phases and milestones
-- 🧪 [Test Specifications](specs/testing/kernel-verification.md) — Verification scenarios and tolerance definitions
+## Kernel progression
 
-## Performance
+| Stage | File | Main idea |
+|-------|------|-----------|
+| Naive | `src/kernels/naive_sgemm.cuh` | Baseline triple-loop mapping |
+| Tiled | `src/kernels/tiled_sgemm.cuh` | Shared-memory blocking |
+| Bank-Free | `src/kernels/bank_conflict_free_sgemm.cuh` | `[TILE_SIZE][TILE_SIZE+1]` padding |
+| Double Buffer | `src/kernels/double_buffer_sgemm.cuh` | Tile staging overlap and latency hiding |
+| Tensor Core | `src/kernels/tensor_core_sgemm.cuh` | WMMA path with safe FP32 fallback |
 
-The exact GFLOPS you see will depend on GPU model, CUDA version, and problem size.
-The benchmark now reports two Tensor Core views:
-
-- **Tensor Core (WMMA end-to-end)**: includes FP32→FP16 conversion and safe fallback for non-WMMA-compatible dimensions.
-- **Tensor Core (WMMA compute-only)**: times only the WMMA compute path and is shown only when `M`, `K`, and `N` are multiples of 16.
-
-Verification tolerances are centralized in code:
-
-- Standard FP32 kernels: `rtol=1e-3`, `atol=1e-4`
-- Tensor Core mixed-precision path: `rtol=5e-2`, `atol=1e-2`
-
-The default benchmark set includes:
-
-- aligned square cases: `512x512x512`, `1024x1024x1024`
-- one aligned non-square case: `256x384x640`
-- one unaligned edge case: `511x513x1025` to exercise safe Tensor Core fallback
-
-> Note: the printed theoretical peak and roofline numbers are approximate analytical references, not exact hardware limits.
-
-## Optimization Roadmap
-
-```
-  Naive  ->  Tiled  ->  Bank-Free  ->  Double Buffer  ->  Tensor Core (WMMA)
-```
-
-| Stage | What Changes | Why It Helps |
-|-------|-------------|--------------|
-| **Naive → Tiled** | Load tiles into shared memory | Data reuse reduces global memory traffic by TILE_SIZE× |
-| **Tiled → Bank-Free** | Pad shared memory `[32][33]` | Eliminates 32-way bank conflicts on column access |
-| **Bank-Free → Double Buffer** | Two shared-memory buffers | Restructures tile staging and buffering to reduce memory stalls |
-| **→ Tensor Core** | WMMA API `mma_sync` | Dedicated matrix units, ~8× peak over CUDA cores |
-
-## Build & Run
-
-Recommended path: CMake
+## Quick start
 
 ```bash
+git clone https://github.com/LessUp/sgemm-optimization.git
+cd sgemm-optimization
+
+# Recommended: CMake
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
-./build/bin/sgemm_benchmark
-./build/bin/sgemm_benchmark --dims 256 384 640
 ./build/bin/sgemm_benchmark -a
-./build/bin/sgemm_benchmark -a --warmup 10 --benchmark 50
+ctest --test-dir build
 ```
 
-Quick local path: Makefile
-
 ```bash
+# Quick local alternative
 make GPU_ARCH=sm_86
 make benchmark
 make test
 ```
 
-## Project Structure
+## Validation model
 
-```
-sgemm-optimization/
-├── src/
-│   ├── kernels/
-│   │   ├── naive_sgemm.cuh              # Naive: basic triple loop
-│   │   ├── tiled_sgemm.cuh              # Tiled: shared memory blocking
-│   │   ├── bank_conflict_free_sgemm.cuh # Bank conflict elimination
-│   │   ├── double_buffer_sgemm.cuh      # Double buffer pipeline
-│   │   └── tensor_core_sgemm.cuh        # Tensor Core (WMMA API)
-│   ├── utils/
-│   │   ├── cuda_utils.cuh               # CUDA error checking, RAII, utilities
-│   │   ├── benchmark.cuh                # Benchmark framework (CUDA Events)
-│   │   └── verify.cuh                   # Correctness verification (vs cuBLAS)
-│   └── main.cu                          # Entry point
-├── tests/
-│   └── test_sgemm.cu                    # Google Test property tests
-├── roofline_data_*.csv                  # Roofline analysis data
-├── CHANGELOG.md                         # Version history
-├── CMakeLists.txt                       # CMake build (recommended)
-└── Makefile                             # Make build (quick start)
-```
+- **Local GPU machine**: runtime tests, correctness checks, and benchmarking
+- **GitHub Actions**: format/style, CUDA compile validation, OpenSpec/repository checks, and Pages deployment
 
-## Testing
+Standard FP32 kernels use `rtol=1e-3`, `atol=1e-4`. The Tensor Core path uses `rtol=5e-2`, `atol=1e-2`.
 
-Google Test coverage includes:
+## Read next
 
-| Property | What It Verifies |
-|----------|-----------------|
-| **Numerical correctness** | Standard kernels match cuBLAS across square and non-square cases |
-| **Tensor Core fast path** | WMMA path is validated on `16`-aligned dimensions |
-| **Tensor Core fallback** | Non-aligned dimensions safely fall back to an FP32 kernel |
-| **Small/edge inputs** | Includes `1x1x1` and unaligned edge cases |
-| **Error detection** | Verification helpers stay consistent with benchmark tolerances |
+- [Getting Started](docs/getting-started.md)
+- [Learning Path](docs/learning-path.md)
+- [Architecture Overview](docs/architecture.md)
+- [Benchmark Notes](docs/benchmark-results.md)
+- [Specifications Index](specs.md)
+- [GitHub Pages site](https://lessup.github.io/sgemm-optimization/)
 
-```bash
-cmake --build build --target test_sgemm
-ctest --test-dir build
+## Repository layout
 
-# or
-make test
+```text
+src/
+├── kernels/        # Five SGEMM kernel variants
+├── utils/          # CUDA RAII, verification, benchmark helpers
+└── main.cu         # Benchmark entry point
+tests/
+└── test_sgemm.cu   # Google Test suite
+docs/               # Public learning-oriented documentation
+openspec/           # Stable specs, changes, and workflow guidance
 ```
 
-## GPU Architecture Reference
+## Development workflow
 
-| GPU Family | Architecture | Compute Capability | Build Flag |
-|------------|-------------|-------------------|-----------|
-| Tesla V100 | Volta | sm_70 | `GPU_ARCH=sm_70` |
-| RTX 2080 | Turing | sm_75 | `GPU_ARCH=sm_75` |
-| RTX 3090 / A100 | Ampere | sm_80 / sm_86 | `GPU_ARCH=sm_86` |
-| RTX 4090 / L40 | Ada Lovelace | sm_89 | `GPU_ARCH=sm_89` |
-| H100 | Hopper | sm_90 | `GPU_ARCH=sm_90` |
+Non-trivial repository changes are expected to follow:
 
-## Engineering Quality
+1. `/opsx:explore`
+2. `/opsx:propose "description"`
+3. `/opsx:apply`
+4. `/review`
+5. `/opsx:archive`
 
-- **Build**: CMake 3.18+ is the primary build system; Makefile remains available for quick local use
-- **Code style**: clang-format enforced via CI
-- **CI**: GitHub Actions runs format checks and a containerized CUDA compile-only build; GPU runtime tests are still local / dedicated-runner only
-- **Testing**: Google Test verification against cuBLAS, including Tensor Core fallback and edge-size coverage
-
-## References
-
-- [CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)
-- [How to Optimize a CUDA Matmul Kernel](https://siboehm.com/articles/22/CUDA-MMM) — Simon Boehm
-- [CUTLASS](https://github.com/NVIDIA/cutlass) — NVIDIA's high-performance GEMM library
-- [cuBLAS Documentation](https://docs.nvidia.com/cuda/cublas/)
-- [Roofline Model](https://crd.lbl.gov/divisions/amcr/computer-science-amcr/par/research/roofline/)
+The stable authoritative specs live under `openspec/specs/`. Active implementation plans live under `openspec/changes/<change>/`.
 
 ## License
 
-MIT License
+MIT. See [LICENSE](LICENSE).
