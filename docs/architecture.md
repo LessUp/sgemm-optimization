@@ -2,7 +2,7 @@
 layout: default
 title: Architecture
 nav_order: 8
-permalink: /docs/architecture
+permalink: /docs/architecture/
 lang: en
 page_key: architecture
 lang_ref: zh-architecture
@@ -98,7 +98,7 @@ This split is deliberate. The repository does not pretend CI can replace a real 
 
 ## Related references
 
-- [Learning Path](learning-path)
-- [Getting Started](getting-started)
-- [Specifications Index](../specs)
+- [Learning Path](learning-path/)
+- [Getting Started](getting-started/)
+- [Specifications Index](../specs/)
 - [Stable architecture spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

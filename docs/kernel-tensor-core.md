@@ -3,7 +3,7 @@ layout: default
 title: 5. Tensor Core
 parent: Home
 nav_order: 7
-permalink: /docs/kernel-tensor-core
+permalink: /docs/kernel-tensor-core/
 lang: en
 page_key: kernel-tensor-core
 lang_ref: zh-kernel-tensor-core

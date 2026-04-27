@@ -17,8 +17,8 @@ lang_ref: zh-home
 From readable baseline code to Tensor Core WMMA
 {: .hero-subtitle }
 
-[🚀 Start Here](docs/getting-started){: .btn .fs-5 .mb-4 .mb-md-0 }
-[📚 Learning Path](docs/learning-path){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
+[🚀 Start Here](docs/getting-started/){: .btn .fs-5 .mb-4 .mb-md-0 }
+[📚 Learning Path](docs/learning-path/){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
@@ -37,11 +37,11 @@ This repository is designed to be a compact CUDA GEMM learning and reference pro
 
 | Stage | Kernel | What you learn |
 |------:|--------|----------------|
-| 1 | [Naive](docs/kernel-naive) | Thread-to-output mapping and baseline cost |
-| 2 | [Tiled](docs/kernel-tiled) | Shared-memory blocking and data reuse |
-| 3 | [Bank-Free](docs/kernel-bank-free) | Padding away 32-way bank conflicts |
-| 4 | [Double Buffer](docs/kernel-double-buffer) | Latency hiding through staged tiles |
-| 5 | [Tensor Core](docs/kernel-tensor-core) | WMMA usage with a guarded fallback path |
+| 1 | [Naive](docs/kernel-naive/) | Thread-to-output mapping and baseline cost |
+| 2 | [Tiled](docs/kernel-tiled/) | Shared-memory blocking and data reuse |
+| 3 | [Bank-Free](docs/kernel-bank-free/) | Padding away 32-way bank conflicts |
+| 4 | [Double Buffer](docs/kernel-double-buffer/) | Latency hiding through staged tiles |
+| 5 | [Tensor Core](docs/kernel-tensor-core/) | WMMA usage with a guarded fallback path |
 
 ---
 
@@ -69,14 +69,14 @@ ctest --test-dir build
 
 ### 2. Follow the learning route
 
-- [Getting Started](docs/getting-started)
-- [Learning Path](docs/learning-path)
-- [Architecture](docs/architecture)
-- [Benchmark Notes](docs/benchmark-results)
+- [Getting Started](docs/getting-started/)
+- [Learning Path](docs/learning-path/)
+- [Architecture](docs/architecture/)
+- [Benchmark Notes](docs/benchmark-results/)
 
 ### 3. Inspect the project rules
 
-- [Specifications Index](specs)
+- [Specifications Index](specs/)
 - [OpenSpec Workflow Notes](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/README.md)
 - [Repository Guide](https://github.com/LessUp/sgemm-optimization/blob/master/AGENTS.md)
 
@@ -93,6 +93,6 @@ That split keeps the repository honest without pretending GitHub-hosted runners 
 
 ## Explore next
 
-[📘 Benchmark results](docs/benchmark-results){: .btn .btn-outline .mr-2 }
-[🏗️ Architecture overview](docs/architecture){: .btn .btn-outline .mr-2 }
+[📘 Benchmark results](docs/benchmark-results/){: .btn .btn-outline .mr-2 }
+[🏗️ Architecture overview](docs/architecture/){: .btn .btn-outline .mr-2 }
 [⭐ View on GitHub](https://github.com/LessUp/sgemm-optimization){: .btn .btn-outline }

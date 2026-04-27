@@ -21,11 +21,11 @@ Progressive CUDA SGEMM tutorial and reference implementation, from naive kernels
 
 | Stage | Kernel | What you learn |
 |------:|--------|----------------|
-| 1 | [Naive](docs/kernel-naive) | Thread-to-output mapping and baseline cost |
-| 2 | [Tiled](docs/kernel-tiled) | Shared-memory blocking and data reuse |
-| 3 | [Bank-Free](docs/kernel-bank-free) | Padding away 32-way bank conflicts |
-| 4 | [Double Buffer](docs/kernel-double-buffer) | Latency hiding through staged tiles |
-| 5 | [Tensor Core](docs/kernel-tensor-core) | WMMA usage with guarded FP32 fallback |
+| 1 | [Naive](docs/kernel-naive/) | Thread-to-output mapping and baseline cost |
+| 2 | [Tiled](docs/kernel-tiled/) | Shared-memory blocking and data reuse |
+| 3 | [Bank-Free](docs/kernel-bank-free/) | Padding away 32-way bank conflicts |
+| 4 | [Double Buffer](docs/kernel-double-buffer/) | Latency hiding through staged tiles |
+| 5 | [Tensor Core](docs/kernel-tensor-core/) | WMMA usage with guarded FP32 fallback |
 
 ## Quick start
 
@@ -51,11 +51,11 @@ make test
 
 | If you want to... | Start here |
 |-------------------|------------|
-| Build and run once | [Getting Started](docs/getting-started) |
-| Learn the optimization path | [Learning Path](docs/learning-path) |
-| Understand repository structure | [Architecture](docs/architecture) |
-| See performance context | [Benchmark Results](docs/benchmark-results) |
-| Inspect governance rules | [Specifications](specs) |
+| Build and run once | [Getting Started](docs/getting-started/) |
+| Learn the optimization path | [Learning Path](docs/learning-path/) |
+| Understand repository structure | [Architecture](docs/architecture/) |
+| See performance context | [Benchmark Results](docs/benchmark-results/) |
+| Inspect governance rules | [Specifications](specs/) |
 
 ## Validation boundary
 

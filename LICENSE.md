@@ -2,7 +2,7 @@
 layout: default
 title: License
 nav_order: 12
-permalink: /LICENSE
+permalink: /LICENSE/
 ---
 
 # MIT License

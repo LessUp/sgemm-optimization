@@ -3,7 +3,7 @@ layout: default
 title: 快速上手
 parent: 首页
 nav_order: 1
-permalink: /zh/docs/getting-started
+permalink: /zh/docs/getting-started/
 lang: zh-CN
 page_key: zh-getting-started
 lang_ref: getting-started
@@ -111,6 +111,6 @@ openspec validate --all
 
 ## 接下来去哪
 
-- [学习路径](learning-path)
-- [架构概览](architecture)
-- [Benchmark 结果](benchmark-results)
+- [学习路径](learning-path/)
+- [架构概览](architecture/)
+- [Benchmark 结果](benchmark-results/)

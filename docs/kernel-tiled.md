@@ -3,7 +3,7 @@ layout: default
 title: 2. Tiled Kernel
 parent: Home
 nav_order: 4
-permalink: /docs/kernel-tiled
+permalink: /docs/kernel-tiled/
 lang: en
 page_key: kernel-tiled
 lang_ref: zh-kernel-tiled
@@ -246,7 +246,7 @@ Default `TILE_SIZE = 32` fits well in typical 48-64 KB shared memory per SM.
 
 While we've improved global memory access, we've introduced a new problem: **shared memory bank conflicts**. When threads access the same memory bank, their requests are serialized.
 
-→ Continue to [Bank Conflict Free Kernel](kernel-bank-free){: .btn .btn-primary }
+→ Continue to [Bank Conflict Free Kernel](kernel-bank-free/){: .btn .btn-primary }
 
 ---
 

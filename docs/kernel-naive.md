@@ -3,7 +3,7 @@ layout: default
 title: 1. Naïve Kernel
 parent: Home
 nav_order: 2
-permalink: /docs/kernel-naive
+permalink: /docs/kernel-naive/
 lang: en
 page_key: kernel-naive
 lang_ref: zh-kernel-naive
@@ -216,7 +216,7 @@ After understanding this kernel, you should be able to:
 
 The naïve kernel's main bottleneck is **memory bandwidth**. In the next kernel, we'll fix this using **shared memory tiling:**
 
-→ Continue to [Tiled Kernel](kernel-tiled){: .btn .btn-primary }
+→ Continue to [Tiled Kernel](kernel-tiled/){: .btn .btn-primary }
 
 ---
 

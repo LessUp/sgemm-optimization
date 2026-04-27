@@ -3,7 +3,7 @@ layout: default
 title: 4. Double Buffer
 parent: Home
 nav_order: 6
-permalink: /docs/kernel-double-buffer
+permalink: /docs/kernel-double-buffer/
 lang: en
 page_key: kernel-double-buffer
 lang_ref: zh-kernel-double-buffer
@@ -307,7 +307,7 @@ We've optimized:
 
 The final frontier: **dedicated matrix hardware**. Modern GPUs have Tensor Cores that can perform 4×4×4 matrix multiply-accumulate in one cycle.
 
-→ Continue to [Tensor Core Kernel](kernel-tensor-core){: .btn .btn-primary }
+→ Continue to [Tensor Core Kernel](kernel-tensor-core/){: .btn .btn-primary }
 
 ---
 

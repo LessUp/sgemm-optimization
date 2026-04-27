@@ -2,7 +2,7 @@
 layout: default
 title: Contributing
 nav_order: 11
-permalink: /CONTRIBUTING
+permalink: /CONTRIBUTING/
 ---
 
 # Contributing
