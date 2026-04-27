@@ -52,3 +52,6 @@ _bmad-output/
 
 # oh-my-claudecode (local tool config)
 .omc/
+
+# Git worktrees
+.worktrees/
