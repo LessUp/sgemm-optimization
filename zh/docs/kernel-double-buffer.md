@@ -3,7 +3,7 @@ layout: default
 title: 4. Double Buffer
 parent: 首页
 nav_order: 6
-permalink: /zh/docs/kernel-double-buffer
+permalink: /zh/docs/kernel-double-buffer/
 lang: zh-CN
 page_key: zh-kernel-double-buffer
 lang_ref: kernel-double-buffer
@@ -157,7 +157,7 @@ __global__ void sgemm_double_buffer_kernel(
 
 最后的边界：**专用矩阵硬件**。现代 GPU 有 Tensor Core，可以在一个周期内执行 4×4×4 矩阵乘累加。
 
-→ 继续阅读 [Tensor Core Kernel](kernel-tensor-core){: .btn .btn-primary }
+→ 继续阅读 [Tensor Core Kernel](kernel-tensor-core/){: .btn .btn-primary }
 
 ---
 

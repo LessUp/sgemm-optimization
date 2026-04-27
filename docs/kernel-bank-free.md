@@ -3,7 +3,7 @@ layout: default
 title: 3. Bank Conflict Free
 parent: Home
 nav_order: 5
-permalink: /docs/kernel-bank-free
+permalink: /docs/kernel-bank-free/
 lang: en
 page_key: kernel-bank-free
 lang_ref: zh-kernel-bank-free
@@ -269,7 +269,7 @@ Metrics to watch:
 
 Now that we have efficient shared memory access, the next optimization target is **memory latency hiding**. Even with bank-free access, threads still wait for memory loads.
 
-→ Continue to [Double Buffer Kernel](kernel-double-buffer){: .btn .btn-primary }
+→ Continue to [Double Buffer Kernel](kernel-double-buffer/){: .btn .btn-primary }
 
 ---
 

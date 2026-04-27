@@ -3,7 +3,7 @@ layout: default
 title: 1. Naïve Kernel
 parent: 首页
 nav_order: 2
-permalink: /zh/docs/kernel-naive
+permalink: /zh/docs/kernel-naive/
 lang: zh-CN
 page_key: zh-kernel-naive
 lang_ref: kernel-naive
@@ -123,7 +123,7 @@ Thread (0,1) 读取: A[0,0], A[0,1], A[0,2] ...  →  与线程 0 相同！
 
 Naïve kernel 的主要瓶颈是**内存带宽**。下一个 kernel 将通过**共享内存分块**来解决这个问题：
 
-→ 继续阅读 [Tiled Kernel](kernel-tiled){: .btn .btn-primary }
+→ 继续阅读 [Tiled Kernel](kernel-tiled/){: .btn .btn-primary }
 
 ---
 

@@ -3,7 +3,7 @@ layout: default
 title: 3. Bank Conflict Free
 parent: 首页
 nav_order: 5
-permalink: /zh/docs/kernel-bank-free
+permalink: /zh/docs/kernel-bank-free/
 lang: zh-CN
 page_key: zh-kernel-bank-free
 lang_ref: kernel-bank-free
@@ -120,7 +120,7 @@ Bank-free kernel 在不同场景下提供更**一致**的性能。
 
 现在我们有了高效的共享内存访问，下一个优化目标是**内存延迟隐藏**。即使有 bank-free 访问，线程仍需等待内存加载。
 
-→ 继续阅读 [Double Buffer Kernel](kernel-double-buffer){: .btn .btn-primary }
+→ 继续阅读 [Double Buffer Kernel](kernel-double-buffer/){: .btn .btn-primary }
 
 ---
 

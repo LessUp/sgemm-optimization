@@ -2,7 +2,7 @@
 layout: default
 title: Benchmark 结果
 nav_order: 9
-permalink: /zh/docs/benchmark-results
+permalink: /zh/docs/benchmark-results/
 lang: zh-CN
 page_key: zh-benchmark-results
 lang_ref: benchmark-results
@@ -79,6 +79,6 @@ cmake --build build -j$(nproc)
 
 ## 相关参考
 
-- [快速上手](getting-started)
-- [学习路径](learning-path)
+- [快速上手](getting-started/)
+- [学习路径](learning-path/)
 - [README 中的 Kernel 演进](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)

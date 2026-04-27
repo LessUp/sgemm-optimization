@@ -3,7 +3,7 @@ layout: default
 title: Getting Started
 parent: Home
 nav_order: 1
-permalink: /docs/getting-started
+permalink: /docs/getting-started/
 lang: en
 page_key: getting-started
 lang_ref: zh-getting-started
@@ -111,6 +111,6 @@ openspec validate --all
 
 ## Where to go next
 
-- [Learning Path](learning-path)
-- [Architecture](architecture)
-- [Benchmark Results](benchmark-results)
+- [Learning Path](learning-path/)
+- [Architecture](architecture/)
+- [Benchmark Results](benchmark-results/)

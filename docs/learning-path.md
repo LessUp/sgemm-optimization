@@ -2,7 +2,7 @@
 layout: default
 title: Learning Path
 nav_order: 3
-permalink: /docs/learning-path
+permalink: /docs/learning-path/
 lang: en
 page_key: learning-path
 lang_ref: zh-learning-path
@@ -20,11 +20,11 @@ Follow the optimization ladder in the order the repository was designed to teach
 
 | Step | Kernel | Why it comes here |
 |------|--------|-------------------|
-| 1 | [Naive](kernel-naive) | Establish the baseline cost model |
-| 2 | [Tiled](kernel-tiled) | Introduce shared-memory reuse |
-| 3 | [Bank-Free](kernel-bank-free) | Show why shared-memory layout still matters |
-| 4 | [Double Buffer](kernel-double-buffer) | Add staging and overlap concepts |
-| 5 | [Tensor Core](kernel-tensor-core) | Move to WMMA and mixed-precision hardware |
+| 1 | [Naive](kernel-naive/) | Establish the baseline cost model |
+| 2 | [Tiled](kernel-tiled/) | Introduce shared-memory reuse |
+| 3 | [Bank-Free](kernel-bank-free/) | Show why shared-memory layout still matters |
+| 4 | [Double Buffer](kernel-double-buffer/) | Add staging and overlap concepts |
+| 5 | [Tensor Core](kernel-tensor-core/) | Move to WMMA and mixed-precision hardware |
 
 ---
 
@@ -66,6 +66,6 @@ Follow the optimization ladder in the order the repository was designed to teach
 
 ## Before you start
 
-- Make sure your environment follows [Getting Started](getting-started)
-- Use the [Architecture](architecture) page if you want the repository-level map first
-- Keep the [Specifications Index](../specs) nearby if you want the normative requirements
+- Make sure your environment follows [Getting Started](getting-started/)
+- Use the [Architecture](architecture/) page if you want the repository-level map first
+- Keep the [Specifications Index](../specs/) nearby if you want the normative requirements

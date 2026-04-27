@@ -3,7 +3,7 @@ layout: default
 title: 2. Tiled Kernel
 parent: 首页
 nav_order: 4
-permalink: /zh/docs/kernel-tiled
+permalink: /zh/docs/kernel-tiled/
 lang: zh-CN
 page_key: zh-kernel-tiled
 lang_ref: kernel-tiled
@@ -150,7 +150,7 @@ __global__ void sgemm_tiled_kernel(
 
 虽然我们改进了全局内存访问，但引入了新问题：**共享内存 bank 冲突**。当多个线程访问同一内存 bank 时，它们的请求被串行化。
 
-→ 继续阅读 [Bank Conflict Free Kernel](kernel-bank-free){: .btn .btn-primary }
+→ 继续阅读 [Bank Conflict Free Kernel](kernel-bank-free/){: .btn .btn-primary }
 
 ---
 

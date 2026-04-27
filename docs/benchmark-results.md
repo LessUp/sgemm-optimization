@@ -2,7 +2,7 @@
 layout: default
 title: Benchmark Results
 nav_order: 9
-permalink: /docs/benchmark-results
+permalink: /docs/benchmark-results/
 lang: en
 page_key: benchmark-results
 lang_ref: zh-benchmark-results
@@ -79,6 +79,6 @@ If you want longer measurements:
 
 ## Related references
 
-- [Getting Started](getting-started)
-- [Learning Path](learning-path)
+- [Getting Started](getting-started/)
+- [Learning Path](learning-path/)
 - [Kernel progression in README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)

@@ -2,7 +2,7 @@
 layout: default
 title: 架构概览
 nav_order: 8
-permalink: /zh/docs/architecture
+permalink: /zh/docs/architecture/
 lang: zh-CN
 page_key: zh-architecture
 lang_ref: architecture
@@ -98,7 +98,7 @@ void launch_xxx_sgemm(
 
 ## 相关参考
 
-- [学习路径](learning-path)
-- [快速上手](getting-started)
-- [规范索引](../../specs)
+- [学习路径](learning-path/)
+- [快速上手](getting-started/)
+- [规范索引](../../specs/)
 - [稳定架构规范](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)
