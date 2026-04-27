@@ -1,0 +1,14 @@
+<div class="language-switcher"
+     data-page-key="{{ page.page_key | default: 'unknown' }}"
+     data-lang="{{ page.lang | default: 'en' }}"
+     data-lang-ref="{{ page.lang_ref | default: '' }}">
+  <span class="language-switcher-label">Lang:</span>
+  <button type="button" data-lang-choice="en"
+          class="{% if page.lang == 'en' or page.lang == nil %}is-active{% endif %}">
+    EN
+  </button>
+  <button type="button" data-lang-choice="zh-CN"
+          class="{% if page.lang == 'zh-CN' %}is-active{% endif %}">
+    中文
+  </button>
+</div>

@@ -4,7 +4,10 @@ title: Home
 nav_order: 1
 has_children: true
 permalink: /
-description: Learn CUDA SGEMM optimization from naive kernels to Tensor Core WMMA in a compact, verifiable repository.
+description: Bilingual CUDA SGEMM optimization tutorial and reference implementation, from naive kernels to Tensor Core WMMA.
+lang: en
+page_key: home
+lang_ref: zh-home
 ---
 
 {: .hero-section }

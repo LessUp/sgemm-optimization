@@ -4,6 +4,9 @@ title: Specifications
 nav_order: 9
 has_children: true
 permalink: /specs/
+lang: en
+page_key: specs
+lang_ref: zh-specs
 ---
 
 # Specifications

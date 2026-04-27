@@ -4,6 +4,9 @@ title: 4. Double Buffer
 parent: Home
 nav_order: 6
 permalink: /docs/kernel-double-buffer
+lang: en
+page_key: kernel-double-buffer
+lang_ref: zh-kernel-double-buffer
 ---
 
 # Kernel 4: Double Buffer

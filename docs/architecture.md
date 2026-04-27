@@ -3,6 +3,9 @@ layout: default
 title: Architecture
 nav_order: 8
 permalink: /docs/architecture
+lang: en
+page_key: architecture
+lang_ref: zh-architecture
 ---
 
 # Architecture

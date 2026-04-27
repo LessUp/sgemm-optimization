@@ -4,6 +4,9 @@ title: 2. Tiled Kernel
 parent: Home
 nav_order: 4
 permalink: /docs/kernel-tiled
+lang: en
+page_key: kernel-tiled
+lang_ref: zh-kernel-tiled
 ---
 
 # Kernel 2: Tiled Implementation

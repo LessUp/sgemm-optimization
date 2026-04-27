@@ -3,6 +3,9 @@ layout: default
 title: Benchmark Results
 nav_order: 9
 permalink: /docs/benchmark-results
+lang: en
+page_key: benchmark-results
+lang_ref: zh-benchmark-results
 ---
 
 # Benchmark Results

@@ -4,6 +4,9 @@ title: 3. Bank Conflict Free
 parent: Home
 nav_order: 5
 permalink: /docs/kernel-bank-free
+lang: en
+page_key: kernel-bank-free
+lang_ref: zh-kernel-bank-free
 ---
 
 # Kernel 3: Bank Conflict Free
