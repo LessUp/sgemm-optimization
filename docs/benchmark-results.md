@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Benchmark Results
-nav_order: 5
+nav_order: 9
 permalink: /docs/benchmark-results
 ---
 

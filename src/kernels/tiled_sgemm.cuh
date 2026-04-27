@@ -27,65 +27,65 @@
 template <int TILE_SIZE>
 __global__ void tiled_sgemm_kernel(const float *__restrict__ A, const float *__restrict__ B,
                                    float *__restrict__ C, int M, int K, int N) {
-  // Shared memory for tiles of A and B
-  __shared__ float As[TILE_SIZE][TILE_SIZE];
-  __shared__ float Bs[TILE_SIZE][TILE_SIZE];
+    // Shared memory for tiles of A and B
+    __shared__ float As[TILE_SIZE][TILE_SIZE];
+    __shared__ float Bs[TILE_SIZE][TILE_SIZE];
 
-  // Block and thread indices
-  int bx = blockIdx.x;
-  int by = blockIdx.y;
-  int tx = threadIdx.x;
-  int ty = threadIdx.y;
+    // Block and thread indices
+    int bx = blockIdx.x;
+    int by = blockIdx.y;
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
 
-  // Calculate global row and column for this thread
-  int row = by * TILE_SIZE + ty;
-  int col = bx * TILE_SIZE + tx;
+    // Calculate global row and column for this thread
+    int row = by * TILE_SIZE + ty;
+    int col = bx * TILE_SIZE + tx;
 
-  // Accumulator for the dot product
-  float sum = 0.0f;
+    // Accumulator for the dot product
+    float sum = 0.0f;
 
-  // Number of tiles needed to cover K dimension
-  int numTiles = (K + TILE_SIZE - 1) / TILE_SIZE;
+    // Number of tiles needed to cover K dimension
+    int numTiles = (K + TILE_SIZE - 1) / TILE_SIZE;
 
-  // Iterate over all tiles
-  for (int t = 0; t < numTiles; ++t) {
-    // Load tile of A into shared memory
-    // Each thread loads one element
-    int aCol = t * TILE_SIZE + tx;
-    if (row < M && aCol < K) {
-      As[ty][tx] = A[row * K + aCol];
-    } else {
-      As[ty][tx] = 0.0f;
-    }
+    // Iterate over all tiles
+    for (int t = 0; t < numTiles; ++t) {
+        // Load tile of A into shared memory
+        // Each thread loads one element
+        int aCol = t * TILE_SIZE + tx;
+        if (row < M && aCol < K) {
+            As[ty][tx] = A[row * K + aCol];
+        } else {
+            As[ty][tx] = 0.0f;
+        }
 
-    // Load tile of B into shared memory
-    // Each thread loads one element
-    int bRow = t * TILE_SIZE + ty;
-    if (bRow < K && col < N) {
-      Bs[ty][tx] = B[bRow * N + col];
-    } else {
-      Bs[ty][tx] = 0.0f;
-    }
+        // Load tile of B into shared memory
+        // Each thread loads one element
+        int bRow = t * TILE_SIZE + ty;
+        if (bRow < K && col < N) {
+            Bs[ty][tx] = B[bRow * N + col];
+        } else {
+            Bs[ty][tx] = 0.0f;
+        }
 
-    // Synchronize to ensure all threads have loaded their data
-    __syncthreads();
+        // Synchronize to ensure all threads have loaded their data
+        __syncthreads();
 
 // Compute partial dot product for this tile
 #pragma unroll
-    for (int k = 0; k < TILE_SIZE; ++k) {
-      sum += As[ty][k] * Bs[k][tx];
+        for (int k = 0; k < TILE_SIZE; ++k) {
+            sum += As[ty][k] * Bs[k][tx];
+        }
+
+        // Synchronize before loading next tile
+        // This prevents threads from overwriting shared memory
+        // while other threads are still reading
+        __syncthreads();
     }
 
-    // Synchronize before loading next tile
-    // This prevents threads from overwriting shared memory
-    // while other threads are still reading
-    __syncthreads();
-  }
-
-  // Write result to global memory
-  if (row < M && col < N) {
-    C[row * N + col] = sum;
-  }
+    // Write result to global memory
+    if (row < M && col < N) {
+        C[row * N + col] = sum;
+    }
 }
 
 /**
@@ -103,14 +103,14 @@ __global__ void tiled_sgemm_kernel(const float *__restrict__ A, const float *__r
 template <int TILE_SIZE = 32>
 void launch_tiled_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
                         cudaStream_t stream = 0) {
-  // Block size matches tile size
-  dim3 blockDim(TILE_SIZE, TILE_SIZE);
+    // Block size matches tile size
+    dim3 blockDim(TILE_SIZE, TILE_SIZE);
 
-  // Grid covers the output matrix
-  dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
+    // Grid covers the output matrix
+    dim3 gridDim((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
-  // Launch kernel
-  tiled_sgemm_kernel<TILE_SIZE><<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+    // Launch kernel
+    tiled_sgemm_kernel<TILE_SIZE><<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
-  CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaGetLastError());
 }

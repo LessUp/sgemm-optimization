@@ -90,3 +90,12 @@ jobs:
             echo "$legacy_files"
             exit 1
           fi
+
+      - name: Check nav_order conflicts in docs
+        run: |
+          nav_orders=$(grep -rh "nav_order:" docs/ 2>/dev/null | sort | uniq -d)
+          if [ -n "$nav_orders" ]; then
+            echo "::error::Duplicate nav_order values found in docs/:"
+            echo "$nav_orders"
+            exit 1
+          fi
