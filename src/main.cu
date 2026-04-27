@@ -6,6 +6,8 @@
  * GPU matrix multiplication optimization techniques.
  */
 
+#include <cerrno>
+#include <climits>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -32,6 +34,30 @@ const std::vector<std::tuple<int, int, int>> DEFAULT_CASES = {
     {256, 384, 640},
     {511, 513, 1025},
 };
+
+// Safe string to int conversion with error handling
+bool safeStrToInt(const char *str, int *result, const char *argName) {
+    if (str == nullptr || str[0] == '\0') {
+        fprintf(stderr, "Error: %s requires a valid number\n", argName);
+        return false;
+    }
+
+    char *endptr;
+    errno = 0;
+    long val = strtol(str, &endptr, 10);
+
+    if (errno == ERANGE || val > INT_MAX || val < INT_MIN) {
+        fprintf(stderr, "Error: %s value '%s' is out of range\n", argName, str);
+        return false;
+    }
+    if (*endptr != '\0') {
+        fprintf(stderr, "Error: Invalid %s value '%s' (not a valid integer)\n", argName, str);
+        return false;
+    }
+
+    *result = static_cast<int>(val);
+    return true;
+}
 } // namespace
 
 void naive_kernel(const float *A, const float *B, float *C, int M, int K, int N) {
@@ -168,7 +194,10 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            int size = atoi(argv[++i]);
+            int size;
+            if (!safeStrToInt(argv[++i], &size, "size")) {
+                return 1;
+            }
             if (size <= 0) {
                 fprintf(stderr, "Error: Size must be positive\n");
                 return 1;
@@ -184,9 +213,12 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            int M = atoi(argv[++i]);
-            int K = atoi(argv[++i]);
-            int N = atoi(argv[++i]);
+            int M, K, N;
+            if (!safeStrToInt(argv[++i], &M, "M dimension") ||
+                !safeStrToInt(argv[++i], &K, "K dimension") ||
+                !safeStrToInt(argv[++i], &N, "N dimension")) {
+                return 1;
+            }
             if (M <= 0 || K <= 0 || N <= 0) {
                 fprintf(stderr, "Error: Dimensions must be positive\n");
                 return 1;
@@ -207,7 +239,10 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            int warmup = atoi(argv[++i]);
+            int warmup;
+            if (!safeStrToInt(argv[++i], &warmup, "warmup")) {
+                return 1;
+            }
             if (warmup < 0) {
                 fprintf(stderr, "Error: Warmup runs must be non-negative\n");
                 return 1;
@@ -223,7 +258,10 @@ int main(int argc, char **argv) {
                 return 1;
             }
 
-            int bench = atoi(argv[++i]);
+            int bench;
+            if (!safeStrToInt(argv[++i], &bench, "benchmark")) {
+                return 1;
+            }
             if (bench <= 0) {
                 fprintf(stderr, "Error: Benchmark runs must be positive\n");
                 return 1;
