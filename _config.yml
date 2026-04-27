@@ -1,5 +1,9 @@
 remote_theme: just-the-docs/just-the-docs@v0.8.2
 
+# Theme settings
+# Dark/light mode toggle is available by default in the nav bar
+# Custom colors are defined in _sass/custom/custom.scss
+
 plugins:
   - jekyll-remote-theme
   - jekyll-seo-tag
