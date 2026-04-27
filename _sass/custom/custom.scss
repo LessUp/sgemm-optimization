@@ -6,32 +6,92 @@
 // ============================================
 // COLOR VARIABLES (NVIDIA + Dark Tech Theme)
 // ============================================
+
+// Primary brand color - NVIDIA Green
+$nvidia-green: #76B900;
+$nvidia-green-light: #8FD917;
+$nvidia-green-dark: #5A8F00;
+
+// Accent colors
+$tech-teal: #00D4AA;
+$tech-blue: #00A8E8;
+$tech-purple: #9D4EDD;
+$tech-orange: #FF8500;
+
+// ============================================
+// LIGHT THEME (default)
+// ============================================
 :root {
-  // Primary brand color - NVIDIA Green
-  --nvidia-green: #76B900;
-  --nvidia-green-light: #8FD917;
-  --nvidia-green-dark: #5A8F00;
-  
-  // Accent colors
-  --tech-teal: #00D4AA;
-  --tech-blue: #00A8E8;
-  --tech-purple: #9D4EDD;
-  --tech-orange: #FF8500;
-  
+  // Backgrounds - light mode
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F6F8FA;
+  --bg-tertiary: #EAEEF2;
+  --bg-elevated: #FFFFFF;
+
+  // Text colors - light mode
+  --text-primary: #1F2328;
+  --text-secondary: #57606A;
+  --text-muted: #8B949E;
+
+  // Border colors - light mode
+  --border-subtle: #D0D7DE;
+  --border-default: #EAEEF2;
+
+  // Brand colors (same for both modes)
+  --nvidia-green: #{$nvidia-green};
+  --nvidia-green-light: #{$nvidia-green-light};
+  --nvidia-green-dark: #{$nvidia-green-dark};
+  --tech-teal: #{$tech-teal};
+  --tech-blue: #{$tech-blue};
+  --tech-purple: #{$tech-purple};
+  --tech-orange: #{$tech-orange};
+
+  // Code block colors - light mode
+  --code-bg: #F6F8FA;
+  --code-text: #1F2328;
+}
+
+// ============================================
+// DARK THEME
+// ============================================
+[data-theme="dark"],
+html[data-theme="dark"] {
   // Dark theme backgrounds
   --bg-primary: #0D1117;
   --bg-secondary: #161B22;
   --bg-tertiary: #21262D;
   --bg-elevated: #1C2128;
-  
-  // Text colors
+
+  // Text colors - dark mode
   --text-primary: #E6EDF3;
   --text-secondary: #8B949E;
   --text-muted: #6E7681;
-  
-  // Border colors
+
+  // Border colors - dark mode
   --border-subtle: #30363D;
   --border-default: #21262D;
+
+  // Code block colors - dark mode
+  --code-bg: #161B22;
+  --code-text: #E6EDF3;
+}
+
+// Fallback: Also apply dark theme at :root for backwards compatibility
+// This ensures dark styles work even without data-theme attribute
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-primary: #0D1117;
+    --bg-secondary: #161B22;
+    --bg-tertiary: #21262D;
+    --bg-elevated: #1C2128;
+    --text-primary: #E6EDF3;
+    --text-secondary: #8B949E;
+    --text-muted: #6E7681;
+    --border-subtle: #30363D;
+    --border-default: #21262D;
+    --code-bg: #161B22;
+    --code-text: #E6EDF3;
+  }
 }
 
 // ============================================
@@ -159,18 +219,72 @@ code {
   margin-right: 1rem !important;
 }
 
-// Syntax highlighting - customized for CUDA
+// Syntax highlighting - CUDA optimized with light/dark support
+// Dark mode syntax colors (default for code blocks)
+$code-comment-dark: #6A9955;
+$code-keyword-dark: #569CD6;
+$code-string-dark: #CE9178;
+$code-number-dark: #B5CEA8;
+$code-function-dark: #DCDCAA;
+$code-punctuation-dark: #D4D4D4;
+$code-preprocessor-dark: #9CDCFE;
+$code-type-dark: #4EC9B0;
+$code-variable-dark: #9CDCFE;
+
+// Light mode syntax colors
+$code-comment-light: #008000;
+$code-keyword-light: #0000FF;
+$code-string-light: #A31515;
+$code-number-light: #098658;
+$code-function-light: #795E26;
+$code-punctuation-light: #333333;
+$code-preprocessor-light: #AF00DB;
+$code-type-light: #267F99;
+$code-variable-light: #001080;
+
 .highlight {
-  .c, .cm, .c1, .cp { color: #6A9955; }  // Comments
-  .k, .kc, .kd, .kn, .kr { color: #569CD6; }  // Keywords
-  .s, .sb, .sc, .sd, .s2 { color: #CE9178; }  // Strings
-  .mi, .mf, .mh, .il { color: #B5CEA8; }  // Numbers
-  .n, .nf, .fm { color: #DCDCAA; }  // Functions
-  .p { color: #D4D4D4; }  // Punctuation
-  .o { color: #D4D4D4; }  // Operators
-  .cpp, .cpf { color: #9CDCFE; }  // Preprocessor
-  .kt, .nc { color: #4EC9B0; }  // Types/Classes
-  .nv { color: #9CDCFE; }  // Variables
+  // Dark mode syntax (default)
+  .c, .cm, .c1, .cp { color: $code-comment-dark; }
+  .k, .kc, .kd, .kn, .kr { color: $code-keyword-dark; }
+  .s, .sb, .sc, .sd, .s2 { color: $code-string-dark; }
+  .mi, .mf, .mh, .il { color: $code-number-dark; }
+  .n, .nf, .fm { color: $code-function-dark; }
+  .p { color: $code-punctuation-dark; }
+  .o { color: $code-punctuation-dark; }
+  .cpp, .cpf { color: $code-preprocessor-dark; }
+  .kt, .nc { color: $code-type-dark; }
+  .nv { color: $code-variable-dark; }
+}
+
+// Light mode syntax highlighting
+[data-theme="light"] .highlight,
+html[data-theme="light"] .highlight {
+  .c, .cm, .c1, .cp { color: $code-comment-light; }
+  .k, .kc, .kd, .kn, .kr { color: $code-keyword-light; }
+  .s, .sb, .sc, .sd, .s2 { color: $code-string-light; }
+  .mi, .mf, .mh, .il { color: $code-number-light; }
+  .n, .nf, .fm { color: $code-function-light; }
+  .p { color: $code-punctuation-light; }
+  .o { color: $code-punctuation-light; }
+  .cpp, .cpf { color: $code-preprocessor-light; }
+  .kt, .nc { color: $code-type-light; }
+  .nv { color: $code-variable-light; }
+}
+
+// System preference light mode
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .highlight {
+    .c, .cm, .c1, .cp { color: $code-comment-light; }
+    .k, .kc, .kd, .kn, .kr { color: $code-keyword-light; }
+    .s, .sb, .sc, .sd, .s2 { color: $code-string-light; }
+    .mi, .mf, .mh, .il { color: $code-number-light; }
+    .n, .nf, .fm { color: $code-function-light; }
+    .p { color: $code-punctuation-light; }
+    .o { color: $code-punctuation-light; }
+    .cpp, .cpf { color: $code-preprocessor-light; }
+    .kt, .nc { color: $code-type-light; }
+    .nv { color: $code-variable-light; }
+  }
 }
 
 // Copy code button
@@ -215,7 +329,22 @@ table {
   }
   
   tr:nth-child(even) {
-    background-color: rgba(255, 255, 255, 0.02) !important;
+    background-color: rgba(128, 128, 128, 0.05) !important;
+  }
+
+  // Dark mode: darker stripe
+  [data-theme="dark"] & {
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.02) !important;
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      tr:nth-child(even) {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+      }
+    }
   }
   
   tr:hover {
