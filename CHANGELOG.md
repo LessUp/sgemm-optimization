@@ -13,10 +13,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 
 ## [Unreleased]
 
+### Fixed
+- Integer overflow risk in `verify.cuh` and `tensor_core_sgemm.cuh` for large matrices (use `size_t`)
+- Command-line parsing now uses `strtol()` with proper error handling instead of `atoi()`
+
 ### Changed
 - Consolidated repository governance around `openspec/specs/`, updated agent instructions, and simplified documentation roles.
 - Reworked README, GitHub Pages content, and supporting docs into clearer repository-entry and learning surfaces.
 - Began pruning redundant release-history and engineering guidance artifacts in favor of fewer authoritative files.
+
+### Removed
+- Duplicate `LICENSE` file (kept `LICENSE.md` with third-party info)
+- Legacy `_bmad/` and `_bmad-output/` directories (replaced by OpenSpec)
+
+### Added
+- `.clang-tidy` configuration for static analysis
 
 ## [2.1.0] - 2026-04-16
 
