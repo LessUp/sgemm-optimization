@@ -4,6 +4,9 @@ title: 1. Naïve Kernel
 parent: Home
 nav_order: 2
 permalink: /docs/kernel-naive
+lang: en
+page_key: kernel-naive
+lang_ref: zh-kernel-naive
 ---
 
 # Kernel 1: Naïve Implementation

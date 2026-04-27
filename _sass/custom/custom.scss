@@ -651,3 +651,59 @@ div.aux-nav {
     grid-template-columns: 1fr;
   }
 }
+
+// ============================================
+// LANGUAGE SWITCHER
+// ============================================
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  padding: 0.5rem;
+  background-color: var(--bg-tertiary);
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.language-switcher-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.25rem;
+}
+
+.language-switcher button {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.language-switcher button:hover {
+  border-color: var(--nvidia-green);
+  color: var(--nvidia-green);
+  background-color: rgba(118, 185, 0, 0.05);
+}
+
+.language-switcher button.is-active {
+  border-color: var(--nvidia-green);
+  color: var(--nvidia-green);
+  background-color: rgba(118, 185, 0, 0.1);
+  font-weight: 600;
+}
+
+// Mobile adjustments for language switcher
+@media (max-width: 800px) {
+  .language-switcher {
+    justify-content: center;
+    margin: 1rem 0;
+  }
+}

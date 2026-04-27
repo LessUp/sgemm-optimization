@@ -4,6 +4,9 @@ title: Getting Started
 parent: Home
 nav_order: 1
 permalink: /docs/getting-started
+lang: en
+page_key: getting-started
+lang_ref: zh-getting-started
 ---
 
 # Getting Started

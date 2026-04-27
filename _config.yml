@@ -12,8 +12,8 @@ plugins:
 
 title: SGEMM Optimization
 description: >-
-  Learn CUDA SGEMM optimization from a readable baseline to Tensor Core WMMA,
-  with verification, benchmarks, and compact engineering guidance.
+  Bilingual CUDA SGEMM optimization tutorial and reference implementation,
+  from naive kernels to Tensor Core WMMA.
 repository: LessUp/sgemm-optimization
 author: LessUp
 lang: en
@@ -31,7 +31,9 @@ aux_links_new_tab: true
 aux_links:
   "GitHub":
     - "//github.com/LessUp/sgemm-optimization"
-  "README (中文)":
+  "English README":
+    - "//github.com/LessUp/sgemm-optimization/blob/master/README.md"
+  "中文 README":
     - "//github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md"
 
 nav_external_links:

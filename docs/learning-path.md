@@ -3,6 +3,9 @@ layout: default
 title: Learning Path
 nav_order: 3
 permalink: /docs/learning-path
+lang: en
+page_key: learning-path
+lang_ref: zh-learning-path
 ---
 
 # Learning Path
