@@ -18,14 +18,14 @@ struct VerifyResult {
     float max_abs_error;
     float max_rel_error;
     int error_count;
-    int total_elements;
+    size_t total_elements;
 
     void print(const char *kernel_name = "Kernel") const {
         printf("  %s Verification: %s\n", kernel_name, passed ? "PASSED" : "FAILED");
         printf("    Max Absolute Error: %.6e\n", max_abs_error);
         printf("    Max Relative Error: %.6e\n", max_rel_error);
         if (!passed) {
-            printf("    Error Count: %d / %d (%.2f%%)\n", error_count, total_elements,
+            printf("    Error Count: %d / %zu (%.2f%%)\n", error_count, total_elements,
                    100.0f * error_count / total_elements);
         }
     }
@@ -112,12 +112,14 @@ class SGEMMVerifier {
     // Verify with device pointers (copies to host internally)
     VerifyResult verifyDevice(const float *d_test, const float *d_ref, int M, int N,
                               VerifyTolerance tolerance = kStandardVerifyTolerance) {
-        std::vector<float> h_test(M * N);
-        std::vector<float> h_ref(M * N);
+        size_t num_elements = static_cast<size_t>(M) * N;
+        std::vector<float> h_test(num_elements);
+        std::vector<float> h_ref(num_elements);
 
+        CUDA_CHECK(cudaMemcpy(h_test.data(), d_test, num_elements * sizeof(float),
+                              cudaMemcpyDeviceToHost));
         CUDA_CHECK(
-            cudaMemcpy(h_test.data(), d_test, M * N * sizeof(float), cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(h_ref.data(), d_ref, M * N * sizeof(float), cudaMemcpyDeviceToHost));
+            cudaMemcpy(h_ref.data(), d_ref, num_elements * sizeof(float), cudaMemcpyDeviceToHost));
 
         return verify(h_test.data(), h_ref.data(), M, N, tolerance);
     }
@@ -143,9 +145,9 @@ inline VerifyResult compareMatrices(const float *h_test, const float *h_ref, int
     result.max_abs_error = 0.0f;
     result.max_rel_error = 0.0f;
     result.error_count = 0;
-    result.total_elements = M * N;
+    result.total_elements = static_cast<size_t>(M) * N;
 
-    for (int i = 0; i < M * N; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(M) * N; ++i) {
         float ref_val = h_ref[i];
         float test_val = h_test[i];
 

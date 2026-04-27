@@ -123,15 +123,19 @@ inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, i
         return;
     }
 
-    DeviceMemory<half> d_A_fp16(M * K);
-    DeviceMemory<half> d_B_fp16(K * N);
+    size_t num_A = static_cast<size_t>(M) * K;
+    size_t num_B = static_cast<size_t>(K) * N;
+    DeviceMemory<half> d_A_fp16(num_A);
+    DeviceMemory<half> d_B_fp16(num_B);
 
     int blockSize = 256;
-    int gridSizeA = (M * K + blockSize - 1) / blockSize;
-    int gridSizeB = (K * N + blockSize - 1) / blockSize;
+    int gridSizeA = static_cast<int>((num_A + blockSize - 1) / blockSize);
+    int gridSizeB = static_cast<int>((num_B + blockSize - 1) / blockSize);
 
-    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(), M * K);
-    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(), K * N);
+    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
+                                                              static_cast<int>(num_A));
+    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(),
+                                                              static_cast<int>(num_B));
     CUDA_CHECK(cudaGetLastError());
 
     launch_tensor_core_sgemm_fp16_fast_path(d_A_fp16.get(), d_B_fp16.get(), C, M, K, N, stream);
