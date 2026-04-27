@@ -2,7 +2,7 @@
 layout: default
 title: 5. Tensor Core
 parent: Home
-nav_order: 6
+nav_order: 7
 permalink: /docs/kernel-tensor-core
 ---
 

@@ -2,7 +2,7 @@
 layout: default
 title: 4. Double Buffer
 parent: Home
-nav_order: 5
+nav_order: 6
 permalink: /docs/kernel-double-buffer
 ---
 

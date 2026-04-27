@@ -28,25 +28,25 @@
  */
 __global__ void naive_sgemm_kernel(const float *__restrict__ A, const float *__restrict__ B,
                                    float *__restrict__ C, int M, int K, int N) {
-  // Calculate global row and column indices
-  int row = blockIdx.y * blockDim.y + threadIdx.y;
-  int col = blockIdx.x * blockDim.x + threadIdx.x;
+    // Calculate global row and column indices
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // Boundary check
-  if (row < M && col < N) {
-    float sum = 0.0f;
+    // Boundary check
+    if (row < M && col < N) {
+        float sum = 0.0f;
 
-    // Compute dot product of row of A and column of B
-    for (int k = 0; k < K; ++k) {
-      // A[row][k] * B[k][col]
-      // A is accessed row-wise (coalesced within a warp for same row)
-      // B is accessed column-wise (NOT coalesced - this is the main bottleneck)
-      sum += A[row * K + k] * B[k * N + col];
+        // Compute dot product of row of A and column of B
+        for (int k = 0; k < K; ++k) {
+            // A[row][k] * B[k][col]
+            // A is accessed row-wise (coalesced within a warp for same row)
+            // B is accessed column-wise (NOT coalesced - this is the main bottleneck)
+            sum += A[row * K + k] * B[k * N + col];
+        }
+
+        // Write result to C
+        C[row * N + col] = sum;
     }
-
-    // Write result to C
-    C[row * N + col] = sum;
-  }
 }
 
 /**
@@ -63,14 +63,14 @@ __global__ void naive_sgemm_kernel(const float *__restrict__ A, const float *__r
 template <int BLOCK_SIZE = 32>
 void launch_naive_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
                         cudaStream_t stream = 0) {
-  // Configure grid and block dimensions
-  // Each thread computes one element of C
-  dim3 blockDim(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 gridDim((N + BLOCK_SIZE - 1) / BLOCK_SIZE, (M + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    // Configure grid and block dimensions
+    // Each thread computes one element of C
+    dim3 blockDim(BLOCK_SIZE, BLOCK_SIZE);
+    dim3 gridDim((N + BLOCK_SIZE - 1) / BLOCK_SIZE, (M + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
-  // Launch kernel
-  naive_sgemm_kernel<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+    // Launch kernel
+    naive_sgemm_kernel<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
-  // Check for launch errors
-  CUDA_CHECK(cudaGetLastError());
+    // Check for launch errors
+    CUDA_CHECK(cudaGetLastError());
 }

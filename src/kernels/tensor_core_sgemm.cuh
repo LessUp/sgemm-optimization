@@ -24,16 +24,16 @@ using tensor_core::WMMA_M;
 using tensor_core::WMMA_N;
 
 inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
-  return M > 0 && K > 0 && N > 0 && M % WMMA_M == 0 && K % WMMA_K == 0 && N % WMMA_N == 0;
+    return M > 0 && K > 0 && N > 0 && M % WMMA_M == 0 && K % WMMA_K == 0 && N % WMMA_N == 0;
 }
 
 inline bool tensorCoresAvailable() {
-  int device;
-  CUDA_CHECK(cudaGetDevice(&device));
+    int device;
+    CUDA_CHECK(cudaGetDevice(&device));
 
-  cudaDeviceProp prop;
-  CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-  return prop.major >= 7;
+    cudaDeviceProp prop;
+    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+    return prop.major >= 7;
 }
 
 /**
@@ -41,10 +41,10 @@ inline bool tensorCoresAvailable() {
  */
 __global__ void float_to_half_kernel(const float *__restrict__ input, half *__restrict__ output,
                                      int size) {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx < size) {
-    output[idx] = __float2half(input[idx]);
-  }
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+        output[idx] = __float2half(input[idx]);
+    }
 }
 
 // WMMA kernel is only available on sm_70+
@@ -61,49 +61,49 @@ __global__ void float_to_half_kernel(const float *__restrict__ input, half *__re
 __global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
                                               const half *__restrict__ B, float *__restrict__ C,
                                               int M, int K, int N) {
-  int warpM = blockIdx.y;
-  int warpN = blockIdx.x;
+    int warpM = blockIdx.y;
+    int warpN = blockIdx.x;
 
-  int aRow = warpM * WMMA_M;
-  int bCol = warpN * WMMA_N;
+    int aRow = warpM * WMMA_M;
+    int bCol = warpN * WMMA_N;
 
-  if (aRow >= M || bCol >= N) {
-    return;
-  }
+    if (aRow >= M || bCol >= N) {
+        return;
+    }
 
-  nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half,
-                         nvcuda::wmma::row_major>
-      a_frag;
-  nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half,
-                         nvcuda::wmma::row_major>
-      b_frag;
-  nvcuda::wmma::fragment<nvcuda::wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> c_frag;
+    nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half,
+                           nvcuda::wmma::row_major>
+        a_frag;
+    nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half,
+                           nvcuda::wmma::row_major>
+        b_frag;
+    nvcuda::wmma::fragment<nvcuda::wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> c_frag;
 
-  nvcuda::wmma::fill_fragment(c_frag, 0.0f);
+    nvcuda::wmma::fill_fragment(c_frag, 0.0f);
 
-  for (int k = 0; k < K; k += WMMA_K) {
-    nvcuda::wmma::load_matrix_sync(a_frag, A + aRow * K + k, K);
-    nvcuda::wmma::load_matrix_sync(b_frag, B + k * N + bCol, N);
-    nvcuda::wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
-  }
+    for (int k = 0; k < K; k += WMMA_K) {
+        nvcuda::wmma::load_matrix_sync(a_frag, A + aRow * K + k, K);
+        nvcuda::wmma::load_matrix_sync(b_frag, B + k * N + bCol, N);
+        nvcuda::wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+    }
 
-  nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N, nvcuda::wmma::mem_row_major);
+    nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N, nvcuda::wmma::mem_row_major);
 }
 
 inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B, float *C, int M,
                                                     int K, int N, cudaStream_t stream = 0) {
-  dim3 blockDim(32, 1);
-  dim3 gridDim((N + WMMA_N - 1) / WMMA_N, (M + WMMA_M - 1) / WMMA_M);
+    dim3 blockDim(32, 1);
+    dim3 gridDim((N + WMMA_N - 1) / WMMA_N, (M + WMMA_M - 1) / WMMA_M);
 
-  tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+    tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
 
-  CUDA_CHECK(cudaGetLastError());
+    CUDA_CHECK(cudaGetLastError());
 }
 #else
 // Stub implementations for older architectures (will not be called)
 inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, float *, int, int,
                                                     int, cudaStream_t) {
-  // This function should never be called on pre-sm_70 GPUs
+    // This function should never be called on pre-sm_70 GPUs
 }
 #endif
 
@@ -114,27 +114,27 @@ inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, 
  */
 inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
                                      cudaStream_t stream = 0) {
-  if (M <= 0 || K <= 0 || N <= 0) {
-    return;
-  }
+    if (M <= 0 || K <= 0 || N <= 0) {
+        return;
+    }
 
-  if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-    launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
-    return;
-  }
+    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
+        launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
+        return;
+    }
 
-  DeviceMemory<half> d_A_fp16(M * K);
-  DeviceMemory<half> d_B_fp16(K * N);
+    DeviceMemory<half> d_A_fp16(M * K);
+    DeviceMemory<half> d_B_fp16(K * N);
 
-  int blockSize = 256;
-  int gridSizeA = (M * K + blockSize - 1) / blockSize;
-  int gridSizeB = (K * N + blockSize - 1) / blockSize;
+    int blockSize = 256;
+    int gridSizeA = (M * K + blockSize - 1) / blockSize;
+    int gridSizeB = (K * N + blockSize - 1) / blockSize;
 
-  float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(), M * K);
-  float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(), K * N);
-  CUDA_CHECK(cudaGetLastError());
+    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(), M * K);
+    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(), K * N);
+    CUDA_CHECK(cudaGetLastError());
 
-  launch_tensor_core_sgemm_fp16_fast_path(d_A_fp16.get(), d_B_fp16.get(), C, M, K, N, stream);
+    launch_tensor_core_sgemm_fp16_fast_path(d_A_fp16.get(), d_B_fp16.get(), C, M, K, N, stream);
 }
 
 /**
@@ -143,14 +143,14 @@ inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, i
  */
 inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C, int M, int K,
                                           int N, cudaStream_t stream = 0) {
-  if (M <= 0 || K <= 0 || N <= 0) {
-    return;
-  }
+    if (M <= 0 || K <= 0 || N <= 0) {
+        return;
+    }
 
-  if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-    throw CudaError("launch_tensor_core_sgemm_fp16 requires sm_70+ and dimensions aligned "
-                    "to 16");
-  }
+    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
+        throw CudaError("launch_tensor_core_sgemm_fp16 requires sm_70+ and dimensions aligned "
+                        "to 16");
+    }
 
-  launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
+    launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
 }
