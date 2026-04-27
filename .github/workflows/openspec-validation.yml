@@ -72,9 +72,10 @@ jobs:
 
       - name: Validate ID uniqueness
         run: |
-          req_dups=$(grep -rh "REQ-" openspec/specs/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+" | sort | uniq -d)
-          dec_dups=$(grep -rh "DEC-" openspec/specs/ 2>/dev/null | grep -oE "DEC-[A-Z]+-[0-9]+" | sort | uniq -d)
-          con_dups=$(grep -rh "CON-" openspec/specs/ 2>/dev/null | grep -oE "CON-[A-Z]+-[0-9]+" | sort | uniq -d)
+          # Match complete IDs only, exclude sub-IDs like REQ-KERNEL-001.1
+          req_dups=$(grep -rh "REQ-" openspec/specs/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
+          dec_dups=$(grep -rh "DEC-" openspec/specs/ 2>/dev/null | grep -oE "DEC-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
+          con_dups=$(grep -rh "CON-" openspec/specs/ 2>/dev/null | grep -oE "CON-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
 
           test -z "$req_dups" || (echo "::error::Duplicate REQ IDs found: $req_dups" && exit 1)
           test -z "$dec_dups" || (echo "::error::Duplicate DEC IDs found: $dec_dups" && exit 1)
