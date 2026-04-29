@@ -149,9 +149,16 @@ __global__ void sgemm_tensor_core_kernel(
 
 ---
 
-## FP32 → FP16 Conversion
+## Safe Wrapper vs. Pure WMMA Path
 
-Since Tensor Cores require FP16 input, we must convert:
+The repository exposes two Tensor Core surfaces:
+
+| Surface | Inputs | Behavior |
+|---------|--------|----------|
+| `launch_tensor_core_sgemm` | FP32 | Safe end-to-end wrapper: checks device and 16-aligned dimensions, converts to FP16, and falls back to FP32 when WMMA is not valid. |
+| `launch_tensor_core_sgemm_fp16` | FP16 | Pure compute path: requires `sm_70+` and 16-aligned dimensions, and throws instead of falling back. |
+
+Since Tensor Cores require FP16 input, the safe wrapper converts before launching the pure WMMA path:
 
 ```cpp
 // FP32 to FP16 conversion kernel
@@ -171,15 +178,15 @@ void launch_tensor_core_sgemm(
     const float* A_fp32,
     const float* B_fp32,
     float* C_fp32,
-    int M, int N, int K,
+    int M, int K, int N,
     cudaStream_t stream)
 {
     // Check alignment for WMMA
     bool aligned = (M % 16 == 0) && (N % 16 == 0) && (K % 16 == 0);
     
     if (!aligned) {
-        // Fall back to FP32 tiled kernel for non-aligned sizes
-        sgemm_tiled<<<grid, block, 0, stream>>>(A_fp32, B_fp32, C_fp32, M, N, K);
+        // Fall back to the FP32 path for non-aligned sizes
+        launch_bank_conflict_free_sgemm<32>(A_fp32, B_fp32, C_fp32, M, K, N, stream);
         return;
     }
 
@@ -201,7 +208,7 @@ void launch_tensor_core_sgemm(
               (M + WMMA_M - 1) / WMMA_M);
     
     sgemm_tensor_core_kernel<<<grid, block, 0, stream>>>(
-        A_fp16.get(), B_fp16.get(), C_fp32, M, N, K);
+        A_fp16.get(), B_fp16.get(), C_fp32, M, K, N);
 
     // No manual cleanup: the RAII wrappers release device memory automatically
 }
@@ -251,7 +258,7 @@ const float atol_tc = 1e-2f;   // 100× looser
 | **GFLOPS (1024³)** | 701 | 2300 | **3.3×** |
 | **vs cuBLAS** | 12.2% | 40.2% | — |
 | **Precision** | FP32 | FP16→FP32 | Mixed |
-| **Alignment Required** | No | 16× | Yes |
+| **Alignment Required** | No | 16× for pure WMMA; wrapper falls back otherwise | Yes |
 | **Compute Units** | CUDA Cores | Tensor Cores | Dedicated |
 
 ---

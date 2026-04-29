@@ -13,9 +13,14 @@ on:
       - 'README.md'
       - 'README.zh-CN.md'
       - '_config.yml'
+      - '_includes/**'
+      - '_sass/**'
+      - 'assets/**'
       - 'docs/**'
+      - 'index.md'
       - 'openspec/**'
       - 'specs.md'
+      - 'zh/**'
   push:
     branches: [master]
     paths:
@@ -28,9 +33,14 @@ on:
       - 'README.md'
       - 'README.zh-CN.md'
       - '_config.yml'
+      - '_includes/**'
+      - '_sass/**'
+      - 'assets/**'
       - 'docs/**'
+      - 'index.md'
       - 'openspec/**'
       - 'specs.md'
+      - 'zh/**'
   workflow_dispatch:
 
 jobs:
@@ -73,9 +83,9 @@ jobs:
       - name: Validate ID uniqueness
         run: |
           # Match complete IDs only, exclude sub-IDs like REQ-KERNEL-001.1
-          req_dups=$(grep -rh "REQ-" openspec/specs/ 2>/dev/null | grep -oE "REQ-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
-          dec_dups=$(grep -rh "DEC-" openspec/specs/ 2>/dev/null | grep -oE "DEC-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
-          con_dups=$(grep -rh "CON-" openspec/specs/ 2>/dev/null | grep -oE "CON-[A-Z]+-[0-9]+(?!\.[0-9])" | sort | uniq -d)
+          req_dups=$(grep -rhPo "REQ-[A-Z]+-[0-9]+(?!\.[0-9])" openspec/specs/ 2>/dev/null | sort | uniq -d)
+          dec_dups=$(grep -rhPo "DEC-[A-Z]+-[0-9]+(?!\.[0-9])" openspec/specs/ 2>/dev/null | sort | uniq -d)
+          con_dups=$(grep -rhPo "CON-[A-Z]+-[0-9]+(?!\.[0-9])" openspec/specs/ 2>/dev/null | sort | uniq -d)
 
           test -z "$req_dups" || (echo "::error::Duplicate REQ IDs found: $req_dups" && exit 1)
           test -z "$dec_dups" || (echo "::error::Duplicate DEC IDs found: $dec_dups" && exit 1)
@@ -85,7 +95,7 @@ jobs:
         run: |
           legacy_files=$(grep -RInE '(^|[[:space:]`(])specs/(product|rfc|testing)/' \
             AGENTS.md CLAUDE.md CHANGELOG.md CONTRIBUTING.md README.md README.zh-CN.md \
-            specs.md openspec/README.md openspec/AGENTS.md docs .github/workflows 2>/dev/null || true)
+            specs.md zh/specs.md openspec/README.md openspec/AGENTS.md docs zh/docs .github/workflows 2>/dev/null || true)
           if [ -n "$legacy_files" ]; then
             echo "::error::Legacy spec path references found:"
             echo "$legacy_files"
@@ -98,5 +108,12 @@ jobs:
           if [ -n "$nav_orders" ]; then
             echo "::error::Duplicate nav_order values found in docs/:"
             echo "$nav_orders"
+            exit 1
+          fi
+
+          zh_nav_orders=$(grep -rh "nav_order:" zh/docs/ 2>/dev/null | sort | uniq -d)
+          if [ -n "$zh_nav_orders" ]; then
+            echo "::error::Duplicate nav_order values found in zh/docs/:"
+            echo "$zh_nav_orders"
             exit 1
           fi

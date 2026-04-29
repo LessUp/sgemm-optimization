@@ -29,13 +29,16 @@
 <meta name="twitter:title" content="{{ page_title }}">
 <meta name="twitter:description" content="{{ page_desc }}">
 
+<meta name="baseurl" content="{{ site.baseurl }}">
+
 <!-- Canonical URL -->
 <link rel="canonical" href="{{ page_url }}">
 
 {%- if page.lang_ref -%}
   {%- comment -%} Alternate language link for SEO {%- endcomment -%}
   {%- if page.lang == 'zh-CN' -%}
-    <link rel="alternate" hreflang="en" href="{{ site.url | append: site.baseurl | append: page.permalink }}">
+    {%- assign en_permalink = page.permalink | replace_first: '/zh/', '/' -%}
+    <link rel="alternate" hreflang="en" href="{{ site.url | append: site.baseurl | append: en_permalink }}">
   {%- else -%}
     <link rel="alternate" hreflang="zh-CN" href="{{ site.url | append: site.baseurl }}/zh{{ page.permalink }}">
   {%- endif -%}

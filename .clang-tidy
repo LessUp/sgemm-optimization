@@ -1,6 +1,7 @@
 ---
 # Clang-tidy configuration for SGEMM Optimization Project
-# Focuses on correctness and performance issues, avoids style nitpicks
+# Focuses on correctness/performance issues and avoids naming rules that fight
+# CUDA, cuBLAS, WMMA, and Google Test conventions.
 
 Checks: >
   -*,
@@ -11,7 +12,6 @@ Checks: >
   -modernize-use-trailing-return-type,
   -modernize-use-nodiscard,
   performance-*,
-  readability-identifier-naming,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-magic-numbers
@@ -21,27 +21,5 @@ WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 
 CheckOptions:
-  - key: readability-identifier-naming.NamespaceCase
-    value: lower_case
-  - key: readability-identifier-naming.FunctionCase
-    value: lower_case
-  - key: readability-identifier-naming.VariableCase
-    value: lower_case
-  - key: readability-identifier-naming.ConstantCase
-    value: UPPER_CASE
-  - key: readability-identifier-naming.ConstantPrefix
-    value: 'k'
-  - key: readability-identifier-naming.ParameterCase
-    value: lower_case
-  - key: readability-identifier-naming.StructCase
-    value: lower_case
-  - key: readability-identifier-naming.ClassCase
-    value: lower_case
-  - key: readability-identifier-naming.EnumConstantCase
-    value: lower_case
-  - key: readability-identifier-naming.MemberCase
-    value: lower_case
-  - key: readability-identifier-naming.PrivateMemberSuffix
-    value: '_'
   - key: performance-move-const-arg.CheckTriviallyCopyableMove
     value: '0'

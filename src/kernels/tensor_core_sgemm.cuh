@@ -108,9 +108,11 @@ inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, 
 #endif
 
 /**
- * Launch wrapper for Tensor Core SGEMM
- * Handles FP32 to FP16 conversion internally and safely falls back when WMMA
- * constraints are not met.
+ * Safe end-to-end Tensor Core wrapper.
+ *
+ * The public FP32 entry point converts inputs to FP16 only when WMMA can be used
+ * safely. Unsupported devices or dimensions fall back to the FP32 bank-conflict-free
+ * kernel so callers can benchmark edge shapes through one stable interface.
  */
 inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
                                      cudaStream_t stream = 0) {
@@ -142,8 +144,11 @@ inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, i
 }
 
 /**
- * Tensor Core SGEMM with pre-converted FP16 inputs.
- * Falls back to a safe FP32 kernel when the WMMA fast path is not applicable.
+ * Pure WMMA compute path for pre-converted FP16 inputs.
+ *
+ * This function intentionally does not fall back. Callers use it when they want
+ * to measure Tensor Core compute separately from FP32-to-FP16 conversion and
+ * fallback behavior.
  */
 inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C, int M, int K,
                                           int N, cudaStream_t stream = 0) {

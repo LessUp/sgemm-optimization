@@ -2,30 +2,20 @@
 
 [![CI](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml)
 [![Pages](https://github.com/LessUp/sgemm-optimization/actions/workflows/pages.yml/badge.svg)](https://lessup.github.io/sgemm-optimization/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 ![CUDA](https://img.shields.io/badge/CUDA-11.0+-76B900?logo=nvidia&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=c%2B%2B&logoColor=white)
 
 English | [简体中文](README.zh-CN.md)
 
-Progressive CUDA SGEMM tutorial and reference implementation, from naive kernels to Tensor Core WMMA. Includes cuBLAS-backed verification, benchmark harness, and OpenSpec-governed repository rules.
+A compact CUDA SGEMM learning project that walks from a readable baseline kernel to Tensor Core WMMA, with cuBLAS verification and a CMake-first build.
 
-## Why this repository exists
+## What makes it useful
 
-- **Show the optimization ladder clearly**: naive → tiled → bank-conflict-free → double-buffer → Tensor Core WMMA
-- **Stay readable**: each optimization lives in its own kernel file with a consistent launch interface
-- **Stay verifiable**: kernels are checked against cuBLAS with separate tolerances for FP32 and Tensor Core paths
-- **Stay maintainable**: OpenSpec keeps docs, workflow, and validation rules aligned
-
-## Optimization ladder
-
-| Stage | Kernel | What you learn |
-|------:|--------|----------------|
-| 1 | [Naive](docs/kernel-naive/) | Thread-to-output mapping and baseline cost |
-| 2 | [Tiled](docs/kernel-tiled/) | Shared-memory blocking and data reuse |
-| 3 | [Bank-Free](docs/kernel-bank-free/) | Padding away 32-way bank conflicts |
-| 4 | [Double Buffer](docs/kernel-double-buffer/) | Latency hiding through staged tiles |
-| 5 | [Tensor Core](docs/kernel-tensor-core/) | WMMA usage with guarded FP32 fallback |
+- **One optimization ladder**: naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core.
+- **Comparable kernel interfaces**: every FP32 kernel uses the same `(A, B, C, M, K, N, stream)` launcher shape.
+- **Verification-first harness**: kernel output is checked against cuBLAS with separate tolerances for FP32 and Tensor Core paths.
+- **Learning-oriented docs**: GitHub Pages carries the full walkthrough instead of duplicating it in the README.
 
 ## Quick start
 
@@ -33,62 +23,35 @@ Progressive CUDA SGEMM tutorial and reference implementation, from naive kernels
 git clone https://github.com/LessUp/sgemm-optimization.git
 cd sgemm-optimization
 
-# Recommended: CMake
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ./build/bin/sgemm_benchmark -a
 ctest --test-dir build
 ```
 
-```bash
-# Quick local alternative
-make GPU_ARCH=sm_86
-make benchmark
-make test
-```
+Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is limited to compile-time, formatting, repository-structure, OpenSpec, and Pages checks.
 
-## Where to start
+## Start here
 
-| If you want to... | Start here |
-|-------------------|------------|
-| Build and run once | [Getting Started](docs/getting-started/) |
-| Learn the optimization path | [Learning Path](docs/learning-path/) |
-| Understand repository structure | [Architecture](docs/architecture/) |
-| See performance context | [Benchmark Results](docs/benchmark-results/) |
-| Inspect governance rules | [Specifications](specs/) |
+| Goal | Entry point |
+|------|-------------|
+| Use the project site | [GitHub Pages](https://lessup.github.io/sgemm-optimization/) |
+| Build and run once | [Getting Started](docs/getting-started.md) |
+| Follow the kernel ladder | [Learning Path](docs/learning-path.md) |
+| Inspect the source layout | [Architecture](docs/architecture.md) |
+| Read the normative specs | [Specifications](specs.md) |
 
-## Validation boundary
-
-- **Local GPU machine**: runtime tests, correctness checks, benchmarking
-- **GitHub Actions**: format/style, CUDA compile, OpenSpec checks, Pages deployment
-
-Standard FP32 kernels: `rtol=1e-3`, `atol=1e-4`. Tensor Core path: `rtol=5e-2`, `atol=1e-2`.
-
-## Repository layout
+## Source map
 
 ```text
-src/
-├── kernels/        # Five SGEMM kernel variants
-├── utils/          # CUDA RAII, verification, benchmark helpers
-└── main.cu         # Benchmark entry point
-tests/
-└── test_sgemm.cu   # Google Test suite
-docs/               # Learning-oriented documentation
-openspec/           # Stable specs, changes, workflow guidance
+src/kernels/   CUDA SGEMM implementations
+src/utils/     CUDA RAII, verification, benchmark helpers
+src/main.cu    benchmark CLI
+tests/         Google Test coverage against cuBLAS
+docs/          learning documentation mirrored on Pages
+openspec/      stable specs and change workflow
 ```
-
-## Project status
-
-This repository is in **archive-ready** state. All kernel implementations are complete, tests pass, and documentation is aligned. Non-trivial changes follow the OpenSpec workflow:
-
-1. `/opsx:explore` — clarify scope and trade-offs
-2. `/opsx:propose "description"` — create change artifacts
-3. `/opsx:apply` — implement tasks
-4. `/review` — quality gate
-5. `/opsx:archive` — merge and close
-
-Stable specs: `openspec/specs/`. Active changes: `openspec/changes/<change>/`.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE.md](LICENSE.md).

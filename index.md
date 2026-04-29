@@ -4,7 +4,7 @@ title: Home
 nav_order: 1
 has_children: true
 permalink: /
-description: Bilingual CUDA SGEMM optimization tutorial and reference implementation, from naive kernels to Tensor Core WMMA.
+description: A CUDA SGEMM optimization portal that turns matrix multiplication kernels into a readable path from baseline code to Tensor Core WMMA.
 lang: en
 page_key: home
 lang_ref: zh-home
@@ -14,85 +14,89 @@ lang_ref: zh-home
 # SGEMM Optimization
 {: .hero-title }
 
-From readable baseline code to Tensor Core WMMA
+Learn CUDA matrix multiplication by walking the exact path from one-thread-per-output SGEMM to guarded Tensor Core WMMA.
 {: .hero-subtitle }
 
-[🚀 Start Here](docs/getting-started/){: .btn .fs-5 .mb-4 .mb-md-0 }
-[📚 Learning Path](docs/learning-path/){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
+[Start the walkthrough](docs/getting-started/){: .btn .fs-5 .mb-4 .mb-md-0 }
+[Follow the kernel ladder](docs/learning-path/){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
+[View on GitHub](https://github.com/LessUp/sgemm-optimization){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
-## Why this project is useful
+## Why this project exists
 
-This repository is designed to be a compact CUDA GEMM learning and reference project:
+Most GEMM examples either hide the details inside a production library or stop at a toy kernel. This project keeps the middle ground: each optimization step is isolated, readable, benchmarkable, and verified against cuBLAS.
 
-- **Progressive**: five kernel variants show what each optimization step changes
-- **Verifiable**: every kernel is checked against cuBLAS
-- **Practical**: benchmark and test entry points are already wired up
-- **Maintainable**: repository rules, workflow, and validation are documented through OpenSpec
+<div class="perf-grid">
+  <div class="perf-card">
+    <div class="perf-label">Path</div>
+    <div class="perf-value">5 stages</div>
+    <div class="perf-vs">baseline to WMMA</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">Reference</div>
+    <div class="perf-value">cuBLAS</div>
+    <div class="perf-vs">correctness oracle</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">Interface</div>
+    <div class="perf-value">1 shape</div>
+    <div class="perf-vs">swap kernels cleanly</div>
+  </div>
+</div>
 
 ---
 
 ## Optimization ladder
 
-| Stage | Kernel | What you learn |
-|------:|--------|----------------|
-| 1 | [Naive](docs/kernel-naive/) | Thread-to-output mapping and baseline cost |
-| 2 | [Tiled](docs/kernel-tiled/) | Shared-memory blocking and data reuse |
-| 3 | [Bank-Free](docs/kernel-bank-free/) | Padding away 32-way bank conflicts |
-| 4 | [Double Buffer](docs/kernel-double-buffer/) | Latency hiding through staged tiles |
-| 5 | [Tensor Core](docs/kernel-tensor-core/) | WMMA usage with a guarded fallback path |
+| Stage | Kernel | The question it answers |
+|------:|--------|-------------------------|
+| 1 | [Naive](docs/kernel-naive/) | What is the simplest correct GPU mapping? |
+| 2 | [Tiled](docs/kernel-tiled/) | How much does shared-memory reuse change the cost model? |
+| 3 | [Bank-Free](docs/kernel-bank-free/) | Why does shared-memory layout matter after tiling? |
+| 4 | [Double Buffer](docs/kernel-double-buffer/) | How do staged tiles hide global-memory latency? |
+| 5 | [Tensor Core](docs/kernel-tensor-core/) | Where does WMMA help, and when should the wrapper fall back? |
 
 ---
 
-## What is inside the repository
+## How the repository earns trust
 
-| Surface | Purpose |
-|---------|---------|
-| `src/` | CUDA kernels, benchmark entry point, and utilities |
-| `tests/` | Google Test verification against cuBLAS |
-| `docs/` | Learning-oriented technical documentation |
-| `openspec/` | Stable requirements, workflow, and change history |
+| Concern | Project answer |
+|---------|----------------|
+| Numerical correctness | Google Test cases compare kernels with cuBLAS using FP32 and mixed-precision tolerances. |
+| Benchmark honesty | The benchmark prints cuBLAS, FP32 kernels, Tensor Core end-to-end, and compute-only WMMA separately. |
+| Unsupported shapes | The public Tensor Core wrapper uses a guarded fallback for non-16-aligned dimensions. |
+| Hosted CI limits | CI validates formatting, CUDA compilation, OpenSpec structure, and Pages; runtime tests remain local GPU work. |
 
 ---
 
-## How to use it
+## Choose your route
 
-### 1. Build and run
+| If you want to... | Start here |
+|-------------------|------------|
+| Build and run once | [Getting Started](docs/getting-started/) |
+| Learn in the intended order | [Learning Path](docs/learning-path/) |
+| Understand file boundaries | [Architecture](docs/architecture/) |
+| Interpret benchmark output | [Benchmark Results](docs/benchmark-results/) |
+| Inspect stable requirements | [Specifications Index](specs/) |
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
-./build/bin/sgemm_benchmark -a
-ctest --test-dir build
+---
+
+## Repository map
+
+```text
+src/kernels/   five SGEMM implementations
+src/utils/     CUDA RAII, verification, benchmark helpers
+tests/         Google Test coverage against cuBLAS
+docs/          English learning path
+zh/docs/       Chinese learning path
+openspec/      stable specs and change workflow
 ```
-
-### 2. Follow the learning route
-
-- [Getting Started](docs/getting-started/)
-- [Learning Path](docs/learning-path/)
-- [Architecture](docs/architecture/)
-- [Benchmark Notes](docs/benchmark-results/)
-
-### 3. Inspect the project rules
-
-- [Specifications Index](specs/)
-- [OpenSpec Workflow Notes](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/README.md)
-- [Repository Guide](https://github.com/LessUp/sgemm-optimization/blob/master/AGENTS.md)
-
----
-
-## Validation boundary
-
-- **Local GPU machine**: runtime verification and benchmarking
-- **Hosted CI**: formatting, compilation, OpenSpec/repository checks, and Pages
-
-That split keeps the repository honest without pretending GitHub-hosted runners can replace a real CUDA runtime environment.
 
 ---
 
 ## Explore next
 
-[📘 Benchmark results](docs/benchmark-results/){: .btn .btn-outline .mr-2 }
-[🏗️ Architecture overview](docs/architecture/){: .btn .btn-outline .mr-2 }
-[⭐ View on GitHub](https://github.com/LessUp/sgemm-optimization){: .btn .btn-outline }
+[Getting Started](docs/getting-started/){: .btn .mr-2 }
+[Learning Path](docs/learning-path/){: .btn .btn-outline .mr-2 }
+[中文首页](zh/){: .btn .btn-outline }

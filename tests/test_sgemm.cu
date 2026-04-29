@@ -26,9 +26,10 @@ constexpr int PBT_ITERATIONS = 100;
 
 std::vector<std::tuple<int, int, int>> getStandardDimensions() {
     return {
-        {1, 1, 1},       {16, 16, 16},    {32, 32, 32},     {64, 64, 64},
-        {128, 128, 128}, {256, 256, 256}, {512, 512, 512},  {64, 128, 256},
-        {256, 64, 128},  {128, 256, 64},  {511, 513, 1025},
+        {1, 1, 1},       {2, 2, 2},      {4, 4, 4},       {16, 16, 16},
+        {32, 32, 32},    {64, 64, 64},   {128, 128, 128}, {256, 256, 256},
+        {512, 512, 512}, {1, 128, 1},    {128, 1, 128},   {1, 128, 128},
+        {64, 128, 256},  {256, 64, 128}, {128, 256, 64},  {511, 513, 1025},
     };
 }
 
@@ -41,10 +42,12 @@ std::vector<std::tuple<int, int, int>> getTensorCoreFastPathDimensions() {
 
 std::vector<std::tuple<int, int, int>> getTensorCoreFallbackDimensions() {
     return {
-        {17, 16, 16},
-        {31, 48, 17},
-        {33, 33, 33},
-        {511, 513, 1025},
+        {15, 15, 15},     // small unaligned
+        {17, 16, 16},     // one unaligned output dimension
+        {17, 19, 23},     // prime dimensions
+        {31, 48, 17},     // mixed aligned and unaligned
+        {33, 33, 33},     // all dimensions unaligned
+        {511, 513, 1025}, // large edge case
     };
 }
 

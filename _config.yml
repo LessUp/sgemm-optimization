@@ -106,8 +106,6 @@ exclude:
   - Makefile
   - Gemfile
   - Gemfile.lock
-  - assets/README.md
-  - assets/images/README.md
   - AGENTS.md
   - CLAUDE.md
   - README.zh-CN.md
