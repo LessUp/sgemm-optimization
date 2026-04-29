@@ -28,6 +28,10 @@ Stable specs live under `openspec/specs/`. Active changes live under `openspec/c
 4. `/review` before major deletions, workflow changes, or archive
 5. `/opsx:archive` once tasks, docs, specs, and validation all agree
 
+## Branch model
+
+`master` is the only long-lived branch. Use a short-lived local branch or worktree only when a task needs isolation, then merge it back to `master` and delete the temporary branch/worktree before closeout. Do not introduce release/version branch automation for routine changes.
+
 ## Validation
 
 ```bash

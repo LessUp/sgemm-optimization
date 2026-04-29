@@ -2,30 +2,20 @@
 
 [![CI](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/LessUp/sgemm-optimization/actions/workflows/ci.yml)
 [![Pages](https://github.com/LessUp/sgemm-optimization/actions/workflows/pages.yml/badge.svg)](https://lessup.github.io/sgemm-optimization/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE.md)
 ![CUDA](https://img.shields.io/badge/CUDA-11.0+-76B900?logo=nvidia&logoColor=white)
 ![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=c%2B%2B&logoColor=white)
 
 [English](README.md) | 简体中文
 
-渐进式 CUDA SGEMM 教程与参考实现，从朴素 kernel 到 Tensor Core WMMA。包含 cuBLAS 对标验证、benchmark 工具，以及 OpenSpec 仓库治理流程。
+这是一个紧凑的 CUDA SGEMM 学习项目：从最容易读懂的 baseline kernel 出发，逐步推进到 Tensor Core WMMA，并用 cuBLAS 做正确性对照。
 
 ## 为什么值得看
 
-- **优化链条完整**：naive → tiled → bank-conflict-free → double-buffer → Tensor Core WMMA
-- **代码可读性强**：每级优化独立成文件，保持统一的 launch 接口
-- **验证链路完整**：cuBLAS 正确性对照，区分标准 FP32 与 Tensor Core 容差
-- **工程边界清晰**：OpenSpec 管理规范、文档、workflow 和收尾整理
-
-## 优化阶梯
-
-| 阶段 | Kernel | 学习重点 |
-|-----:|--------|----------|
-| 1 | [Naive](zh/docs/kernel-naive) | 线程到输出的映射与基线代价 |
-| 2 | [Tiled](zh/docs/kernel-tiled) | 共享内存分块与数据复用 |
-| 3 | [Bank-Free](zh/docs/kernel-bank-free) | Padding 消除 32 路 bank 冲突 |
-| 4 | [Double Buffer](zh/docs/kernel-double-buffer) | 分阶段 tile 加载与延迟隐藏 |
-| 5 | [Tensor Core](zh/docs/kernel-tensor-core) | WMMA 使用与安全的 FP32 回退 |
+- **优化链条完整**：naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core。
+- **接口保持一致**：FP32 kernel 都使用统一的 `(A, B, C, M, K, N, stream)` launcher 形态。
+- **验证先行**：所有 kernel 与 cuBLAS 对照，FP32 与 Tensor Core 使用不同容差。
+- **文档职责清晰**：README 只做仓库入口，完整学习路线放在 GitHub Pages。
 
 ## 快速开始
 
@@ -33,62 +23,36 @@
 git clone https://github.com/LessUp/sgemm-optimization.git
 cd sgemm-optimization
 
-# 推荐：CMake
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ./build/bin/sgemm_benchmark -a
 ctest --test-dir build
 ```
 
-```bash
-# 本地快速方案
-make GPU_ARCH=sm_86
-make benchmark
-make test
-```
+运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 只覆盖编译、格式、仓库结构、OpenSpec 与 Pages 构建检查。
 
 ## 从哪里开始
 
-| 如果你想... | 从这里开始 |
-|-------------|-----------|
-| 编译运行一次 | [快速上手](zh/docs/getting-started) |
-| 学习优化路径 | [学习路径](zh/docs/learning-path) |
-| 了解仓库结构 | [架构概览](zh/docs/architecture) |
-| 查看性能数据 | [Benchmark 结果](zh/docs/benchmark-results) |
-| 查看治理规则 | [规范索引](zh/specs) |
+| 目标 | 入口 |
+|------|------|
+| 打开项目站点 | [GitHub Pages](https://lessup.github.io/sgemm-optimization/zh/) |
+| 编译运行一次 | [快速上手](zh/docs/getting-started.md) |
+| 跟随优化路线 | [学习路径](zh/docs/learning-path.md) |
+| 查看源码结构 | [架构概览](zh/docs/architecture.md) |
+| 阅读稳定规范 | [规范索引](zh/specs.md) |
 
-## 验证边界
-
-- **本地 GPU 机器**：运行时测试、正确性验证、benchmark
-- **GitHub Actions**：格式/风格、CUDA 编译、OpenSpec 校验、Pages 部署
-
-标准 FP32 kernel：`rtol=1e-3`、`atol=1e-4`。Tensor Core 路径：`rtol=5e-2`、`atol=1e-2`。
-
-## 仓库结构
+## 源码地图
 
 ```text
-src/
-├── kernels/        # 五个 SGEMM kernel 版本
-├── utils/          # CUDA RAII、验证和 benchmark 工具
-└── main.cu         # Benchmark 入口
-tests/
-└── test_sgemm.cu   # Google Test 测试套件
-docs/               # 面向读者的学习型文档
-openspec/           # 稳定 specs、变更和流程说明
+src/kernels/   CUDA SGEMM kernel 实现
+src/utils/     CUDA RAII、验证与 benchmark 工具
+src/main.cu    benchmark CLI
+tests/         基于 cuBLAS 的 Google Test 覆盖
+docs/          英文学习文档与 Pages 内容
+zh/docs/       中文学习文档与 Pages 内容
+openspec/      稳定 specs 与变更工作流
 ```
-
-## 项目状态
-
-本仓库处于**归档就绪**状态。所有 kernel 实现已完成，测试通过，文档对齐。非小改动遵循 OpenSpec 工作流：
-
-1. `/opsx:explore` — 明确范围与权衡
-2. `/opsx:propose "描述"` — 创建变更文档
-3. `/opsx:apply` — 实施任务
-4. `/review` — 质量门禁
-5. `/opsx:archive` — 合并并关闭
-
-稳定规范：`openspec/specs/`。活动变更：`openspec/changes/<change>/`。
 
 ## 许可证
 
-MIT，见 [LICENSE](LICENSE)。
+MIT，见 [LICENSE.md](LICENSE.md)。

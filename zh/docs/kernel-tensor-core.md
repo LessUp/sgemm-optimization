@@ -92,6 +92,19 @@ store_matrix_sync(D_ptr, d_frag, ldd, mem_row_major);
 
 ---
 
+## 安全包装器与纯 WMMA 路径
+
+仓库中 Tensor Core 有两个不同的接口语义：
+
+| 接口 | 输入 | 行为 |
+|------|------|------|
+| `launch_tensor_core_sgemm` | FP32 | 安全端到端 wrapper：检查设备与 16 对齐维度，转换为 FP16，不满足 WMMA 条件时回退到 FP32。 |
+| `launch_tensor_core_sgemm_fp16` | FP16 | 纯计算路径：要求 `sm_70+` 和 16 对齐维度，不满足条件时抛错而不是回退。 |
+
+这一区分让 benchmark 可以同时报告“包含转换/回退的端到端结果”和“纯 WMMA compute-only 结果”，避免把 fallback 当作 Tensor Core 计算性能。
+
+---
+
 ## 混合精度考量
 
 ### 精度权衡
@@ -134,7 +147,7 @@ const float atol_tc = 1e-2f;   // 宽松 100×
 | **GFLOPS (1024³)** | 701 | 2300 | **3.3×** |
 | **vs cuBLAS** | 12.2% | 40.2% | — |
 | **精度** | FP32 | FP16→FP32 | 混合 |
-| **对齐要求** | 无 | 16× | 有 |
+| **对齐要求** | 无 | 纯 WMMA 需要 16×；wrapper 不满足时回退 | 有 |
 | **计算单元** | CUDA Core | Tensor Core | 专用 |
 
 ---

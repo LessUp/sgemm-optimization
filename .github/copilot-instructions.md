@@ -1,17 +1,10 @@
 # Copilot Instructions
 
-This repository is in a **closeout-oriented** phase. Optimize for consolidation, clarity, and archive-ready stability.
+Use `AGENTS.md` for shared repository rules and `openspec/AGENTS.md` for OpenSpec workflow details. This file only records Copilot-specific deltas.
 
-## Repository Rules
+## Copilot Defaults
 
-- Treat `openspec/specs/*` as the authoritative stable spec source.
-- Use active change artifacts under `openspec/changes/<change>/` as the implementation contract.
-- Prefer deleting or merging redundant docs, workflows, and configs over preserving duplicate files.
-- Keep `README.md` as the repo entry point and `index.md` + `docs/` as the public landing/documentation surface.
-
-## Working Preferences
-
-- Prefer CMake-based validation and `openspec validate --all` for repository-wide changes.
-- Use `gh` for repository metadata and GitHub-side operations.
-- Assume `clangd` + `compile_commands.json` is the shared LSP baseline.
-- Avoid adding project-level instructions unless they are specific to this repository and do not duplicate existing guidance.
+- Prefer concise, surgical changes on `master`; do not create release/version branch automation.
+- Use `gh` for repository metadata, Actions inspection, and GitHub-side maintenance.
+- Prefer CMake/OpenSpec validation commands already documented in `AGENTS.md`; do not invent extra tooling.
+- Keep generated guidance repository-specific to CUDA SGEMM, GitHub Pages, and OpenSpec closeout work.

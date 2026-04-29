@@ -5,4 +5,6 @@ Index:
   Background: Build
 
 Diagnostics:
+  # CUDA toolkit headers and generated compile flags vary across machines; keep
+  # clangd focused on semantic navigation rather than noisy include hygiene.
   UnusedIncludes: None

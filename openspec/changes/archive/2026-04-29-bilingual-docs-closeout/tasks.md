@@ -49,9 +49,9 @@
 ## Task 7: Validation and Final Polish
 
 - [x] Run `openspec validate --all` — PASSED
-- [ ] Run available repository baseline checks (requires CUDA environment)
+- [x] Run available repository baseline checks (OpenSpec passed; CUDA build/runtime blocked in this environment because `nvcc` is unavailable)
 - [x] Review published-surface checklist
-- [ ] Archive OpenSpec change when complete (after merge to master)
+- [x] Archive OpenSpec change when complete
 
 ---
 
@@ -74,7 +74,6 @@
 After merge to master:
 1. Verify Pages build succeeds on CI
 2. Test language switcher on deployed site
-3. Archive the OpenSpec change
 
 ## Files Created/Modified Summary
 

@@ -31,6 +31,13 @@ If two files say the same thing, keep one and remove the other.
 4. `/review` before large deletions, workflow changes, or archive
 5. `/opsx:archive` only after specs, docs, workflows, and validation agree
 
+## Branch and Worktree Policy
+
+- `master` is the only long-lived branch.
+- Short-lived local branches or worktrees are allowed only as temporary isolation for a specific task.
+- Before closeout, merge completed work back to `master`, delete temporary branches/worktrees, and ensure local and remote branch lists contain no stale task branches.
+- Do not add release/version branch automation; this repository favors a single-mainline closeout flow.
+
 ## Repository Boundaries
 
 ### Code

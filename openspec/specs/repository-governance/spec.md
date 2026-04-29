@@ -29,6 +29,13 @@ The repository MUST keep only automation that materially improves closeout-state
 - **WHEN** a pull request or push matches the repository automation rules
 - **THEN** workflows MUST be limited to high-signal validation or publishing tasks, align with the default branch strategy, and avoid redundant or low-value executions
 
+### Requirement: Branch strategy is single-mainline
+The repository MUST use `master` as the only long-lived branch and avoid automated release/version branch creation for routine maintenance.
+
+#### Scenario: Maintainer finishes a task branch or worktree
+- **WHEN** a maintainer completes isolated local work
+- **THEN** the work MUST be merged back to `master`, temporary branches/worktrees MUST be removed, and remote branch state MUST remain free of stale task branches
+
 ### Requirement: Shared developer tooling is lightweight and portable
 The repository MUST provide a project-level tooling baseline that works across multiple AI and editor environments without depending on heavy, context-expensive integrations.
 
