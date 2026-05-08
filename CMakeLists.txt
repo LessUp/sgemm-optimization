@@ -71,6 +71,34 @@ if(BUILD_TESTS)
         $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
     )
 
+    # 工具层测试
+    add_executable(test_utils tests/test_utils.cu)
+    target_include_directories(test_utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_utils PRIVATE
+        GTest::gtest_main
+        CUDA::cudart
+        CUDA::cublas
+        CUDA::curand
+    )
+    target_compile_options(test_utils PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+    )
+
+    # 性能回归测试
+    add_executable(test_performance tests/test_performance.cu)
+    target_include_directories(test_performance PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_performance PRIVATE
+        GTest::gtest_main
+        CUDA::cudart
+        CUDA::cublas
+        CUDA::curand
+    )
+    target_compile_options(test_performance PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+    )
+
     include(GoogleTest)
     gtest_discover_tests(test_sgemm)
+    gtest_discover_tests(test_utils)
+    gtest_discover_tests(test_performance)
 endif()

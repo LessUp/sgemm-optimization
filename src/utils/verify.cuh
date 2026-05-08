@@ -31,13 +31,21 @@ struct VerifyResult {
     }
 };
 
+// ============================================================================
+// Tolerance Configuration
+// ============================================================================
+
 struct VerifyTolerance {
     float rtol;
     float atol;
 };
 
+// Standard verification tolerance for FP32 kernels
 inline constexpr VerifyTolerance kStandardVerifyTolerance{1e-3f, 1e-4f};
-inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
+
+// Tensor Core tolerance is defined in tensor_core_launcher.cuh
+// to keep precision-related constants with their implementation.
+// Use tensor_core_launcher.cuh for kTensorCoreRelativeTolerance/absolute.
 
 inline float toleranceForValue(float ref_val, VerifyTolerance tolerance) {
     return tolerance.atol + tolerance.rtol * std::fabs(ref_val);
@@ -46,6 +54,63 @@ inline float toleranceForValue(float ref_val, VerifyTolerance tolerance) {
 inline bool isWithinTolerance(float test_val, float ref_val, VerifyTolerance tolerance) {
     float abs_error = std::fabs(test_val - ref_val);
     return abs_error <= toleranceForValue(ref_val, tolerance);
+}
+
+// ============================================================================
+// Internal Implementation
+// ============================================================================
+
+namespace detail {
+
+// 内部实现：比较两个矩阵并返回验证结果
+// 供 verify() 和 compareMatrices() 共享
+inline VerifyResult compareMatricesImpl(const float *h_test, const float *h_ref, size_t num_elements,
+                                        VerifyTolerance tolerance) {
+    VerifyResult result;
+    result.max_abs_error = 0.0f;
+    result.max_rel_error = 0.0f;
+    result.error_count = 0;
+    result.total_elements = num_elements;
+
+    for (size_t i = 0; i < num_elements; ++i) {
+        float ref_val = h_ref[i];
+        float test_val = h_test[i];
+
+        // Check for NaN or Inf
+        if (std::isnan(test_val) || std::isinf(test_val)) {
+            result.error_count++;
+            result.max_abs_error = std::numeric_limits<float>::infinity();
+            result.max_rel_error = std::numeric_limits<float>::infinity();
+            continue;
+        }
+
+        float abs_error = std::fabs(test_val - ref_val);
+        float rel_error = abs_error / (std::fabs(ref_val) + 1e-8f);
+
+        result.max_abs_error = std::max(result.max_abs_error, abs_error);
+        result.max_rel_error = std::max(result.max_rel_error, rel_error);
+
+        if (!isWithinTolerance(test_val, ref_val, tolerance)) {
+            result.error_count++;
+        }
+    }
+
+    result.passed = (result.error_count == 0);
+    return result;
+}
+
+} // namespace detail
+
+// ============================================================================
+// Standalone Verification Functions
+// ============================================================================
+
+// Compare two matrices and return verification result
+// Uses numpy-style allclose: |test - ref| <= atol + rtol * |ref|
+inline VerifyResult compareMatrices(const float *h_test, const float *h_ref, int M, int N,
+                                    VerifyTolerance tolerance = kStandardVerifyTolerance) {
+    size_t num_elements = static_cast<size_t>(M) * N;
+    return detail::compareMatricesImpl(h_test, h_ref, num_elements, tolerance);
 }
 
 // ============================================================================
@@ -77,36 +142,8 @@ class SGEMMVerifier {
     // Uses numpy-style allclose: |test - ref| <= atol + rtol * |ref|
     VerifyResult verify(const float *h_test, const float *h_ref, int M, int N,
                         VerifyTolerance tolerance = kStandardVerifyTolerance) {
-        VerifyResult result;
-        result.max_abs_error = 0.0f;
-        result.max_rel_error = 0.0f;
-        result.error_count = 0;
-        result.total_elements = M * N;
-
-        for (int i = 0; i < M * N; ++i) {
-            float ref_val = h_ref[i];
-            float test_val = h_test[i];
-
-            if (std::isnan(test_val) || std::isinf(test_val)) {
-                result.error_count++;
-                result.max_abs_error = std::numeric_limits<float>::infinity();
-                result.max_rel_error = std::numeric_limits<float>::infinity();
-                continue;
-            }
-
-            float abs_error = std::fabs(test_val - ref_val);
-            float rel_error = abs_error / (std::fabs(ref_val) + 1e-8f);
-
-            result.max_abs_error = std::max(result.max_abs_error, abs_error);
-            result.max_rel_error = std::max(result.max_rel_error, rel_error);
-
-            if (!isWithinTolerance(test_val, ref_val, tolerance)) {
-                result.error_count++;
-            }
-        }
-
-        result.passed = (result.error_count == 0);
-        return result;
+        size_t num_elements = static_cast<size_t>(M) * N;
+        return detail::compareMatricesImpl(h_test, h_ref, num_elements, tolerance);
     }
 
     // Verify with device pointers (copies to host internally)
@@ -132,44 +169,3 @@ class SGEMMVerifier {
   private:
     cublasHandle_t handle_;
 };
-
-// ============================================================================
-// Standalone Verification Functions
-// ============================================================================
-
-// Compare two matrices and return verification result
-// Uses numpy-style allclose: |test - ref| <= atol + rtol * |ref|
-inline VerifyResult compareMatrices(const float *h_test, const float *h_ref, int M, int N,
-                                    VerifyTolerance tolerance = kStandardVerifyTolerance) {
-    VerifyResult result;
-    result.max_abs_error = 0.0f;
-    result.max_rel_error = 0.0f;
-    result.error_count = 0;
-    result.total_elements = static_cast<size_t>(M) * N;
-
-    for (size_t i = 0; i < static_cast<size_t>(M) * N; ++i) {
-        float ref_val = h_ref[i];
-        float test_val = h_test[i];
-
-        // Check for NaN or Inf
-        if (std::isnan(test_val) || std::isinf(test_val)) {
-            result.error_count++;
-            result.max_abs_error = std::numeric_limits<float>::infinity();
-            result.max_rel_error = std::numeric_limits<float>::infinity();
-            continue;
-        }
-
-        float abs_error = std::fabs(test_val - ref_val);
-        float rel_error = abs_error / (std::fabs(ref_val) + 1e-8f);
-
-        result.max_abs_error = std::max(result.max_abs_error, abs_error);
-        result.max_rel_error = std::max(result.max_rel_error, rel_error);
-
-        if (!isWithinTolerance(test_val, ref_val, tolerance)) {
-            result.error_count++;
-        }
-    }
-
-    result.passed = (result.error_count == 0);
-    return result;
-}

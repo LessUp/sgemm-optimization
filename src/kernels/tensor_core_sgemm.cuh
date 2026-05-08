@@ -1,165 +1,41 @@
 #pragma once
 
-#include "../utils/cuda_utils.cuh"
-#include "bank_conflict_free_sgemm.cuh"
-#include "tiled_sgemm.cuh"
-#include <cuda_fp16.h>
-#include <cuda_runtime.h>
+// ============================================================================
+// Tensor Core SGEMM - 公共接口
+// ============================================================================
+//
+// 此文件作为 Tensor Core 功能的公共入口点，保持向后兼容。
+// 内部实现已拆分为多个深度模块：
+//
+// 1. tensor_core_capabilities.cuh - 能力查询接口
+//    - tensorCoresAvailable()
+//    - tensorCoreDimensionsSupported()
+//    - getTensorCoreArchName()
+//
+// 2. tensor_core_compute.cuh - 纯 WMMA 计算路径
+//    - float_to_half_kernel
+//    - launch_tensor_core_sgemm_fp16()
+//    - launch_tensor_core_sgemm_fp16_fast_path()
+//
+// 3. tensor_core_launcher.cuh - 统一启动接口（支持自定义 fallback）
+//    - launch_tensor_core_sgemm_with_fallback()
+//    - FallbackKernel 类型定义
+//    - Tensor Core 容差常量
+//
+// 4. tensor_core_launcher_impl.cuh - 默认实现
+//    - launch_tensor_core_sgemm() 使用 bank-conflict-free 作为默认 fallback
+//
+// 5. tensor_core_benchmark.cuh - Tensor Core 专用 benchmark
+//    - runTensorCoreComputeOnlyBenchmark()
+//
+// 这种拆分提高了：
+// - 局部性 (Locality)：每个关注点有独立的测试面
+// - 杠杆 (Leverage)：能力检测可被多个模块使用
+// - 可测试性：可以独立测试能力检测、纯计算路径、fallback 路径
+// - 灵活性：用户可以注入自定义 fallback 策略
+// ============================================================================
 
-// WMMA is only available on sm_70+
-// When compiling for host (__CUDA_ARCH__ not defined), always include WMMA
-// When compiling for device, only include for sm_70+
-#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
-#include <mma.h>
-#endif
-
-namespace tensor_core {
-inline constexpr int WMMA_M = 16;
-inline constexpr int WMMA_N = 16;
-inline constexpr int WMMA_K = 16;
-} // namespace tensor_core
-
-using tensor_core::WMMA_K;
-using tensor_core::WMMA_M;
-using tensor_core::WMMA_N;
-
-inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
-    return M > 0 && K > 0 && N > 0 && M % WMMA_M == 0 && K % WMMA_K == 0 && N % WMMA_N == 0;
-}
-
-inline bool tensorCoresAvailable() {
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp prop;
-    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-    return prop.major >= 7;
-}
-
-/**
- * Kernel to convert FP32 to FP16
- */
-__global__ void float_to_half_kernel(const float *__restrict__ input, half *__restrict__ output,
-                                     int size) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < size) {
-        output[idx] = __float2half(input[idx]);
-    }
-}
-
-// WMMA kernel is only available on sm_70+
-#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
-/**
- * Basic Tensor Core SGEMM Kernel
- *
- * Each warp computes one WMMA_M x WMMA_N output tile.
- * Input matrices are expected to be in FP16 format.
- *
- * This kernel is only safe for dimensions that are multiples of 16.
- * Callers must validate dimensions before launching it.
- */
-__global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
-                                              const half *__restrict__ B, float *__restrict__ C,
-                                              int M, int K, int N) {
-    int warpM = blockIdx.y;
-    int warpN = blockIdx.x;
-
-    int aRow = warpM * WMMA_M;
-    int bCol = warpN * WMMA_N;
-
-    if (aRow >= M || bCol >= N) {
-        return;
-    }
-
-    nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half,
-                           nvcuda::wmma::row_major>
-        a_frag;
-    nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half,
-                           nvcuda::wmma::row_major>
-        b_frag;
-    nvcuda::wmma::fragment<nvcuda::wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> c_frag;
-
-    nvcuda::wmma::fill_fragment(c_frag, 0.0f);
-
-    for (int k = 0; k < K; k += WMMA_K) {
-        nvcuda::wmma::load_matrix_sync(a_frag, A + aRow * K + k, K);
-        nvcuda::wmma::load_matrix_sync(b_frag, B + k * N + bCol, N);
-        nvcuda::wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
-    }
-
-    nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N, nvcuda::wmma::mem_row_major);
-}
-
-inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B, float *C, int M,
-                                                    int K, int N, cudaStream_t stream = 0) {
-    dim3 blockDim(32, 1);
-    dim3 gridDim((N + WMMA_N - 1) / WMMA_N, (M + WMMA_M - 1) / WMMA_M);
-
-    tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
-
-    CUDA_CHECK(cudaGetLastError());
-}
-#else
-// Stub implementations for older architectures (will not be called)
-inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, float *, int, int,
-                                                    int, cudaStream_t) {
-    // This function should never be called on pre-sm_70 GPUs
-}
-#endif
-
-/**
- * Safe end-to-end Tensor Core wrapper.
- *
- * The public FP32 entry point converts inputs to FP16 only when WMMA can be used
- * safely. Unsupported devices or dimensions fall back to the FP32 bank-conflict-free
- * kernel so callers can benchmark edge shapes through one stable interface.
- */
-inline void launch_tensor_core_sgemm(const float *A, const float *B, float *C, int M, int K, int N,
-                                     cudaStream_t stream = 0) {
-    if (M <= 0 || K <= 0 || N <= 0) {
-        return;
-    }
-
-    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-        launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
-        return;
-    }
-
-    size_t num_A = static_cast<size_t>(M) * K;
-    size_t num_B = static_cast<size_t>(K) * N;
-    DeviceMemory<half> d_A_fp16(num_A);
-    DeviceMemory<half> d_B_fp16(num_B);
-
-    int blockSize = 256;
-    int gridSizeA = static_cast<int>((num_A + blockSize - 1) / blockSize);
-    int gridSizeB = static_cast<int>((num_B + blockSize - 1) / blockSize);
-
-    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
-                                                              static_cast<int>(num_A));
-    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(),
-                                                              static_cast<int>(num_B));
-    CUDA_CHECK(cudaGetLastError());
-
-    launch_tensor_core_sgemm_fp16_fast_path(d_A_fp16.get(), d_B_fp16.get(), C, M, K, N, stream);
-}
-
-/**
- * Pure WMMA compute path for pre-converted FP16 inputs.
- *
- * This function intentionally does not fall back. Callers use it when they want
- * to measure Tensor Core compute separately from FP32-to-FP16 conversion and
- * fallback behavior.
- */
-inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C, int M, int K,
-                                          int N, cudaStream_t stream = 0) {
-    if (M <= 0 || K <= 0 || N <= 0) {
-        return;
-    }
-
-    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-        throw CudaError("launch_tensor_core_sgemm_fp16 requires sm_70+ and dimensions aligned "
-                        "to 16");
-    }
-
-    launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
-}
+#include "tensor_core_capabilities.cuh"
+#include "tensor_core_compute.cuh"
+#include "tensor_core_launcher.cuh"
+#include "tensor_core_launcher_impl.cuh"
