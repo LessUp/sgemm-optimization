@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Architecture
+parent: Home
 nav_order: 8
 permalink: /docs/architecture/
 lang: en

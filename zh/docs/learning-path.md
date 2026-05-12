@@ -1,6 +1,7 @@
 ---
 layout: default
 title: 学习路径
+parent: 首页
 nav_order: 3
 permalink: /zh/docs/learning-path/
 lang: zh-CN

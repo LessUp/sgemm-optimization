@@ -10,93 +10,117 @@ page_key: zh-home
 lang_ref: home
 ---
 
-{: .hero-section }
-# SGEMM Optimization
-{: .hero-title }
-
-沿着一条可验证的 CUDA 矩阵乘法路线，从“一线程算一个输出”的 baseline 走到受保护的 Tensor Core WMMA。
-{: .hero-subtitle }
-
-[开始上手](zh/docs/getting-started/){: .btn .fs-5 .mb-4 .mb-md-0 }
-[跟随优化阶梯](zh/docs/learning-path/){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
-[查看 GitHub](https://github.com/LessUp/sgemm-optimization){: .btn .btn-outline .fs-5 .mb-4 .mb-md-0 }
-
----
-
-## 这个项目解决什么问题
-
-很多 GEMM 示例要么把细节藏在生产级库里，要么停留在玩具 kernel。本项目保留中间层：每一步优化都独立、可读、可 benchmark，并用 cuBLAS 做正确性对照。
-
-<div class="perf-grid">
-  <div class="perf-card">
-    <div class="perf-label">路径</div>
-    <div class="perf-value">5 阶段</div>
-    <div class="perf-vs">baseline 到 WMMA</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">参考</div>
-    <div class="perf-value">cuBLAS</div>
-    <div class="perf-vs">正确性对照</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">接口</div>
-    <div class="perf-value">1 形态</div>
-    <div class="perf-vs">kernel 可直接替换</div>
+<div class="home-shell">
+  <div class="home-hero-grid">
+    <div>
+      <p class="home-eyebrow">CUDA SGEMM ENGINEERING NOTEBOOK</p>
+      <h1 class="home-main-title">SGEMM Optimization</h1>
+      <p class="home-main-subtitle">
+        一个双语、可基准验证的 CUDA SGEMM 学习站点：从基线 FP32 kernel 到带保护回退的 Tensor Core WMMA。
+        让代码可读，让每一次提速都可解释。
+      </p>
+      <div class="home-action-row">
+        <a class="btn" href="docs/getting-started/">5 分钟开始</a>
+        <a class="btn btn-outline" href="docs/learning-path/">跟随优化阶梯</a>
+        <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
+      </div>
+    </div>
+    <div class="signal-grid">
+      <div class="signal-card">
+        <div class="signal-title">优化阶段</div>
+        <div class="signal-value">5</div>
+        <div class="signal-note">naive -> WMMA</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-title">正确性对照</div>
+        <div class="signal-value">cuBLAS</div>
+        <div class="signal-note">FP32 / Tensor Core 分别使用容差</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-title">验证边界</div>
+        <div class="signal-value">CI + GPU</div>
+        <div class="signal-note">CI 负责编译，本地 GPU 负责运行时验证</div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-title">语言支持</div>
+        <div class="signal-value">EN / 中文</div>
+        <div class="signal-note">中英文页面一一对应，自动跳转</div>
+      </div>
+    </div>
   </div>
 </div>
 
----
+## 一张图看完整个项目
 
-## 优化阶梯
+```mermaid
+flowchart LR
+    A[Naive\n一线程一输出] --> B[Tiled\n共享内存复用]
+    B --> C[Bank-Free\n消除共享内存 bank 冲突]
+    C --> D[Double Buffer\n分阶段加载，隐藏延迟]
+    D --> E[Tensor Core WMMA\n抬高吞吐上限]
 
-| 阶段 | Kernel | 它回答的问题 |
-|-----:|--------|--------------|
-| 1 | [Naive](zh/docs/kernel-naive/) | 最简单且正确的 GPU 映射是什么？ |
-| 2 | [Tiled](zh/docs/kernel-tiled/) | 共享内存复用会如何改变成本模型？ |
-| 3 | [Bank-Free](zh/docs/kernel-bank-free/) | 分块之后，为什么 shared memory 布局仍然重要？ |
-| 4 | [Double Buffer](zh/docs/kernel-double-buffer/) | 如何用 staged tiles 隐藏全局内存延迟？ |
-| 5 | [Tensor Core](zh/docs/kernel-tensor-core/) | WMMA 什么时候有价值，包装器何时应该回退？ |
+    E --> F{维度是否 16 对齐？}
+    F -- 是 --> G[WMMA 计算路径]
+    F -- 否 --> H[受保护 FP32 回退]
 
----
+    T1[Google Test 对照 cuBLAS] -. 正确性护栏 .-> A
+    T1 -. 正确性护栏 .-> E
+    T2[Benchmark 拆分\n端到端 vs 仅计算] -. 可观测性护栏 .-> E
+```
 
-## 可信度来自哪里
+## 核心精华
 
-| 关注点 | 项目做法 |
-|--------|----------|
-| 数值正确性 | Google Test 将各 kernel 与 cuBLAS 对照，区分 FP32 与混合精度容差。 |
-| Benchmark 诚实性 | 输出中分开呈现 cuBLAS、FP32 kernel、Tensor Core 端到端、compute-only WMMA。 |
-| 不支持的 shape | 公开 Tensor Core wrapper 对非 16 对齐维度使用受保护的 fallback。 |
-| 托管 CI 边界 | CI 验证格式、CUDA 编译、OpenSpec 结构和 Pages；运行时测试仍属于本地 GPU 工作。 |
+| 精华 | 价值 | 对应入口 |
+|------|------|----------|
+| 渐进式 kernel 阶梯 | 每一步优化只回答一个问题，并且可量化 | [学习路径](docs/learning-path/) |
+| 统一 launcher 契约 | kernel 可替换，可对比，可验证 | [架构概览](docs/architecture/) |
+| 验证先行工作流 | 任何性能结论都绑定正确性检查 | [Benchmark 结果](docs/benchmark-results/) |
+| OpenSpec 治理 | 文档、实现、仓库流程保持一致 | [规范索引](specs/) |
 
----
+## 知识补给站
 
-## 选择你的路线
+<div class="knowledge-grid">
+  <a class="knowledge-card" href="docs/optimization-playbook/">
+    <h3>优化实战手册</h3>
+    <p>提供 SGEMM 性能瓶颈诊断闭环、决策树和实验模板，方便快速定位问题。</p>
+  </a>
+  <a class="knowledge-card" href="docs/performance-casebook/">
+    <h3>性能案例库</h3>
+    <p>按 Volta、Turing、Ampere、Ada、Hopper 架构整理调优重点和建议动作。</p>
+  </a>
+  <a class="knowledge-card" href="docs/cuda-memory-cheatsheet/">
+    <h3>CUDA 内存速查表</h3>
+    <p>把内存合并访问、共享内存 bank、占用率提示和 profiler 指标放在同一张地图里。</p>
+  </a>
+  <a class="knowledge-card" href="docs/kernel-tensor-core/">
+    <h3>Tensor Core 实战</h3>
+    <p>理解 WMMA 的对齐约束，以及为什么带保护回退能保证稳定行为。</p>
+  </a>
+</div>
+
+## 命令驾驶舱
+
+```bash
+# 编译
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+
+# 验证
+ctest --test-dir build
+openspec validate --all
+
+# 基准测试
+./build/bin/sgemm_benchmark -a
+./build/bin/sgemm_benchmark --dims 256 384 640
+```
+
+## 按目标开始
 
 | 如果你想... | 从这里开始 |
 |-------------|-----------|
-| 编译运行一次 | [快速上手](zh/docs/getting-started/) |
-| 按设计顺序学习 | [学习路径](zh/docs/learning-path/) |
-| 理解文件边界 | [架构概览](zh/docs/architecture/) |
-| 解读 benchmark 输出 | [Benchmark 结果](zh/docs/benchmark-results/) |
-| 查看稳定需求 | [规范索引](zh/specs/) |
-
----
-
-## 仓库地图
-
-```text
-src/kernels/   五个 SGEMM kernel 实现
-src/utils/     CUDA RAII、验证与 benchmark 工具
-tests/         基于 cuBLAS 的 Google Test 覆盖
-docs/          英文学习路径
-zh/docs/       中文学习路径
-openspec/      稳定 specs 与变更工作流
-```
-
----
-
-## 继续探索
-
-[快速上手](zh/docs/getting-started/){: .btn .mr-2 }
-[学习路径](zh/docs/learning-path/){: .btn .btn-outline .mr-2 }
-[English home](../){: .btn .btn-outline }
+| 编译并跑通一次 | [快速上手](docs/getting-started/) |
+| 按设计顺序学习 | [学习路径](docs/learning-path/) |
+| 建立优化诊断能力 | [优化实战手册](docs/optimization-playbook/) |
+| 按 GPU 架构做针对性调优 | [性能案例库](docs/performance-casebook/) |
+| 快速复习 CUDA 内存知识 | [CUDA 内存速查表](docs/cuda-memory-cheatsheet/) |
+| 切换到英文站点 | [English Home](../) |

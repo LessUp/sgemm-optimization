@@ -1,191 +1,191 @@
 /**
- * Language Toggle for SGEMM Optimization Docs
- * Handles switching between English and Chinese pages
- * Auto-redirects based on browser language preference
+ * Language toggle and auto-redirect for SGEMM Optimization docs.
+ * - Keeps paired EN/ZH page switching consistent.
+ * - Redirects homepage based on saved preference or browser language.
  */
 
-(function() {
+(function () {
   'use strict';
 
-  // Page pair mappings - maps page_key to language-specific paths
-  const pagePairs = {
-    'home': { en: '/', 'zh-CN': '/zh/' },
-    'specs': { en: '/specs/', 'zh-CN': '/zh/specs/' },
+  const PAGE_PAIRS = {
+    home: { en: '/', 'zh-CN': '/zh/' },
+    specs: { en: '/specs/', 'zh-CN': '/zh/specs/' },
     'getting-started': { en: '/docs/getting-started/', 'zh-CN': '/zh/docs/getting-started/' },
     'learning-path': { en: '/docs/learning-path/', 'zh-CN': '/zh/docs/learning-path/' },
-    'architecture': { en: '/docs/architecture/', 'zh-CN': '/zh/docs/architecture/' },
+    architecture: { en: '/docs/architecture/', 'zh-CN': '/zh/docs/architecture/' },
     'benchmark-results': { en: '/docs/benchmark-results/', 'zh-CN': '/zh/docs/benchmark-results/' },
     'kernel-naive': { en: '/docs/kernel-naive/', 'zh-CN': '/zh/docs/kernel-naive/' },
     'kernel-tiled': { en: '/docs/kernel-tiled/', 'zh-CN': '/zh/docs/kernel-tiled/' },
     'kernel-bank-free': { en: '/docs/kernel-bank-free/', 'zh-CN': '/zh/docs/kernel-bank-free/' },
     'kernel-double-buffer': { en: '/docs/kernel-double-buffer/', 'zh-CN': '/zh/docs/kernel-double-buffer/' },
     'kernel-tensor-core': { en: '/docs/kernel-tensor-core/', 'zh-CN': '/zh/docs/kernel-tensor-core/' },
-    // Chinese page keys (for reverse lookup)
-    'zh-home': { en: '/', 'zh-CN': '/zh/' },
-    'zh-specs': { en: '/specs/', 'zh-CN': '/zh/specs/' },
-    'zh-getting-started': { en: '/docs/getting-started/', 'zh-CN': '/zh/docs/getting-started/' },
-    'zh-learning-path': { en: '/docs/learning-path/', 'zh-CN': '/zh/docs/learning-path/' },
-    'zh-architecture': { en: '/docs/architecture/', 'zh-CN': '/zh/docs/architecture/' },
-    'zh-benchmark-results': { en: '/docs/benchmark-results/', 'zh-CN': '/zh/docs/benchmark-results/' },
-    'zh-kernel-naive': { en: '/docs/kernel-naive/', 'zh-CN': '/zh/docs/kernel-naive/' },
-    'zh-kernel-tiled': { en: '/docs/kernel-tiled/', 'zh-CN': '/zh/docs/kernel-tiled/' },
-    'zh-kernel-bank-free': { en: '/docs/kernel-bank-free/', 'zh-CN': '/zh/docs/kernel-bank-free/' },
-    'zh-kernel-double-buffer': { en: '/docs/kernel-double-buffer/', 'zh-CN': '/zh/docs/kernel-double-buffer/' },
-    'zh-kernel-tensor-core': { en: '/docs/kernel-tensor-core/', 'zh-CN': '/zh/docs/kernel-tensor-core/' }
+    'optimization-playbook': {
+      en: '/docs/optimization-playbook/',
+      'zh-CN': '/zh/docs/optimization-playbook/'
+    },
+    'cuda-memory-cheatsheet': {
+      en: '/docs/cuda-memory-cheatsheet/',
+      'zh-CN': '/zh/docs/cuda-memory-cheatsheet/'
+    },
+    'performance-casebook': {
+      en: '/docs/performance-casebook/',
+      'zh-CN': '/zh/docs/performance-casebook/'
+    }
   };
 
-  // Key for storing redirect state
   const REDIRECT_KEY = 'sgemm-lang-redirected';
+  const PREFERENCE_KEY = 'preferred-doc-lang';
 
-  // Get base URL from Jekyll site
-  const baseurl = document.querySelector('meta[name="baseurl"]')?.content ||
-                  document.documentElement.getAttribute('data-baseurl') ||
-                  '/sgemm-optimization';
+  function normalizeBase(rawBase) {
+    if (!rawBase || rawBase === '/') {
+      return '';
+    }
+    return rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase;
+  }
 
-  /**
-   * Detect browser language preference
-   * Returns 'zh-CN' for Chinese browsers, 'en' otherwise
-   */
+  const rawBaseurl = document.querySelector('meta[name="baseurl"]')?.content || '';
+  const baseurl = normalizeBase(rawBaseurl);
+
+  function withBase(path) {
+    const target = `${baseurl}${path}`;
+    return target || '/';
+  }
+
+  function normalizePath(path) {
+    if (!path) {
+      return '/';
+    }
+    return path.endsWith('/') ? path : `${path}/`;
+  }
+
+  function pathEquals(currentPath, targetPath) {
+    return normalizePath(currentPath) === normalizePath(withBase(targetPath));
+  }
+
   function detectBrowserLanguage() {
     const browserLang = navigator.language || navigator.userLanguage || 'en';
-    // Match zh-CN, zh-TW, zh-HK, zh-SG, or plain zh
     return /^zh/i.test(browserLang) ? 'zh-CN' : 'en';
   }
 
-  /**
-   * Check if this session has already handled language redirect
-   */
-  function hasRedirectedThisSession() {
-    try {
-      return sessionStorage.getItem(REDIRECT_KEY) === 'true';
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /**
-   * Mark that redirect has been handled this session
-   */
-  function markRedirectHandled() {
-    try {
-      sessionStorage.setItem(REDIRECT_KEY, 'true');
-    } catch (e) {
-      // sessionStorage not available
-    }
-  }
-
-  /**
-   * Check if user has explicitly set language preference
-   */
-  function hasExplicitPreference() {
-    try {
-      return localStorage.getItem('preferred-doc-lang') !== null;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /**
-   * Auto-redirect based on browser language (first visit only)
-   */
-  function autoRedirect() {
-    // Skip if already redirected this session or user has explicit preference
-    if (hasRedirectedThisSession() || hasExplicitPreference()) {
-      return;
-    }
-
-    // Mark that we've handled redirect for this session
-    markRedirectHandled();
-
-    const browserLang = detectBrowserLanguage();
-    const currentPath = window.location.pathname;
-
-    // Check if we're on an English page (not /zh/)
-    const isEnglishPage = !currentPath.includes('/zh/');
-    const isHomePage = currentPath === baseurl + '/' || currentPath === baseurl;
-
-    // Only redirect from English home page to Chinese if browser is Chinese
-    if (isHomePage && browserLang === 'zh-CN') {
-      window.location.replace(baseurl + '/zh/');
-    }
-  }
-
-  /**
-   * Store language preference
-   */
-  function setLanguagePreference(lang) {
-    try {
-      localStorage.setItem('preferred-doc-lang', lang);
-    } catch (e) {
-      // localStorage not available
-    }
-  }
-
-  /**
-   * Get stored language preference
-   */
   function getLanguagePreference() {
     try {
-      return localStorage.getItem('preferred-doc-lang');
-    } catch (e) {
+      const value = localStorage.getItem(PREFERENCE_KEY);
+      return value === 'zh-CN' || value === 'en' ? value : null;
+    } catch (_error) {
       return null;
     }
   }
 
-  /**
-   * Find the paired page path for a given page key and target language
-   */
-  function findPairedPath(pageKey, targetLang) {
-    const pair = pagePairs[pageKey];
-    if (pair && pair[targetLang]) {
-      return baseurl + pair[targetLang];
+  function setLanguagePreference(lang) {
+    try {
+      localStorage.setItem(PREFERENCE_KEY, lang);
+    } catch (_error) {
+      // localStorage may be disabled in private mode.
     }
-    // Fallback to language home
-    return targetLang === 'zh-CN' ? baseurl + '/zh/' : baseurl + '/';
   }
 
-  /**
-   * Initialize language switcher functionality
-   */
+  function hasRedirectedThisSession() {
+    try {
+      return sessionStorage.getItem(REDIRECT_KEY) === 'true';
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function markRedirectHandled() {
+    try {
+      sessionStorage.setItem(REDIRECT_KEY, 'true');
+    } catch (_error) {
+      // sessionStorage may be unavailable.
+    }
+  }
+
+  function normalizePageKey(pageKey) {
+    if (!pageKey) {
+      return '';
+    }
+    return pageKey.startsWith('zh-') ? pageKey.slice(3) : pageKey;
+  }
+
+  function findPairedPath(pageKey, targetLang) {
+    const normalizedKey = normalizePageKey(pageKey);
+    const pair = PAGE_PAIRS[normalizedKey];
+
+    if (pair && pair[targetLang]) {
+      return withBase(pair[targetLang]);
+    }
+
+    return targetLang === 'zh-CN' ? withBase('/zh/') : withBase('/');
+  }
+
+  function autoRedirect() {
+    const currentPath = window.location.pathname;
+    const onEnglishHome = pathEquals(currentPath, '/');
+    const onChineseHome = pathEquals(currentPath, '/zh/');
+
+    if (!onEnglishHome && !onChineseHome) {
+      return;
+    }
+
+    const preferredLang = getLanguagePreference();
+    if (preferredLang === 'zh-CN' && onEnglishHome) {
+      window.location.replace(withBase('/zh/'));
+      return;
+    }
+    if (preferredLang === 'en' && onChineseHome) {
+      window.location.replace(withBase('/'));
+      return;
+    }
+
+    if (hasRedirectedThisSession()) {
+      return;
+    }
+    markRedirectHandled();
+
+    if (detectBrowserLanguage() === 'zh-CN' && onEnglishHome) {
+      window.location.replace(withBase('/zh/'));
+    }
+  }
+
   function initSwitcher() {
-    const switcher = document.querySelector('.language-switcher');
-    if (!switcher) return;
+    const switchers = document.querySelectorAll('.language-switcher');
+    if (!switchers.length) {
+      return;
+    }
 
-    const pageKey = switcher.dataset.pageKey;
-    const currentLang = switcher.dataset.lang;
+    switchers.forEach((switcher) => {
+      const pageKey = switcher.dataset.pageKey || '';
+      const currentLang = switcher.dataset.lang === 'zh-CN' ? 'zh-CN' : 'en';
+      const buttons = switcher.querySelectorAll('button[data-lang-choice]');
 
-    // Add click handlers to buttons
-    const buttons = switcher.querySelectorAll('button[data-lang-choice]');
-    buttons.forEach(button => {
-      button.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetLang = this.dataset.langChoice;
+      buttons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
 
-        // Skip if already on this language
-        if (targetLang === currentLang) return;
+          const targetLang = button.dataset.langChoice;
+          if (targetLang !== 'en' && targetLang !== 'zh-CN') {
+            return;
+          }
+          if (targetLang === currentLang) {
+            return;
+          }
 
-        // Store preference
-        setLanguagePreference(targetLang);
+          setLanguagePreference(targetLang);
 
-        // Navigate to paired page
-        const targetPath = findPairedPath(pageKey, targetLang);
-        window.location.assign(targetPath);
+          const targetPath = findPairedPath(pageKey, targetLang);
+          if (normalizePath(targetPath) !== normalizePath(window.location.pathname)) {
+            window.location.assign(targetPath);
+          }
+        });
       });
     });
   }
 
-  /**
-   * Initialize all language features
-   */
   function init() {
-    // Run auto-redirect first (only on first visit)
     autoRedirect();
-
-    // Initialize switcher buttons
     initSwitcher();
   }
 
-  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
