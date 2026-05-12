@@ -30,8 +30,7 @@
 **位置**: `src/kernels/tensor_core_launcher.cuh`
 
 统一的 SGEMM 启动接口，提供：
-- `launch_tensor_core_sgemm()` - 安全的端到端 FP32 入口点（使用默认 fallback）
-- `launch_tensor_core_sgemm_with_fallback()` - 支持自定义 fallback 策略的模板版本
+- `launch_tensor_core_sgemm_with_fallback()` - 端到端 FP32 入口点（强制显式指定 fallback）
 - `FallbackKernel` - fallback 函数类型定义
 - `kTensorCoreVerifyTolerance` - Tensor Core 验证容差
 
@@ -40,15 +39,17 @@
 - FP32 → FP16 类型转换
 - 不支持情况下的 fallback 到用户指定的策略
 
-**设计优势**：
-- 解耦 Tensor Core 模块与特定 fallback 内核
-- 用户可注入自定义 fallback（如 naive、tiled、bank-conflict-free）
-- 支持运行时选择 fallback 策略
+**设计原则**：
+- **不提供默认 fallback**：调用者必须显式指定 fallback 策略
+- **编译期解耦**：Tensor Core 模块不依赖任何具体内核
+- **深度提升**：模块职责单一（类型转换 + Tensor Core 启动）
 
-#### Tensor Core Launcher Impl
-**位置**: `src/kernels/tensor_core_launcher_impl.cuh`
-
-默认实现，使用 bank-conflict-free 作为 fallback。
+**便利函数**：
+调用点可以使用 `defaultTensorCoreFallback()` 便利函数（定义在各自的调用位置）：
+```cpp
+launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
+    defaultTensorCoreFallback(), stream);
+```
 
 #### Tensor Core Benchmark
 **位置**: `src/kernels/tensor_core_benchmark.cuh`

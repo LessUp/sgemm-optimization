@@ -101,18 +101,15 @@ inline void launch_tensor_core_sgemm_with_fallback(const float* A, const float* 
 }
 
 // ============================================================================
-// 默认接口声明
+// 注意：不提供默认 fallback 版本
 // ============================================================================
-
-/**
- * 使用 bank-conflict-free 作为默认 fallback
- *
- * 注意：此函数实现在 tensor_core_launcher_impl.cuh 中，
- * 以避免与 bank_conflict_free_sgemm.cuh 的循环依赖。
- *
- * 使用方法：
- * 1. 包含 tensor_core_launcher.cuh 和 bank_conflict_free_sgemm.cuh
- * 2. 直接调用 launch_tensor_core_sgemm()
- */
-inline void launch_tensor_core_sgemm(const float* A, const float* B, float* C, int M, int K, int N,
-                                     cudaStream_t stream = 0);
+//
+// 此模块不提供 launch_tensor_core_sgemm() 默认入口。
+// 调用者必须显式指定 fallback 策略：
+//
+//   launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N, myFallback, stream);
+//
+// 这种设计：
+// - 消除与具体内核的循环依赖
+// - 强制调用者思考"不支持时怎么办"
+// - 保持模块职责单一（类型转换 + Tensor Core 启动）

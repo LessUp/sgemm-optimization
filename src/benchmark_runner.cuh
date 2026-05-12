@@ -14,6 +14,23 @@
 #include <cstdio>
 
 // ============================================================================
+// Tensor Core 便利函数
+// ============================================================================
+
+/**
+ * 默认 Tensor Core fallback 策略
+ *
+ * 使用 bank-conflict-free 内核作为 fallback。
+ * 这是一个便利函数，减少调用点的重复代码。
+ */
+inline auto defaultTensorCoreFallback() {
+    return [](const float* A, const float* B, float* C, int M, int K, int N,
+              cudaStream_t stream) {
+        launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
+    };
+}
+
+// ============================================================================
 // Benchmark 编排器
 // ============================================================================
 
@@ -158,7 +175,8 @@ class BenchmarkRunner {
         benchmark.run(
             "Tensor Core (WMMA end-to-end)",
             [](const float* A, const float* B, float* C, int M, int K, int N) {
-                launch_tensor_core_sgemm(A, B, C, M, K, N);
+                launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
+                    defaultTensorCoreFallback());
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kTensorCoreVerifyTolerance);
 
