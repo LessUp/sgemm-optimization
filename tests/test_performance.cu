@@ -24,6 +24,23 @@
 #include "utils/cuda_utils.cuh"
 
 // ============================================================================
+// Tensor Core 便利函数
+// ============================================================================
+
+/**
+ * 默认 Tensor Core fallback 策略
+ *
+ * 使用 bank-conflict-free 内核作为 fallback。
+ * 这是一个便利函数，减少调用点的重复代码。
+ */
+inline auto defaultTensorCoreFallback() {
+    return [](const float* A, const float* B, float* C, int M, int K, int N,
+              cudaStream_t stream) {
+        launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
+    };
+}
+
+// ============================================================================
 // 性能基线结构
 // ============================================================================
 
@@ -255,7 +272,11 @@ TEST_F(PerformanceRegressionTest, TensorCoreKernelPerformance) {
     };
 
     for (const auto& [M, K, N] : tc_dimensions) {
-        runPerformanceTest("TensorCore", launch_tensor_core_sgemm, M, K, N, kTensorCoreVerifyTolerance);
+        runPerformanceTest("TensorCore",
+            [](const float* A, const float* B, float* C, int M, int K, int N, cudaStream_t s) {
+                launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
+                    defaultTensorCoreFallback(), s);
+            }, M, K, N, kTensorCoreVerifyTolerance);
     }
 }
 
