@@ -1,6 +1,7 @@
 /**
  * Language Toggle for SGEMM Optimization Docs
  * Handles switching between English and Chinese pages
+ * Auto-redirects based on browser language preference
  */
 
 (function() {
@@ -33,21 +34,80 @@
     'zh-kernel-tensor-core': { en: '/docs/kernel-tensor-core/', 'zh-CN': '/zh/docs/kernel-tensor-core/' }
   };
 
+  // Key for storing redirect state
+  const REDIRECT_KEY = 'sgemm-lang-redirected';
+
   // Get base URL from Jekyll site
   const baseurl = document.querySelector('meta[name="baseurl"]')?.content ||
                   document.documentElement.getAttribute('data-baseurl') ||
                   '/sgemm-optimization';
 
   /**
-   * Find the paired page path for a given page key and target language
+   * Detect browser language preference
+   * Returns 'zh-CN' for Chinese browsers, 'en' otherwise
    */
-  function findPairedPath(pageKey, targetLang) {
-    const pair = pagePairs[pageKey];
-    if (pair && pair[targetLang]) {
-      return baseurl + pair[targetLang];
+  function detectBrowserLanguage() {
+    const browserLang = navigator.language || navigator.userLanguage || 'en';
+    // Match zh-CN, zh-TW, zh-HK, zh-SG, or plain zh
+    return /^zh/i.test(browserLang) ? 'zh-CN' : 'en';
+  }
+
+  /**
+   * Check if this session has already handled language redirect
+   */
+  function hasRedirectedThisSession() {
+    try {
+      return sessionStorage.getItem(REDIRECT_KEY) === 'true';
+    } catch (e) {
+      return false;
     }
-    // Fallback to language home
-    return targetLang === 'zh-CN' ? baseurl + '/zh/' : baseurl + '/';
+  }
+
+  /**
+   * Mark that redirect has been handled this session
+   */
+  function markRedirectHandled() {
+    try {
+      sessionStorage.setItem(REDIRECT_KEY, 'true');
+    } catch (e) {
+      // sessionStorage not available
+    }
+  }
+
+  /**
+   * Check if user has explicitly set language preference
+   */
+  function hasExplicitPreference() {
+    try {
+      return localStorage.getItem('preferred-doc-lang') !== null;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * Auto-redirect based on browser language (first visit only)
+   */
+  function autoRedirect() {
+    // Skip if already redirected this session or user has explicit preference
+    if (hasRedirectedThisSession() || hasExplicitPreference()) {
+      return;
+    }
+
+    // Mark that we've handled redirect for this session
+    markRedirectHandled();
+
+    const browserLang = detectBrowserLanguage();
+    const currentPath = window.location.pathname;
+
+    // Check if we're on an English page (not /zh/)
+    const isEnglishPage = !currentPath.includes('/zh/');
+    const isHomePage = currentPath === baseurl + '/' || currentPath === baseurl;
+
+    // Only redirect from English home page to Chinese if browser is Chinese
+    if (isHomePage && browserLang === 'zh-CN') {
+      window.location.replace(baseurl + '/zh/');
+    }
   }
 
   /**
@@ -73,9 +133,21 @@
   }
 
   /**
+   * Find the paired page path for a given page key and target language
+   */
+  function findPairedPath(pageKey, targetLang) {
+    const pair = pagePairs[pageKey];
+    if (pair && pair[targetLang]) {
+      return baseurl + pair[targetLang];
+    }
+    // Fallback to language home
+    return targetLang === 'zh-CN' ? baseurl + '/zh/' : baseurl + '/';
+  }
+
+  /**
    * Initialize language switcher functionality
    */
-  function init() {
+  function initSwitcher() {
     const switcher = document.querySelector('.language-switcher');
     if (!switcher) return;
 
@@ -100,6 +172,17 @@
         window.location.assign(targetPath);
       });
     });
+  }
+
+  /**
+   * Initialize all language features
+   */
+  function init() {
+    // Run auto-redirect first (only on first visit)
+    autoRedirect();
+
+    // Initialize switcher buttons
+    initSwitcher();
   }
 
   // Initialize when DOM is ready
