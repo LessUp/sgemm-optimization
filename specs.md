@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Specifications
+parent: Home
 nav_order: 9
 has_children: true
 permalink: /specs/

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Benchmark Results
+parent: Home
 nav_order: 9
 permalink: /docs/benchmark-results/
 lang: en

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Benchmark 结果
+parent: 首页
 nav_order: 9
 permalink: /zh/docs/benchmark-results/
 lang: zh-CN

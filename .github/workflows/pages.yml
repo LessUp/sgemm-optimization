@@ -6,7 +6,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
-    paths:
+    paths: &pages_paths
       - 'CHANGELOG.md'
       - 'CONTRIBUTING.md'
       - 'index.md'
@@ -18,12 +18,13 @@ on:
       - 'assets/**'
       - '_sass/**'
       - '.github/workflows/pages.yml'
+  pull_request:
+    branches: [master]
+    paths: *pages_paths
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-${{ github.ref }}
@@ -46,11 +47,16 @@ jobs:
           destination: ./_site
 
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./_site
 
   deploy:
+    if: github.event_name != 'pull_request'
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

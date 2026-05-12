@@ -1,6 +1,7 @@
 ---
 layout: default
 title: 规范索引
+parent: 首页
 nav_order: 9
 has_children: true
 permalink: /zh/specs/

@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Learning Path
+parent: Home
 nav_order: 3
 permalink: /docs/learning-path/
 lang: en

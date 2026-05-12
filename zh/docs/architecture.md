@@ -1,6 +1,7 @@
 ---
 layout: default
 title: 架构概览
+parent: 首页
 nav_order: 8
 permalink: /zh/docs/architecture/
 lang: zh-CN
