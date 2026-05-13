@@ -1,9 +1,7 @@
 #pragma once
 
-#include "../utils/benchmark.cuh"
-#include "tensor_core_capabilities.cuh"
-#include "tensor_core_compute.cuh"
-#include "tensor_core_launcher.cuh"
+#include "tensor_core_sgemm.cuh"
+#include <cublas_v2.h>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 #include <vector>
@@ -12,12 +10,9 @@
 // Tensor Core Benchmark Extensions
 // ============================================================================
 //
-// 此模块提供 Tensor Core 特有的 benchmark 功能，将工具层的
-// Tensor Core 特定逻辑移到内核层，避免循环依赖。
-//
-// 架构原理：
-// - benchmark.cuh (工具层) 只提供通用的 benchmark 框架
-// - tensor_core_benchmark.cuh (内核层) 提供 Tensor Core 特有的 benchmark 功能
+// 此模块提供 Tensor Core 特有的 benchmark 功能。
+// 接口设计：只接受 cublasHandle_t，不依赖整个 SGEMMBenchmark 类，
+// 避免内核层对工具层的上穿依赖。
 // ============================================================================
 
 /**
@@ -26,7 +21,7 @@
  * 此函数仅测试 WMMA FP16→FP32 计算性能，不包含 FP32→FP16 转换和 fallback。
  * 用于分离测量 Tensor Core 计算单元的实际性能。
  *
- * @param benchmark SGEMMBenchmark 实例
+ * @param cublas_handle cuBLAS 句柄（用于参考计算）
  * @param M, K, N 矩阵维度
  * @param warmup_runs 预热次数
  * @param benchmark_runs 测量次数
@@ -34,7 +29,7 @@
  * @return BenchmarkResult 包含性能数据
  */
 inline BenchmarkResult
-runTensorCoreComputeOnlyBenchmark(SGEMMBenchmark &benchmark, int M, int K, int N,
+runTensorCoreComputeOnlyBenchmark(cublasHandle_t cublas_handle, int M, int K, int N,
                                   int warmup_runs = 5, int benchmark_runs = 20,
                                   VerifyTolerance tolerance = kTensorCoreVerifyTolerance) {
 
@@ -64,7 +59,7 @@ runTensorCoreComputeOnlyBenchmark(SGEMMBenchmark &benchmark, int M, int K, int N
     d_B.copyFromHost(h_B.data(), K * N);
 
     float alpha = 1.0f, beta = 0.0f;
-    CUBLAS_CHECK(cublasSgemm(benchmark.getCublasHandle(), CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
+    CUBLAS_CHECK(cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
                              d_B.get(), N, d_A.get(), K, &beta, d_C_ref.get(), N));
 
     int blockSize = 256;

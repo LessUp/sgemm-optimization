@@ -62,11 +62,15 @@ class SGEMMBenchmark {
     SGEMMBenchmark() {
         CUDA_CHECK(cudaEventCreate(&start_));
         CUDA_CHECK(cudaEventCreate(&stop_));
+        CUBLAS_CHECK(cublasCreate(&cublas_handle_));
     }
 
     ~SGEMMBenchmark() {
         cudaEventDestroy(start_);
         cudaEventDestroy(stop_);
+        if (cublas_handle_) {
+            cublasDestroy(cublas_handle_);
+        }
     }
 
     /**

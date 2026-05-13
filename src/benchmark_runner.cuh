@@ -182,7 +182,7 @@ class BenchmarkRunner {
         if (tensorCoreDimensionsSupported(M, K, N)) {
             printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
             BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
-                benchmark, M, K, N, config_.warmup_runs, config_.benchmark_runs,
+                benchmark.getCublasHandle(), M, K, N, config_.warmup_runs, config_.benchmark_runs,
                 kTensorCoreVerifyTolerance);
             tc_result.print();
         } else {
