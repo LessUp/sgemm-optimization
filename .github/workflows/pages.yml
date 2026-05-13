@@ -1,5 +1,5 @@
 # GitHub Pages Deployment
-# Builds and deploys the public documentation portal.
+# Builds and deploys the public documentation portal using VitePress.
 
 name: Deploy to GitHub Pages
 
@@ -9,14 +9,7 @@ on:
     paths: &pages_paths
       - 'CHANGELOG.md'
       - 'CONTRIBUTING.md'
-      - 'index.md'
-      - '_config.yml'
-      - '_includes/**'
       - 'docs/**'
-      - 'zh/**'
-      - 'specs.md'
-      - 'assets/**'
-      - '_sass/**'
       - '.github/workflows/pages.yml'
   pull_request:
     branches: [master]
@@ -37,20 +30,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          source: ./
-          destination: ./_site
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build with VitePress
+        working-directory: docs
+        env:
+          VITEPRESS_BASE: /sgemm-optimization/
+        run: npm run build
+
+      - name: Add .nojekyll
+        working-directory: docs
+        run: touch .vitepress/dist/.nojekyll
 
       - name: Upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          path: docs/.vitepress/dist
 
   deploy:
     if: github.event_name != 'pull_request'

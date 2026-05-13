@@ -39,6 +39,11 @@ _site/
 .jekyll-cache/
 .jekyll-metadata
 
+# VitePress
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
 # Cache
 .cache/
 
