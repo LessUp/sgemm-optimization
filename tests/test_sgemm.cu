@@ -16,6 +16,7 @@
 #include "kernels/bank_conflict_free_sgemm.cuh"
 #include "kernels/double_buffer_sgemm.cuh"
 #include "kernels/naive_sgemm.cuh"
+#include "kernels/tensor_core_fallback.cuh"
 #include "kernels/tensor_core_sgemm.cuh"
 #include "kernels/tiled_sgemm.cuh"
 #include "utils/cuda_utils.cuh"
@@ -23,13 +24,6 @@
 
 namespace {
 constexpr int PBT_ITERATIONS = 100;
-
-// Tensor Core 默认 fallback（使用 bank-conflict-free）
-auto defaultTensorCoreFallback() {
-    return [](const float *A, const float *B, float *C, int M, int K, int N, cudaStream_t stream) {
-        launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
-    };
-}
 } // namespace
 
 std::vector<std::tuple<int, int, int>> getStandardDimensions() {
