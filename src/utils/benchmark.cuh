@@ -81,7 +81,7 @@ class SGEMMBenchmark {
      * @param tolerance 验证容差
      */
     template <typename KernelFunc>
-    BenchmarkResult run(const std::string& name, KernelFunc kernel_func, int M, int K, int N,
+    BenchmarkResult run(const std::string &name, KernelFunc kernel_func, int M, int K, int N,
                         int warmup_runs = 5, int benchmark_runs = 20,
                         VerifyTolerance tolerance = kStandardVerifyTolerance) {
         BenchmarkResult result;
@@ -208,7 +208,7 @@ class SGEMMBenchmark {
         printf("--------------------------------------------------------------------"
                "------------\n");
 
-        for (const auto& result : results_) {
+        for (const auto &result : results_) {
             result.print();
         }
 
@@ -216,7 +216,7 @@ class SGEMMBenchmark {
                "============\n");
     }
 
-    void exportRooflineData(const std::string& filename) const {
+    void exportRooflineData(const std::string &filename) const {
         std::ofstream file(filename);
         if (!file.is_open()) {
             fprintf(stderr, "Failed to open file: %s\n", filename.c_str());
@@ -225,7 +225,7 @@ class SGEMMBenchmark {
 
         file << "kernel,M,K,N,time_ms,gflops,bandwidth_gb_s,arithmetic_intensity\n";
 
-        for (const auto& result : results_) {
+        for (const auto &result : results_) {
             double flops = 2.0 * result.M * result.N * result.K;
             double bytes =
                 (result.M * result.K + result.K * result.N + result.M * result.N) * sizeof(float);
@@ -240,7 +240,7 @@ class SGEMMBenchmark {
         printf("Approximate roofline data exported to: %s\n", filename.c_str());
     }
 
-    const std::vector<BenchmarkResult>& getResults() const { return results_; }
+    const std::vector<BenchmarkResult> &getResults() const { return results_; }
     void clearResults() { results_.clear(); }
     cublasHandle_t getCublasHandle() const { return cublas_handle_; }
 
@@ -254,7 +254,7 @@ class SGEMMBenchmark {
 // 实用工具函数
 // ============================================================================
 
-inline void printPerformanceComparison(const std::vector<BenchmarkResult>& results,
+inline void printPerformanceComparison(const std::vector<BenchmarkResult> &results,
                                        float cublas_gflops) {
     printf("\n");
     printf("Performance Comparison (vs cuBLAS):\n");
@@ -264,7 +264,7 @@ inline void printPerformanceComparison(const std::vector<BenchmarkResult>& resul
     printf("---------------------------------------------------------------------"
            "-----------\n");
 
-    for (const auto& result : results) {
+    for (const auto &result : results) {
         float percentage = (result.gflops / cublas_gflops) * 100.0f;
         printf("  %-30s | %10.2f     | %8.1f%%\n", result.kernel_name.c_str(), result.gflops,
                percentage);

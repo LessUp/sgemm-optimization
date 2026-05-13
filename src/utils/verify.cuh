@@ -64,8 +64,8 @@ namespace detail {
 
 // 内部实现：比较两个矩阵并返回验证结果
 // 供 verify() 和 compareMatrices() 共享
-inline VerifyResult compareMatricesImpl(const float *h_test, const float *h_ref, size_t num_elements,
-                                        VerifyTolerance tolerance) {
+inline VerifyResult compareMatricesImpl(const float *h_test, const float *h_ref,
+                                        size_t num_elements, VerifyTolerance tolerance) {
     VerifyResult result;
     result.max_abs_error = 0.0f;
     result.max_rel_error = 0.0f;

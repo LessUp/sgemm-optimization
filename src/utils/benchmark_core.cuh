@@ -26,8 +26,8 @@ class CudaTimer {
     }
 
     // 禁用拷贝
-    CudaTimer(const CudaTimer&) = delete;
-    CudaTimer& operator=(const CudaTimer&) = delete;
+    CudaTimer(const CudaTimer &) = delete;
+    CudaTimer &operator=(const CudaTimer &) = delete;
 
     // 记录开始事件
     void start() { CUDA_CHECK(cudaEventRecord(start_)); }

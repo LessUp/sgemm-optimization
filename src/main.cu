@@ -13,7 +13,7 @@
 #include "benchmark_runner.cuh"
 #include "cli_parser.cuh"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     BenchmarkConfig config;
     CliParser parser(argc, argv);
 

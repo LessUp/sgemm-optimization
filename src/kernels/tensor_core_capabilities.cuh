@@ -41,7 +41,7 @@ inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
 /**
  * 获取当前设备的 Tensor Core 信息字符串
  */
-inline const char* getTensorCoreArchName() {
+inline const char *getTensorCoreArchName() {
     int device;
     CUDA_CHECK(cudaGetDevice(&device));
 

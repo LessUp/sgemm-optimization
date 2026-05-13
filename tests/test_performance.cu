@@ -6,8 +6,8 @@
  */
 
 #include <cuda_runtime.h>
-#include <gtest/gtest.h>
 #include <fstream>
+#include <gtest/gtest.h>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -34,8 +34,7 @@
  * 这是一个便利函数，减少调用点的重复代码。
  */
 inline auto defaultTensorCoreFallback() {
-    return [](const float* A, const float* B, float* C, int M, int K, int N,
-              cudaStream_t stream) {
+    return [](const float *A, const float *B, float *C, int M, int K, int N, cudaStream_t stream) {
         launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
     };
 }
@@ -47,8 +46,8 @@ inline auto defaultTensorCoreFallback() {
 struct PerformanceBaseline {
     std::string kernel_name;
     int M, K, N;
-    float min_gflops;  // 最小可接受的 GFLOPS
-    float max_gflops;  // 记录的最大 GFLOPS（参考）
+    float min_gflops; // 最小可接受的 GFLOPS
+    float max_gflops; // 记录的最大 GFLOPS（参考）
     std::string gpu_name;
 
     std::string key() const {
@@ -63,21 +62,21 @@ struct PerformanceBaseline {
 
 class BaselineManager {
   public:
-    explicit BaselineManager(const std::string& baseline_file) : baseline_file_(baseline_file) {
+    explicit BaselineManager(const std::string &baseline_file) : baseline_file_(baseline_file) {
         loadBaselines();
     }
 
     ~BaselineManager() { saveBaselines(); }
 
     // 获取基线（如果存在）
-    bool hasBaseline(const std::string& key) const { return baselines_.count(key) > 0; }
+    bool hasBaseline(const std::string &key) const { return baselines_.count(key) > 0; }
 
-    const PerformanceBaseline& getBaseline(const std::string& key) const {
+    const PerformanceBaseline &getBaseline(const std::string &key) const {
         return baselines_.at(key);
     }
 
     // 更新或添加基线
-    void updateBaseline(const PerformanceBaseline& baseline) {
+    void updateBaseline(const PerformanceBaseline &baseline) {
         baselines_[baseline.key()] = baseline;
     }
 
@@ -132,7 +131,7 @@ class BaselineManager {
         file << "# Performance Baselines (auto-generated)\n";
         file << "# Format: kernel_name,M,K,N,min_gflops,max_gflops,gpu_name\n";
 
-        for (const auto& [key, baseline] : baselines_) {
+        for (const auto &[key, baseline] : baselines_) {
             file << baseline.kernel_name << "," << baseline.M << "," << baseline.K << ","
                  << baseline.N << "," << baseline.min_gflops << "," << baseline.max_gflops << ","
                  << baseline.gpu_name << "\n";
@@ -162,11 +161,11 @@ class PerformanceRegressionTest : public ::testing::Test {
         // 性能效率阈值（相对于理论峰值的百分比）
         // 这些是保守值，实际性能可能更高
         min_efficiency_ = {
-            {"Naive", 0.05f},          // 5% 峰值
-            {"Tiled", 0.20f},          // 20% 峰值
+            {"Naive", 0.05f},            // 5% 峰值
+            {"Tiled", 0.20f},            // 20% 峰值
             {"BankConflictFree", 0.30f}, // 30% 峰值
-            {"DoubleBuffer", 0.35f},   // 35% 峰值
-            {"TensorCore", 0.50f}      // 50% 峰值（当可用时）
+            {"DoubleBuffer", 0.35f},     // 35% 峰值
+            {"TensorCore", 0.50f}        // 50% 峰值（当可用时）
         };
 
         // 测试维度
@@ -191,8 +190,8 @@ class PerformanceRegressionTest : public ::testing::Test {
         d_B.copyFromHost(h_B.data(), K * N);
 
         // 测量
-        float time_ms = measureGpuTime(
-            [&]() { launch_func(d_A.get(), d_B.get(), d_C.get(), M, K, N); }, 3, 10);
+        float time_ms =
+            measureGpuTime([&]() { launch_func(d_A.get(), d_B.get(), d_C.get(), M, K, N); }, 3, 10);
 
         // 计算 GFLOPS
         PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, time_ms);
@@ -200,7 +199,7 @@ class PerformanceRegressionTest : public ::testing::Test {
     }
 
     // 运行性能测试
-    void runPerformanceTest(const std::string& kernel_name, auto launch_func, int M, int K, int N,
+    void runPerformanceTest(const std::string &kernel_name, auto launch_func, int M, int K, int N,
                             VerifyTolerance tolerance = kStandardVerifyTolerance) {
         float gflops = measureGflops(launch_func, M, K, N);
 
@@ -233,28 +232,28 @@ class PerformanceRegressionTest : public ::testing::Test {
 
 TEST_F(PerformanceRegressionTest, NaiveKernelPerformance) {
     printf("\nNaive Kernel Performance:\n");
-    for (const auto& [M, K, N] : test_dimensions_) {
+    for (const auto &[M, K, N] : test_dimensions_) {
         runPerformanceTest("Naive", launch_naive_sgemm<>, M, K, N);
     }
 }
 
 TEST_F(PerformanceRegressionTest, TiledKernelPerformance) {
     printf("\nTiled Kernel Performance:\n");
-    for (const auto& [M, K, N] : test_dimensions_) {
+    for (const auto &[M, K, N] : test_dimensions_) {
         runPerformanceTest("Tiled", launch_tiled_sgemm<32>, M, K, N);
     }
 }
 
 TEST_F(PerformanceRegressionTest, BankConflictFreeKernelPerformance) {
     printf("\nBank-Conflict-Free Kernel Performance:\n");
-    for (const auto& [M, K, N] : test_dimensions_) {
+    for (const auto &[M, K, N] : test_dimensions_) {
         runPerformanceTest("BankConflictFree", launch_bank_conflict_free_sgemm<32>, M, K, N);
     }
 }
 
 TEST_F(PerformanceRegressionTest, DoubleBufferKernelPerformance) {
     printf("\nDouble-Buffer Kernel Performance:\n");
-    for (const auto& [M, K, N] : test_dimensions_) {
+    for (const auto &[M, K, N] : test_dimensions_) {
         runPerformanceTest("DoubleBuffer", launch_double_buffer_sgemm<32>, M, K, N);
     }
 }
@@ -271,12 +270,14 @@ TEST_F(PerformanceRegressionTest, TensorCoreKernelPerformance) {
         {256, 256, 256},
     };
 
-    for (const auto& [M, K, N] : tc_dimensions) {
-        runPerformanceTest("TensorCore",
-            [](const float* A, const float* B, float* C, int M, int K, int N, cudaStream_t s) {
+    for (const auto &[M, K, N] : tc_dimensions) {
+        runPerformanceTest(
+            "TensorCore",
+            [](const float *A, const float *B, float *C, int M, int K, int N, cudaStream_t s) {
                 launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
-                    defaultTensorCoreFallback(), s);
-            }, M, K, N, kTensorCoreVerifyTolerance);
+                                                       defaultTensorCoreFallback(), s);
+            },
+            M, K, N, kTensorCoreVerifyTolerance);
     }
 }
 
@@ -298,7 +299,7 @@ TEST_F(PerformanceRegressionTest, PeakPerformanceReference) {
     EXPECT_LT(peak_gflops_, 100000.0f) << "Peak GFLOPS seems too high";
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     printGPUInfo();
     return RUN_ALL_TESTS();

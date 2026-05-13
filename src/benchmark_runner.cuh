@@ -24,8 +24,7 @@
  * 这是一个便利函数，减少调用点的重复代码。
  */
 inline auto defaultTensorCoreFallback() {
-    return [](const float* A, const float* B, float* C, int M, int K, int N,
-              cudaStream_t stream) {
+    return [](const float *A, const float *B, float *C, int M, int K, int N, cudaStream_t stream) {
         launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
     };
 }
@@ -42,7 +41,7 @@ inline auto defaultTensorCoreFallback() {
  */
 class BenchmarkRunner {
   public:
-    explicit BenchmarkRunner(const BenchmarkConfig& config) : config_(config) {}
+    explicit BenchmarkRunner(const BenchmarkConfig &config) : config_(config) {}
 
     /**
      * 运行所有配置的 benchmark
@@ -50,7 +49,7 @@ class BenchmarkRunner {
     void runAll() {
         printHeader();
 
-        for (const auto& [M, K, N] : config_.dimensions) {
+        for (const auto &[M, K, N] : config_.dimensions) {
             runBenchmarks(M, K, N);
         }
 
@@ -125,11 +124,11 @@ class BenchmarkRunner {
         benchmark.exportRooflineData(filename);
     }
 
-    void runStandardKernels(SGEMMBenchmark& benchmark, int M, int K, int N) {
+    void runStandardKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
         printf("Running Naive SGEMM...\n");
         benchmark.run(
             "Naive",
-            [](const float* A, const float* B, float* C, int M, int K, int N) {
+            [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_naive_sgemm<32>(A, B, C, M, K, N);
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
@@ -137,7 +136,7 @@ class BenchmarkRunner {
         printf("Running Tiled SGEMM...\n");
         benchmark.run(
             "Tiled (32x32)",
-            [](const float* A, const float* B, float* C, int M, int K, int N) {
+            [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_tiled_sgemm<32>(A, B, C, M, K, N);
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
@@ -145,7 +144,7 @@ class BenchmarkRunner {
         printf("Running Bank Conflict Free SGEMM...\n");
         benchmark.run(
             "Bank Conflict Free",
-            [](const float* A, const float* B, float* C, int M, int K, int N) {
+            [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N);
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
@@ -153,13 +152,13 @@ class BenchmarkRunner {
         printf("Running Double Buffer SGEMM...\n");
         benchmark.run(
             "Double Buffer",
-            [](const float* A, const float* B, float* C, int M, int K, int N) {
+            [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_double_buffer_sgemm<32>(A, B, C, M, K, N);
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
     }
 
-    void runTensorCoreKernels(SGEMMBenchmark& benchmark, int M, int K, int N) {
+    void runTensorCoreKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
         if (!tensorCoresAvailable()) {
             int device;
             CUDA_CHECK(cudaGetDevice(&device));
@@ -174,9 +173,9 @@ class BenchmarkRunner {
                "conversion/fallback)...\n");
         benchmark.run(
             "Tensor Core (WMMA end-to-end)",
-            [](const float* A, const float* B, float* C, int M, int K, int N) {
+            [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
-                    defaultTensorCoreFallback());
+                                                       defaultTensorCoreFallback());
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kTensorCoreVerifyTolerance);
 

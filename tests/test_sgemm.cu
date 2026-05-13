@@ -26,8 +26,7 @@ constexpr int PBT_ITERATIONS = 100;
 
 // Tensor Core 默认 fallback（使用 bank-conflict-free）
 auto defaultTensorCoreFallback() {
-    return [](const float* A, const float* B, float* C, int M, int K, int N,
-              cudaStream_t stream) {
+    return [](const float *A, const float *B, float *C, int M, int K, int N, cudaStream_t stream) {
         launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N, stream);
     };
 }
@@ -256,8 +255,8 @@ TEST_P(TensorCoreSGEMMTest, FastPathCorrectnessProperty) {
 
     VerifyResult result = runKernelAndCompare(
         [&] {
-            launch_tensor_core_sgemm_with_fallback(d_A_->get(), d_B_->get(), d_C_->get(),
-                M_, K_, N_, defaultTensorCoreFallback());
+            launch_tensor_core_sgemm_with_fallback(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_,
+                                                   N_, defaultTensorCoreFallback());
         },
         kTensorCoreVerifyTolerance);
 
@@ -274,8 +273,8 @@ class TensorCoreFallbackTest : public SGEMMKernelTest {};
 TEST_P(TensorCoreFallbackTest, NonAlignedInputsFallbackSafely) {
     VerifyResult result = runKernelAndCompare(
         [&] {
-            launch_tensor_core_sgemm_with_fallback(d_A_->get(), d_B_->get(), d_C_->get(),
-                M_, K_, N_, defaultTensorCoreFallback());
+            launch_tensor_core_sgemm_with_fallback(d_A_->get(), d_B_->get(), d_C_->get(), M_, K_,
+                                                   N_, defaultTensorCoreFallback());
         },
         kStandardVerifyTolerance);
 
@@ -287,10 +286,13 @@ INSTANTIATE_TEST_SUITE_P(TensorCoreFallbackDimensions, TensorCoreFallbackTest,
                          ::testing::ValuesIn(getTensorCoreFallbackDimensions()));
 
 TEST(TensorCoreWrapperTest, ZeroSizeInputsReturnSafely) {
-    auto fallback = [](const float*, const float*, float*, int, int, int, cudaStream_t) {};
-    EXPECT_NO_THROW(launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 0, 16, 16, fallback));
-    EXPECT_NO_THROW(launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 16, 0, 16, fallback));
-    EXPECT_NO_THROW(launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 16, 16, 0, fallback));
+    auto fallback = [](const float *, const float *, float *, int, int, int, cudaStream_t) {};
+    EXPECT_NO_THROW(
+        launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 0, 16, 16, fallback));
+    EXPECT_NO_THROW(
+        launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 16, 0, 16, fallback));
+    EXPECT_NO_THROW(
+        launch_tensor_core_sgemm_with_fallback(nullptr, nullptr, nullptr, 16, 16, 0, fallback));
 }
 
 class DimensionInvarianceTest : public ::testing::Test {

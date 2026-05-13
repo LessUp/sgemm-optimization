@@ -31,8 +31,8 @@ class CublasSgemm {
     }
 
     // 禁用拷贝
-    CublasSgemm(const CublasSgemm&) = delete;
-    CublasSgemm& operator=(const CublasSgemm&) = delete;
+    CublasSgemm(const CublasSgemm &) = delete;
+    CublasSgemm &operator=(const CublasSgemm &) = delete;
 
     /**
      * 执行 SGEMM: C = alpha * A * B + beta * C
@@ -43,7 +43,7 @@ class CublasSgemm {
      *
      * 注意：cuBLAS 使用列优先，内部进行转置处理
      */
-    void sgemm(const float* d_A, const float* d_B, float* d_C, int M, int K, int N,
+    void sgemm(const float *d_A, const float *d_B, float *d_C, int M, int K, int N,
                float alpha = 1.0f, float beta = 0.0f) {
         // cuBLAS 使用列优先，计算 C^T = B^T * A^T
         // 结果 C 仍为行优先格式
@@ -56,13 +56,13 @@ class CublasSgemm {
      *
      * @return 平均执行时间（毫秒）
      */
-    float measurePerformance(const float* d_A, const float* d_B, float* d_C, int M, int K, int N,
+    float measurePerformance(const float *d_A, const float *d_B, float *d_C, int M, int K, int N,
                              int warmup_runs = 5, int benchmark_runs = 20) {
         float alpha = 1.0f, beta = 0.0f;
 
         auto run_func = [&]() {
-            CUBLAS_CHECK(cublasSgemm(handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A,
-                                     K, &beta, d_C, N));
+            CUBLAS_CHECK(cublasSgemm(handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N,
+                                     d_A, K, &beta, d_C, N));
         };
 
         return measureGpuTime(run_func, warmup_runs, benchmark_runs);
@@ -133,12 +133,12 @@ class SgemmReferenceCalculator {
     }
 
     // 访问器
-    const std::vector<float>& hostA() const { return h_A_; }
-    const std::vector<float>& hostB() const { return h_B_; }
-    float* deviceA() { return d_A_->get(); }
-    float* deviceB() { return d_B_->get(); }
-    float* deviceCRef() { return d_C_ref_->get(); }
-    CublasSgemm& cublas() { return cublas_; }
+    const std::vector<float> &hostA() const { return h_A_; }
+    const std::vector<float> &hostB() const { return h_B_; }
+    float *deviceA() { return d_A_->get(); }
+    float *deviceB() { return d_B_->get(); }
+    float *deviceCRef() { return d_C_ref_->get(); }
+    CublasSgemm &cublas() { return cublas_; }
     int M() const { return M_; }
     int K() const { return K_; }
     int N() const { return N_; }

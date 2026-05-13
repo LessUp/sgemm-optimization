@@ -24,15 +24,15 @@ inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
  * 签名与所有标准 SGEMM 内核一致：
  * void(const float* A, const float* B, float* C, int M, int K, int N, cudaStream_t stream)
  */
-using FallbackKernel = std::function<void(const float*, const float*, float*, int, int, int,
-                                          cudaStream_t)>;
+using FallbackKernel =
+    std::function<void(const float *, const float *, float *, int, int, int, cudaStream_t)>;
 
 /**
  * 默认 fallback 策略
  *
  * 提供一个空的 fallback（用于测试或显式配置场景）
  */
-inline void nullFallback(const float*, const float*, float*, int, int, int, cudaStream_t = 0) {
+inline void nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t = 0) {
     // 空实现 - 用于测试
 }
 
@@ -57,7 +57,7 @@ inline void nullFallback(const float*, const float*, float*, int, int, int, cuda
  * @param stream CUDA 流
  */
 template <typename FallbackFunc>
-inline void launch_tensor_core_sgemm_with_fallback(const float* A, const float* B, float* C, int M,
+inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *B, float *C, int M,
                                                    int K, int N, FallbackFunc fallback,
                                                    cudaStream_t stream = 0) {
     if (M <= 0 || K <= 0 || N <= 0) {
@@ -94,8 +94,8 @@ inline void launch_tensor_core_sgemm_with_fallback(const float* A, const float* 
  *
  * 允许运行时选择 fallback 策略。
  */
-inline void launch_tensor_core_sgemm_with_fallback(const float* A, const float* B, float* C, int M,
-                                                   int K, int N, const FallbackKernel& fallback,
+inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *B, float *C, int M,
+                                                   int K, int N, const FallbackKernel &fallback,
                                                    cudaStream_t stream = 0) {
     launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N, fallback, stream);
 }

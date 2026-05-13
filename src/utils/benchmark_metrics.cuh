@@ -12,9 +12,9 @@
  * 存储计算的性能指标
  */
 struct PerformanceMetrics {
-    float time_ms;           // 执行时间（毫秒）
-    float gflops;            // GFLOPS（每秒十亿次浮点运算）
-    float bandwidth_gb_s;    // 带宽（GB/s）
+    float time_ms;              // 执行时间（毫秒）
+    float gflops;               // GFLOPS（每秒十亿次浮点运算）
+    float bandwidth_gb_s;       // 带宽（GB/s）
     float arithmetic_intensity; // 算术强度（FLOPs/Byte）
 };
 
@@ -157,7 +157,7 @@ inline float calculateBandwidthUtilization(float actual_bandwidth, float peak_ba
  * @param metrics 性能指标
  * @param baseline_gflops 基线 GFLOPS（如 cuBLAS）
  */
-inline void printPerformanceReport(const char* kernel_name, const PerformanceMetrics& metrics,
+inline void printPerformanceReport(const char *kernel_name, const PerformanceMetrics &metrics,
                                    float baseline_gflops = 0.0f) {
     printf("  %-30s | %8.3f ms | %10.2f GFLOPS | %8.2f GB/s | AI: %.1f\n", kernel_name,
            metrics.time_ms, metrics.gflops, metrics.bandwidth_gb_s, metrics.arithmetic_intensity);
