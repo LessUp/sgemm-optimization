@@ -1,4 +1,5 @@
 ---
+layout: home
 title: SGEMM 优化
 ---
 

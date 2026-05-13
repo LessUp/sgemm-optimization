@@ -1,25 +1,34 @@
 ---
 layout: home
+hero:
+  name: SGEMM Optimization
+  text: ' '
+  actions:
+    - theme: brand
+      text: English
+      link: /en/
+    - theme: alt
+      text: 简体中文
+      link: /zh/
 ---
 
 <script setup>
 import { onMounted } from 'vue'
+import { useRouter } from 'vitepress'
 
 onMounted(() => {
-  // Auto-detect language and redirect
+  const router = useRouter()
   const savedLang = localStorage.getItem('vitepress-locale')
   const browserLang = navigator.language.toLowerCase()
-  
-  if (savedLang) {
-    window.location.href = savedLang === 'zh' ? '/sgemm-optimization/zh/' : '/sgemm-optimization/en/'
+
+  if (savedLang === 'zh') {
+    router.go('/zh/')
+  } else if (savedLang === 'en') {
+    router.go('/en/')
   } else if (browserLang.startsWith('zh')) {
-    window.location.href = '/sgemm-optimization/zh/'
+    router.go('/zh/')
   } else {
-    window.location.href = '/sgemm-optimization/en/'
+    router.go('/en/')
   }
 })
 </script>
-
-# SGEMM Optimization
-
-Redirecting to your preferred language...
