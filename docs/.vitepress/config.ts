@@ -11,8 +11,8 @@ const base = rawBase
 
 export default withMermaid(defineConfig({
   base,
-  title: 'SGEMM Optimization Lab',
-  description: 'Interview-grade CUDA SGEMM engineering notebook from naive FP32 to guarded Tensor Core WMMA',
+  title: 'SGEMM Architecture Whitepaper',
+  description: 'Bilingual CUDA SGEMM whitepaper covering architecture, optimization methodology, validation evidence, and engineering references',
 
   head: [
     ['meta', { name: 'theme-color', content: '#76b900' }],
@@ -29,32 +29,29 @@ export default withMermaid(defineConfig({
       label: 'English',
       lang: 'en-US',
       link: '/en/',
-      title: 'SGEMM Optimization Lab',
-      description: 'CUDA SGEMM project with benchmark discipline, interview storytelling, and research references',
+      title: 'SGEMM Architecture Whitepaper',
+      description: 'CUDA SGEMM whitepaper with architecture walkthroughs, optimization methodology, validation boundaries, and engineering references',
       themeConfig: {
         nav: [
           { text: 'Home', link: '/en/', activeMatch: '^/en/$' },
-          { text: 'Quick Start', link: '/en/getting-started' },
-          { text: 'Highlights', link: '/en/project-highlights' },
-          { text: 'Interview', link: '/en/interview-playbook' },
-          { text: 'Kernels', link: '/en/kernel-naive', activeMatch: '/en/kernel-' },
-          { text: 'Benchmark', link: '/en/benchmark-results' },
-          { text: 'References', link: '/en/references' },
+          { text: 'Architecture', link: '/en/architecture', activeMatch: '^/en/(architecture|project-highlights)' },
+          { text: 'Methodology', link: '/en/learning-path', activeMatch: '^/en/(learning-path|kernel-.*|optimization-playbook)' },
+          { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: 'Validation', link: '/en/benchmark-results', activeMatch: '^/en/benchmark-results' },
+          { text: 'Support', link: '/en/getting-started', activeMatch: '^/en/(getting-started|interview-playbook)' },
         ],
         sidebar: {
           '/en/': [
             {
-              text: 'Project Brief',
+              text: 'Architecture',
               items: [
-                { text: 'Home', link: '/en/' },
-                { text: 'Getting Started', link: '/en/getting-started' },
+                { text: 'Whitepaper Home', link: '/en/' },
+                { text: 'Architecture Overview', link: '/en/architecture' },
                 { text: 'Project Highlights', link: '/en/project-highlights' },
-                { text: 'Interview Playbook', link: '/en/interview-playbook' },
-                { text: 'Architecture', link: '/en/architecture' },
               ],
             },
             {
-              text: 'Kernel Ladder',
+              text: 'Methodology',
               items: [
                 { text: 'Learning Path', link: '/en/learning-path' },
                 { text: 'Naive Kernel', link: '/en/kernel-naive' },
@@ -62,21 +59,28 @@ export default withMermaid(defineConfig({
                 { text: 'Bank Conflict Free', link: '/en/kernel-bank-free' },
                 { text: 'Double Buffer', link: '/en/kernel-double-buffer' },
                 { text: 'Tensor Core WMMA', link: '/en/kernel-tensor-core' },
+                { text: 'Optimization Playbook', link: '/en/optimization-playbook' },
               ],
             },
             {
-              text: 'Performance & Ops',
+              text: 'Resources',
+              items: [
+                { text: 'CUDA Memory Cheat Sheet', link: '/en/cuda-memory-cheatsheet' },
+                { text: 'Performance Casebook', link: '/en/performance-casebook' },
+                { text: 'References', link: '/en/references' },
+              ],
+            },
+            {
+              text: 'Validation',
               items: [
                 { text: 'Benchmark Results', link: '/en/benchmark-results' },
-                { text: 'Optimization Playbook', link: '/en/optimization-playbook' },
-                { text: 'Performance Casebook', link: '/en/performance-casebook' },
-                { text: 'CUDA Memory Cheatsheet', link: '/en/cuda-memory-cheatsheet' },
               ],
             },
             {
-              text: 'Research References',
+              text: 'Support',
               items: [
-                { text: 'Papers & Repositories', link: '/en/references' },
+                { text: 'Getting Started', link: '/en/getting-started' },
+                { text: 'Interview Playbook', link: '/en/interview-playbook' },
               ],
             },
           ],
@@ -87,32 +91,29 @@ export default withMermaid(defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       link: '/zh/',
-      title: 'SGEMM 优化实验室',
-      description: '面向面试展示与社区传播的 CUDA SGEMM 项目文档：从朴素内核到 Tensor Core WMMA',
+      title: 'SGEMM 架构白皮书',
+      description: '双语 CUDA SGEMM 白皮书，聚焦架构设计、优化方法、验证边界与工程参考资料',
       themeConfig: {
         nav: [
           { text: '首页', link: '/zh/', activeMatch: '^/zh/$' },
-          { text: '快速开始', link: '/zh/getting-started' },
-          { text: '项目亮点', link: '/zh/project-highlights' },
-          { text: '面试手册', link: '/zh/interview-playbook' },
-          { text: '内核阶梯', link: '/zh/kernel-naive', activeMatch: '/zh/kernel-' },
-          { text: '基准验证', link: '/zh/benchmark-results' },
-          { text: '参考文献', link: '/zh/references' },
+          { text: '架构', link: '/zh/architecture', activeMatch: '^/zh/(architecture|project-highlights)' },
+          { text: '方法论', link: '/zh/learning-path', activeMatch: '^/zh/(learning-path|kernel-.*|optimization-playbook)' },
+          { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: '验证', link: '/zh/benchmark-results', activeMatch: '^/zh/benchmark-results' },
+          { text: '支持', link: '/zh/getting-started', activeMatch: '^/zh/(getting-started|interview-playbook)' },
         ],
         sidebar: {
           '/zh/': [
             {
-              text: '项目总览',
+              text: '架构',
               items: [
-                { text: '首页', link: '/zh/' },
-                { text: '快速上手', link: '/zh/getting-started' },
-                { text: '项目亮点', link: '/zh/project-highlights' },
-                { text: '面试手册', link: '/zh/interview-playbook' },
+                { text: '白皮书首页', link: '/zh/' },
                 { text: '架构概述', link: '/zh/architecture' },
+                { text: '项目亮点', link: '/zh/project-highlights' },
               ],
             },
             {
-              text: '内核阶梯',
+              text: '方法论',
               items: [
                 { text: '学习路径', link: '/zh/learning-path' },
                 { text: '朴素内核', link: '/zh/kernel-naive' },
@@ -120,21 +121,28 @@ export default withMermaid(defineConfig({
                 { text: '消除 Bank Conflict', link: '/zh/kernel-bank-free' },
                 { text: '双缓冲', link: '/zh/kernel-double-buffer' },
                 { text: 'Tensor Core WMMA', link: '/zh/kernel-tensor-core' },
+                { text: '优化手册', link: '/zh/optimization-playbook' },
               ],
             },
             {
-              text: '性能与工程',
+              text: '资源',
+              items: [
+                { text: 'CUDA 内存速查表', link: '/zh/cuda-memory-cheatsheet' },
+                { text: '性能案例库', link: '/zh/performance-casebook' },
+                { text: '参考文献', link: '/zh/references' },
+              ],
+            },
+            {
+              text: '验证',
               items: [
                 { text: 'Benchmark 结果', link: '/zh/benchmark-results' },
-                { text: '优化手册', link: '/zh/optimization-playbook' },
-                { text: '性能案例集', link: '/zh/performance-casebook' },
-                { text: 'CUDA 内存速查表', link: '/zh/cuda-memory-cheatsheet' },
               ],
             },
             {
-              text: '论文与引用',
+              text: '支持',
               items: [
-                { text: '论文与仓库索引', link: '/zh/references' },
+                { text: '快速上手', link: '/zh/getting-started' },
+                { text: '面试手册', link: '/zh/interview-playbook' },
               ],
             },
           ],
