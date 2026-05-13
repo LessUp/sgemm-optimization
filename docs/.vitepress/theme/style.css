@@ -455,6 +455,27 @@ div[class*='language-'] {
   padding: calc(var(--vp-nav-height) + 48px) var(--spacing-lg) 48px;
 }
 
+.home-kicker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.home-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(118, 185, 0, 0.35);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a8f00;
+  background: rgba(118, 185, 0, 0.07);
+}
+
 .home-hero-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -497,6 +518,59 @@ div[class*='language-'] {
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   margin-bottom: var(--spacing-lg);
+}
+
+.home-proof-strip {
+  margin-top: var(--spacing-lg);
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(145deg, rgba(118, 185, 0, 0.06), rgba(0, 212, 170, 0.03));
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.proof-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.proof-item {
+  border-right: 1px solid rgba(118, 185, 0, 0.2);
+  padding-right: var(--spacing-sm);
+}
+
+.proof-item:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.proof-label {
+  color: var(--vp-c-text-3);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.proof-value {
+  margin-top: 6px;
+  color: var(--vp-c-text-1);
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.home-section-title {
+  margin-top: var(--spacing-2xl);
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--vp-c-text-1);
+}
+
+.home-section-subtitle {
+  margin-bottom: var(--spacing-md);
+  color: var(--vp-c-text-2);
+  font-size: 0.95rem;
 }
 
 /* Performance Cards Grid */
@@ -554,6 +628,7 @@ div[class*='language-'] {
   border-radius: var(--radius-lg);
   background: linear-gradient(160deg, var(--vp-c-bg-soft), var(--vp-c-bg-elv));
   padding: var(--spacing-md);
+  min-height: 112px;
 }
 
 .signal-title {
@@ -614,6 +689,42 @@ div[class*='language-'] {
   box-shadow: 0 10px 28px rgba(118, 185, 0, 0.14);
 }
 
+.route-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-md) 0 var(--spacing-xl);
+}
+
+.route-card {
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(165deg, var(--vp-c-bg), var(--vp-c-bg-soft));
+  padding: var(--spacing-lg);
+}
+
+.route-card h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: var(--vp-c-text-1);
+}
+
+.route-card p {
+  margin: var(--spacing-sm) 0 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.9rem;
+}
+
+.route-links {
+  margin-top: var(--spacing-sm);
+}
+
+.route-links a {
+  display: inline-block;
+  margin-right: var(--spacing-sm);
+  font-size: 0.85rem;
+}
+
 /* Highlight Box */
 .highlight-box {
   background: linear-gradient(135deg, rgba(118, 185, 0, 0.1), rgba(0, 212, 170, 0.05));
@@ -664,6 +775,21 @@ div[class*='language-'] {
   color: #fff;
 }
 
+.reference-list {
+  margin: var(--spacing-md) 0 var(--spacing-xl);
+}
+
+.reference-list li {
+  margin-bottom: var(--spacing-sm);
+}
+
+.references-note {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(118, 185, 0, 0.3);
+  background: rgba(118, 185, 0, 0.06);
+}
+
 /* === Responsive Design === */
 @media (max-width: 960px) {
   .VPHero {
@@ -694,6 +820,21 @@ div[class*='language-'] {
     grid-template-columns: 1fr;
   }
 
+  .proof-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .proof-item {
+    border-right: none;
+    border-bottom: 1px solid rgba(118, 185, 0, 0.2);
+    padding-bottom: var(--spacing-sm);
+  }
+
+  .proof-item:nth-last-child(-n + 2) {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
   .home-hero-grid {
     grid-template-columns: 1fr;
   }
@@ -704,6 +845,10 @@ div[class*='language-'] {
 
   .home-main-subtitle {
     font-size: 0.95rem;
+  }
+
+  .route-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -731,5 +876,17 @@ div[class*='language-'] {
 
   .signal-grid {
     grid-template-columns: 1fr;
+  }
+
+  .proof-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .proof-item {
+    border-bottom: 1px solid rgba(118, 185, 0, 0.2);
+  }
+
+  .proof-item:last-child {
+    border-bottom: none;
   }
 }

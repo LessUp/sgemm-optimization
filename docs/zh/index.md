@@ -1,93 +1,183 @@
 ---
 layout: home
-title: SGEMM 优化
+title: SGEMM 优化实验室
 ---
 
 <div class="home-shell">
   <div class="home-hero-grid">
     <div>
       <p class="home-eyebrow">CUDA SGEMM ENGINEERING NOTEBOOK</p>
-      <h1 class="home-main-title">SGEMM Optimization</h1>
+      <h1 class="home-main-title">SGEMM 优化实验室</h1>
       <p class="home-main-subtitle">
-        一个双语、可基准验证的 CUDA SGEMM 学习站点：从基线 FP32 kernel 到带保护回退的 Tensor Core WMMA。
-        让代码可读，让每一次提速都可解释。
+        这是一个面向学习与面试展示的双语 CUDA SGEMM 项目：不仅讲优化，还讲证据与边界。
+        每一步提速都绑定正确性约束、基准解释和可复现的验证路径。
       </p>
       <div class="home-action-row">
         <a class="btn" href="/zh/getting-started">5 分钟开始</a>
-        <a class="btn btn-outline" href="/zh/learning-path">跟随优化阶梯</a>
+        <a class="btn btn-outline" href="/zh/project-highlights">查看项目亮点</a>
+        <a class="btn btn-outline" href="/zh/interview-playbook">面试手册</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
+      </div>
+      <div class="home-kicker-row">
+        <span class="home-chip">cuBLAS 对照</span>
+        <span class="home-chip">OpenSpec 治理</span>
+        <span class="home-chip">中英镜像页面</span>
       </div>
     </div>
     <div class="signal-grid">
       <div class="signal-card">
-        <div class="signal-title">优化阶段</div>
+        <div class="signal-title">内核阶梯</div>
         <div class="signal-value">5</div>
-        <div class="signal-note">naive -> WMMA</div>
+        <div class="signal-note">naive -> tiled -> bank-free -> double-buffer -> WMMA</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">正确性对照</div>
+        <div class="signal-title">正确性基准</div>
         <div class="signal-value">cuBLAS</div>
-        <div class="signal-note">FP32 / Tensor Core 分别使用容差</div>
+        <div class="signal-note">FP32 与 Tensor Core 使用不同容差预算</div>
       </div>
       <div class="signal-card">
         <div class="signal-title">验证边界</div>
         <div class="signal-value">CI + GPU</div>
-        <div class="signal-note">CI 负责编译，本地 GPU 负责运行时验证</div>
+        <div class="signal-note">CI 保证构建健康，本地 GPU 验证运行时与性能</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">语言支持</div>
+        <div class="signal-title">公开内容</div>
         <div class="signal-value">EN / 中文</div>
-        <div class="signal-note">中英文页面一一对应，自动跳转</div>
+        <div class="signal-note">教程、面试、参考资料均中英对照</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-proof-strip">
+    <div class="proof-grid">
+      <div class="proof-item">
+        <div class="proof-label">Benchmark 范围</div>
+        <div class="proof-value">WMMA 端到端与仅计算路径分开汇报，避免混淆。</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-label">数值策略</div>
+        <div class="proof-value">FP32 与 Tensor Core 按路径设定不同精度容差。</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-label">工程契约</div>
+        <div class="proof-value">统一 launcher 形态保证 kernel 可替换、可对比、可验证。</div>
+      </div>
+      <div class="proof-item">
+        <div class="proof-label">治理一致性</div>
+        <div class="proof-value">OpenSpec 持续对齐文档、流程与实现意图。</div>
       </div>
     </div>
   </div>
 </div>
 
-## 一张图看完整个项目
+## 为什么这个项目值得关注
+
+<div class="perf-grid">
+  <div class="perf-card">
+    <div class="perf-label">学习深度</div>
+    <div class="perf-value">渐进式</div>
+    <div class="perf-note">每个内核阶段只解决一个核心性能问题。</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">证据模型</div>
+    <div class="perf-value">可追踪</div>
+    <div class="perf-note">性能结论绑定正确性验证与范围标注。</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">面试价值</div>
+    <div class="perf-value">可讲清</div>
+    <div class="perf-note">可以按工程决策链条讲出“为什么这样做”。</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">社区价值</div>
+    <div class="perf-value">可复用</div>
+    <div class="perf-note">包含调优手册、架构案例与参考文献索引。</div>
+  </div>
+</div>
+
+## 一张图看项目全貌
 
 ```mermaid
 flowchart LR
-    A[Naive\n一线程一输出] --> B[Tiled\n共享内存复用]
-    B --> C[Bank-Free\n消除共享内存 bank 冲突]
-    C --> D[Double Buffer\n分阶段加载，隐藏延迟]
-    D --> E[Tensor Core WMMA\n抬高吞吐上限]
+    A[Naive FP32\n一线程一输出] --> B[Tiled FP32\n共享内存复用]
+    B --> C[Bank-Free FP32\n填充消除 bank 冲突]
+    C --> D[Double Buffer FP32\n加载与计算重叠]
+    D --> E[Tensor Core WMMA\n混合精度]
 
-    E --> F{维度是否 16 对齐？}
+    E --> F{M/K/N 是否都 16 对齐?}
     F -- 是 --> G[WMMA 计算路径]
     F -- 否 --> H[受保护 FP32 回退]
 
-    T1[Google Test 对照 cuBLAS] -. 正确性护栏 .-> A
+    T1[Google Test + cuBLAS 对照] -. 正确性护栏 .-> A
     T1 -. 正确性护栏 .-> E
-    T2[Benchmark 拆分\n端到端 vs 仅计算] -. 可观测性护栏 .-> E
+    T2[Benchmark 标签:\n端到端 vs 仅计算] -. 证据护栏 .-> E
+    T3[OpenSpec 治理] -. 流程护栏 .-> A
+    T3 -. 流程护栏 .-> H
 ```
 
-## 核心精华
+## 按目标选择入口
 
-| 精华 | 价值 | 对应入口 |
-|------|------|----------|
-| 渐进式 kernel 阶梯 | 每一步优化只回答一个问题，并且可量化 | [学习路径](/zh/learning-path) |
-| 统一 launcher 契约 | kernel 可替换，可对比，可验证 | [架构概览](/zh/architecture) |
-| 验证先行工作流 | 任何性能结论都绑定正确性检查 | [Benchmark 结果](/zh/benchmark-results) |
-| OpenSpec 治理 | 文档、实现、仓库流程保持一致 | [规范索引](https://github.com/LessUp/sgemm-optimization/tree/master/openspec) |
+<div class="route-grid">
+  <div class="route-card">
+    <h3>快速编译与运行</h3>
+    <p>从 clone 到 benchmark，明确本地验证与 CI 验证分工。</p>
+    <div class="route-links">
+      <a href="/zh/getting-started">快速上手</a>
+      <a href="/zh/benchmark-results">Benchmark 结果</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>系统学习优化阶梯</h3>
+    <p>按顺序理解每一步如何改变内存行为与性能画像。</p>
+    <div class="route-links">
+      <a href="/zh/learning-path">学习路径</a>
+      <a href="/zh/kernel-naive">内核系列</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>准备面试表达</h3>
+    <p>用一条清晰叙事线讲清架构决策、验证策略和结果可信度。</p>
+    <div class="route-links">
+      <a href="/zh/project-highlights">项目亮点</a>
+      <a href="/zh/interview-playbook">面试手册</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>追溯技术来源</h3>
+    <p>从实现选择反查到官方文档、论文和高质量开源仓库。</p>
+    <div class="route-links">
+      <a href="/zh/references">参考文献</a>
+      <a href="/zh/optimization-playbook">优化手册</a>
+    </div>
+  </div>
+</div>
 
 ## 知识补给站
 
 <div class="knowledge-grid">
+  <a class="knowledge-card" href="/zh/project-highlights">
+    <h3>项目亮点</h3>
+    <p>从差异化、工程规范、可验证性三个维度解释项目竞争力。</p>
+  </a>
+  <a class="knowledge-card" href="/zh/interview-playbook">
+    <h3>面试手册</h3>
+    <p>覆盖“如何讲”“常见追问”“如何回应权衡”的实战模板。</p>
+  </a>
+  <a class="knowledge-card" href="/zh/references">
+    <h3>参考文献</h3>
+    <p>按用途整理论文、官方文档和仓库，并映射到具体设计决策。</p>
+  </a>
   <a class="knowledge-card" href="/zh/optimization-playbook">
-    <h3>优化实战手册</h3>
-    <p>提供 SGEMM 性能瓶颈诊断闭环、决策树和实验模板，方便快速定位问题。</p>
+    <h3>优化手册</h3>
+    <p>给出瓶颈归类、假设验证、实验记录的闭环方法。</p>
   </a>
   <a class="knowledge-card" href="/zh/performance-casebook">
     <h3>性能案例库</h3>
-    <p>按 Volta、Turing、Ampere、Ada、Hopper 架构整理调优重点和建议动作。</p>
+    <p>按 Volta、Turing、Ampere、Ada、Hopper 总结调优优先级。</p>
   </a>
   <a class="knowledge-card" href="/zh/cuda-memory-cheatsheet">
     <h3>CUDA 内存速查表</h3>
-    <p>把内存合并访问、共享内存 bank、占用率提示和 profiler 指标放在同一张地图里。</p>
-  </a>
-  <a class="knowledge-card" href="/zh/kernel-tensor-core">
-    <h3>Tensor Core 实战</h3>
-    <p>理解 WMMA 的对齐约束，以及为什么带保护回退能保证稳定行为。</p>
+    <p>内存合并访问、bank 行为、占用率与 profiler 指标快速对照。</p>
   </a>
 </div>
 
@@ -107,13 +197,8 @@ openspec validate --all
 ./build/bin/sgemm_benchmark --dims 256 384 640
 ```
 
-## 按目标开始
+## 语言与入口
 
-| 如果你想... | 从这里开始 |
-|-------------|-----------|
-| 编译并跑通一次 | [快速上手](/zh/getting-started) |
-| 按设计顺序学习 | [学习路径](/zh/learning-path) |
-| 建立优化诊断能力 | [优化实战手册](/zh/optimization-playbook) |
-| 按 GPU 架构做针对性调优 | [性能案例库](/zh/performance-casebook) |
-| 快速复习 CUDA 内存知识 | [CUDA 内存速查表](/zh/cuda-memory-cheatsheet) |
-| 切换到英文站点 | [English Home](/en/) |
+- English mirrored home: [English Home](/en/)
+- 仓库入口: [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md)
+- OpenSpec 权威规范: [openspec/specs](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs)

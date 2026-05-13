@@ -8,14 +8,15 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A compact CUDA SGEMM learning project that walks from a readable baseline kernel to Tensor Core WMMA, with cuBLAS verification and a CMake-first build.
+A CUDA SGEMM engineering notebook designed for both deep learning and interview presentation: from readable FP32 baselines to guarded Tensor Core WMMA, with cuBLAS-backed verification and explicit benchmark boundaries.
 
-## What makes it useful
+## Why this project stands out
 
-- **One optimization ladder**: naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core.
-- **Comparable kernel interfaces**: every FP32 kernel uses the same `(A, B, C, M, K, N, stream)` launcher shape.
-- **Verification-first harness**: kernel output is checked against cuBLAS with separate tolerances for FP32 and Tensor Core paths.
-- **Learning-oriented docs**: GitHub Pages carries the full walkthrough instead of duplicating it in the README.
+- **Progressive kernel ladder**: naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core.
+- **Evidence-first reporting**: performance claims are paired with correctness policy and scope labels.
+- **Comparable interfaces**: FP32 kernels share a unified `(A, B, C, M, K, N, stream)` launcher contract.
+- **Interview-ready narrative**: dedicated pages for project highlights, interview walkthrough, and references.
+- **Bilingual mirrored docs**: English and Chinese public pages stay aligned.
 
 ## Quick start
 
@@ -31,15 +32,26 @@ ctest --test-dir build
 
 Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is limited to compile-time, formatting, repository-structure, OpenSpec, and Pages checks.
 
-## Start here
+## Start here (GitHub Pages)
 
 | Goal | Entry point |
 |------|-------------|
-| Use the project site | [GitHub Pages](https://lessup.github.io/sgemm-optimization/) |
-| Build and run once | [Getting Started](docs/getting-started.md) |
-| Follow the kernel ladder | [Learning Path](docs/learning-path.md) |
-| Inspect the source layout | [Architecture](docs/architecture.md) |
-| Read the normative specs | [Specifications](specs.md) |
+| Open English home | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
+| Open Chinese home | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
+| Build and run once | [Getting Started](https://lessup.github.io/sgemm-optimization/en/getting-started) |
+| Understand differentiation | [Project Highlights](https://lessup.github.io/sgemm-optimization/en/project-highlights) |
+| Prepare interview explanation | [Interview Playbook](https://lessup.github.io/sgemm-optimization/en/interview-playbook) |
+| Trace technical lineage | [References](https://lessup.github.io/sgemm-optimization/en/references) |
+| Read normative specs | [OpenSpec Specs](openspec/specs/) |
+
+## Validation boundary
+
+| Environment | What to trust |
+|-------------|---------------|
+| Hosted CI | Formatting, compile validity, OpenSpec structure, Pages buildability |
+| Local CUDA GPU | Runtime correctness verification and benchmark performance |
+
+This split is deliberate. CI keeps repository health; real GPU hardware validates runtime behavior and speed claims.
 
 ## Source map
 

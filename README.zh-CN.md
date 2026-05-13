@@ -8,14 +8,15 @@
 
 [English](README.md) | 简体中文
 
-这是一个紧凑的 CUDA SGEMM 学习项目：从最容易读懂的 baseline kernel 出发，逐步推进到 Tensor Core WMMA，并用 cuBLAS 做正确性对照。
+这是一个面向学习与面试展示的 CUDA SGEMM 工程化项目：从可读的 FP32 baseline kernel 演进到带保护回退的 Tensor Core WMMA，并通过 cuBLAS 对照建立可信验证。
 
-## 为什么值得看
+## 为什么它更有竞争力
 
 - **优化链条完整**：naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core。
-- **接口保持一致**：FP32 kernel 都使用统一的 `(A, B, C, M, K, N, stream)` launcher 形态。
-- **验证先行**：所有 kernel 与 cuBLAS 对照，FP32 与 Tensor Core 使用不同容差。
-- **文档职责清晰**：README 只做仓库入口，完整学习路线放在 GitHub Pages。
+- **证据优先表达**：性能结论与正确性策略、测量范围一起呈现。
+- **接口保持一致**：FP32 kernel 使用统一 `(A, B, C, M, K, N, stream)` launcher 契约。
+- **面试友好叙事**：提供项目亮点、面试手册、参考文献三类高价值入口。
+- **中英文镜像文档**：公开页面结构保持一致，便于传播与复用。
 
 ## 快速开始
 
@@ -31,15 +32,26 @@ ctest --test-dir build
 
 运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 只覆盖编译、格式、仓库结构、OpenSpec 与 Pages 构建检查。
 
-## 从哪里开始
+## 推荐入口（GitHub Pages）
 
 | 目标 | 入口 |
 |------|------|
-| 打开项目站点 | [GitHub Pages](https://lessup.github.io/sgemm-optimization/zh/) |
-| 编译运行一次 | [快速上手](zh/docs/getting-started.md) |
-| 跟随优化路线 | [学习路径](zh/docs/learning-path.md) |
-| 查看源码结构 | [架构概览](zh/docs/architecture.md) |
-| 阅读稳定规范 | [规范索引](zh/specs.md) |
+| 打开中文首页 | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
+| 打开英文首页 | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
+| 编译运行一次 | [快速上手](https://lessup.github.io/sgemm-optimization/zh/getting-started) |
+| 了解项目差异化 | [项目亮点](https://lessup.github.io/sgemm-optimization/zh/project-highlights) |
+| 准备面试表达 | [面试手册](https://lessup.github.io/sgemm-optimization/zh/interview-playbook) |
+| 追溯技术来源 | [参考文献](https://lessup.github.io/sgemm-optimization/zh/references) |
+| 阅读规范源 | [OpenSpec 规范](openspec/specs/) |
+
+## 验证边界
+
+| 环境 | 可以信任什么 |
+|------|--------------|
+| 托管 CI | 格式、编译有效性、OpenSpec 结构、Pages 可构建性 |
+| 本地 CUDA GPU | 运行时正确性与 benchmark 性能 |
+
+这种拆分是刻意设计：CI 负责仓库健康，真实 GPU 负责运行时与性能结论。
 
 ## 源码地图
 
@@ -48,8 +60,7 @@ src/kernels/   CUDA SGEMM kernel 实现
 src/utils/     CUDA RAII、验证与 benchmark 工具
 src/main.cu    benchmark CLI
 tests/         基于 cuBLAS 的 Google Test 覆盖
-docs/          英文学习文档与 Pages 内容
-zh/docs/       中文学习文档与 Pages 内容
+docs/          中英文 Pages 文档（含 /en 与 /zh）
 openspec/      稳定 specs 与变更工作流
 ```
 
