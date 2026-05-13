@@ -11,8 +11,8 @@ const base = rawBase
 
 export default withMermaid(defineConfig({
   base,
-  title: 'SGEMM Architecture Whitepaper',
-  description: 'Bilingual CUDA SGEMM whitepaper covering architecture, optimization methodology, validation evidence, and engineering references',
+  title: 'SGEMM Optimization Lab',
+  description: 'Bilingual CUDA SGEMM lab covering architecture, optimization methodology, validation evidence, and engineering references',
 
   head: [
     ['meta', { name: 'theme-color', content: '#76b900' }],
@@ -29,25 +29,29 @@ export default withMermaid(defineConfig({
       label: 'English',
       lang: 'en-US',
       link: '/en/',
-      title: 'SGEMM Architecture Whitepaper',
-      description: 'CUDA SGEMM whitepaper with architecture walkthroughs, optimization methodology, validation boundaries, and engineering references',
+      title: 'SGEMM Optimization Lab',
+      description: 'CUDA SGEMM lab with architecture walkthroughs, optimization methodology, validation boundaries, and engineering references',
       themeConfig: {
         nav: [
           { text: 'Home', link: '/en/', activeMatch: '^/en/$' },
-          { text: 'Architecture', link: '/en/architecture', activeMatch: '^/en/(architecture|project-highlights)' },
+          { text: 'Architecture', link: '/en/architecture', activeMatch: '^/en/architecture' },
           { text: 'Methodology', link: '/en/learning-path', activeMatch: '^/en/(learning-path|kernel-.*|optimization-playbook)' },
-          { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook|project-highlights|interview-playbook)' },
           { text: 'Validation', link: '/en/benchmark-results', activeMatch: '^/en/benchmark-results' },
-          { text: 'Support', link: '/en/getting-started', activeMatch: '^/en/(getting-started|interview-playbook)' },
+          { text: 'Support', link: '/en/getting-started', activeMatch: '^/en/getting-started' },
         ],
         sidebar: {
           '/en/': [
             {
+              text: 'Home',
+              items: [
+                { text: 'SGEMM Optimization Lab Home', link: '/en/' },
+              ],
+            },
+            {
               text: 'Architecture',
               items: [
-                { text: 'Whitepaper Home', link: '/en/' },
                 { text: 'Architecture Overview', link: '/en/architecture' },
-                { text: 'Project Highlights', link: '/en/project-highlights' },
               ],
             },
             {
@@ -80,7 +84,13 @@ export default withMermaid(defineConfig({
               text: 'Support',
               items: [
                 { text: 'Getting Started', link: '/en/getting-started' },
-                { text: 'Interview Playbook', link: '/en/interview-playbook' },
+              ],
+            },
+            {
+              text: 'Transitional Guides',
+              items: [
+                { text: 'Project Highlights (transitional)', link: '/en/project-highlights' },
+                { text: 'Interview Playbook (transitional)', link: '/en/interview-playbook' },
               ],
             },
           ],
@@ -91,25 +101,29 @@ export default withMermaid(defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       link: '/zh/',
-      title: 'SGEMM 架构白皮书',
-      description: '双语 CUDA SGEMM 白皮书，聚焦架构设计、优化方法、验证边界与工程参考资料',
+      title: 'SGEMM 优化实验室',
+      description: '双语 CUDA SGEMM 实验室，聚焦架构设计、优化方法、验证边界与工程参考资料',
       themeConfig: {
         nav: [
           { text: '首页', link: '/zh/', activeMatch: '^/zh/$' },
-          { text: '架构', link: '/zh/architecture', activeMatch: '^/zh/(architecture|project-highlights)' },
+          { text: '架构', link: '/zh/architecture', activeMatch: '^/zh/architecture' },
           { text: '方法论', link: '/zh/learning-path', activeMatch: '^/zh/(learning-path|kernel-.*|optimization-playbook)' },
-          { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook|project-highlights|interview-playbook)' },
           { text: '验证', link: '/zh/benchmark-results', activeMatch: '^/zh/benchmark-results' },
-          { text: '支持', link: '/zh/getting-started', activeMatch: '^/zh/(getting-started|interview-playbook)' },
+          { text: '支持', link: '/zh/getting-started', activeMatch: '^/zh/getting-started' },
         ],
         sidebar: {
           '/zh/': [
             {
+              text: '首页',
+              items: [
+                { text: 'SGEMM 优化实验室首页', link: '/zh/' },
+              ],
+            },
+            {
               text: '架构',
               items: [
-                { text: '白皮书首页', link: '/zh/' },
                 { text: '架构概述', link: '/zh/architecture' },
-                { text: '项目亮点', link: '/zh/project-highlights' },
               ],
             },
             {
@@ -142,7 +156,13 @@ export default withMermaid(defineConfig({
               text: '支持',
               items: [
                 { text: '快速上手', link: '/zh/getting-started' },
-                { text: '面试手册', link: '/zh/interview-playbook' },
+              ],
+            },
+            {
+              text: '过渡内容',
+              items: [
+                { text: '项目亮点（过渡）', link: '/zh/project-highlights' },
+                { text: '面试手册（过渡）', link: '/zh/interview-playbook' },
               ],
             },
           ],
