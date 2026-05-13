@@ -1,32 +1,12 @@
 ---
-layout: default
 title: 2. Tiled Kernel
-parent: Home
-nav_order: 4
-permalink: /docs/kernel-tiled/
-lang: en
-page_key: kernel-tiled
-lang_ref: zh-kernel-tiled
 ---
 
 # Kernel 2: Tiled Implementation
-{: .fs-8 }
 
 Shared memory blocking for better data reuse
-{: .fs-6 .fw-300 }
 
----
 
-## Overview
-
-The tiled kernel introduces **shared memory** to dramatically reduce global memory traffic. Instead of each thread loading data from global memory K times, we load tiles once into fast shared memory and reuse them.
-
-<div class="highlight-box info">
-  <strong>Key Insight</strong><br>
-  Each element of A and B is used N and M times respectively. Shared memory reduces global memory reads by <strong>TILE_SIZE×</strong>.
-</div>
-
----
 
 ## The Problem with Naïve
 
@@ -44,26 +24,7 @@ In the naïve kernel:
 └─────────────────────────────────────────┘
 ```
 
----
 
-## The Solution: Tiling
-
-Divide matrices into **TILE_SIZE × TILE_SIZE** tiles:
-
-```
-A (M×K)          B (K×N)          C (M×N)
-┌───┬───┐       ┌───┬───┐       ┌───┬───┐
-│A00│A01│       │B00│B01│       │C00│C01│
-├───┼───┤   ×   ├───┼───┤   =   ├───┼───┤
-│A10│A11│       │B10│B11│       │C10│C11│
-└───┴───┘       └───┴───┘       └───┴───┘
-
-C00 = A00×B00 + A01×B10
-```
-
-Each tile of C is computed by loading corresponding tiles from A and B into shared memory.
-
----
 
 ## Implementation
 
@@ -125,36 +86,7 @@ __global__ void sgemm_tiled_kernel(
 }
 ```
 
----
 
-## Memory Access Pattern
-
-### Before (Naïve)
-```
-Global Memory Reads = M × N × K elements × 2 matrices
-                    = 2 × M × N × K reads
-```
-
-### After (Tiled)
-```
-Global Memory Reads = (M × K) for A tiles + (K × N) for B tiles
-                    = K × (M + N) reads per tile iteration
-                    = O((M × N × K) / TILE_SIZE) total
-Reduction factor: TILE_SIZE×
-```
-
-### Coalesced Access
-
-Consecutive threads now read consecutive memory addresses:
-
-```
-Thread 0: A[row, t*TILE+0], B[t*TILE+0, col]
-Thread 1: A[row, t*TILE+1], B[t*TILE+1, col]
-Thread 2: A[row, t*TILE+2], B[t*TILE+2, col]
-          ↑ consecutive! ✓
-```
-
----
 
 ## Memory Architecture
 
@@ -180,18 +112,7 @@ Thread 2: A[row, t*TILE+2], B[t*TILE+2, col]
 └─────────────────────────────────────────────────────────┘
 ```
 
----
 
-## Performance Characteristics
-
-| Metric | Naïve | Tiled | Improvement |
-|--------|-------|-------|-------------|
-| **GFLOPS (1024³)** | 604 | 753 | **+25%** |
-| **Global Mem Traffic** | 2MNK | 2MNK/TILE | **-97%** |
-| **Shared Memory** | 0 KB | ~8 KB | new |
-| **Memory Bound?** | Yes | Still yes | — |
-
----
 
 ## Synchronization Points
 
@@ -213,22 +134,7 @@ __syncthreads();  // Compute complete, safe to load next tile
   Missing either <code>__syncthreads()</code> causes race conditions — some threads read garbage data or write before others finish.
 </div>
 
----
 
-## Boundary Handling
-
-For matrices not divisible by TILE_SIZE:
-
-```cpp
-if (row < M && a_col < K)
-    As[ty][tx] = A[row * K + a_col];
-else
-    As[ty][tx] = 0.0f;  // Zero padding
-```
-
-The zero padding ensures correct computation without special-case logic.
-
----
 
 ## Tile Size Selection
 
@@ -240,15 +146,7 @@ The zero padding ensures correct computation without special-case logic.
 
 Default `TILE_SIZE = 32` fits well in typical 48-64 KB shared memory per SM.
 
----
 
-## Next Steps
-
-While we've improved global memory access, we've introduced a new problem: **shared memory bank conflicts**. When threads access the same memory bank, their requests are serialized.
-
-→ Continue to [Bank Conflict Free Kernel](kernel-bank-free/){: .btn .btn-primary }
-
----
 
 ## Key Takeaways
 

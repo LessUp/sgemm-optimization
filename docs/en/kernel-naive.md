@@ -1,32 +1,12 @@
 ---
-layout: default
 title: 1. Naïve Kernel
-parent: Home
-nav_order: 2
-permalink: /docs/kernel-naive/
-lang: en
-page_key: kernel-naive
-lang_ref: zh-kernel-naive
 ---
 
 # Kernel 1: Naïve Implementation
-{: .fs-8 }
 
 The simplest approach — each thread computes one output element
-{: .fs-6 .fw-300 }
 
----
 
-## Overview
-
-The naïve kernel is our **baseline implementation**. It follows the most straightforward approach to matrix multiplication: each CUDA thread is responsible for computing exactly one element of the output matrix C.
-
-<div class="highlight-box info">
-  <strong>Learning Goal</strong><br>
-  Understand the basic CUDA programming model and identify why this "obvious" approach performs poorly on GPUs.
-</div>
-
----
 
 ## Algorithm
 
@@ -52,37 +32,7 @@ Thread (tx, ty) in block (bx, by) computes:
   C[row, col] if row < M and col < N
 ```
 
----
 
-## Implementation
-
-```cpp
-// File: src/kernels/naive_sgemm.cuh
-
-__global__ void sgemm_naive_kernel(
-    const float* A, const float* B, float* C,
-    int M, int N, int K)
-{
-    // Calculate global row and column
-    int row = blockIdx.y * blockDim.y + threadIdx.y;
-    int col = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // Bounds check
-    if (row < M && col < N) {
-        float sum = 0.0f;
-        
-        // Compute dot product of row and column
-        for (int k = 0; k < K; ++k) {
-            sum += A[row * K + k] * B[k * N + col];
-        }
-        
-        // Write result
-        C[row * N + col] = sum;
-    }
-}
-```
-
----
 
 ## Memory Access Pattern
 
@@ -114,22 +64,7 @@ B (row-major):    [0,0] [0,1] [0,2] ... [1,0] [1,1] ...
                     This is NOT consecutive in memory!
 ```
 
----
 
-## Performance Characteristics
-
-| Metric | Value | Analysis |
-|--------|-------|----------|
-| **GFLOPS (1024³)** | ~604 | Baseline |
-| **Memory Access** | Strided for B | Bank conflicts likely |
-| **Data Reuse** | None | Each element read once per use |
-| **Arithmetic Intensity** | 2 FLOPs / 8 bytes | Memory-bound |
-
-### Roofline Position
-
-Located deep in the **memory-bound region** — performance is entirely limited by memory bandwidth, not compute capability.
-
----
 
 ## Code Walkthrough
 
@@ -177,29 +112,7 @@ for (int k = 0; k < K; ++k) {
 - Single loop over K dimension
 - Row of A × Column of B
 
----
 
-## Compilation & Execution
-
-### Launch Configuration
-
-```cpp
-dim3 blockDim(16, 16);  // 256 threads per block
-dim3 gridDim(
-    (N + blockDim.x - 1) / blockDim.x,  // Ceiling division
-    (M + blockDim.y - 1) / blockDim.y
-);
-
-sgemm_naive_kernel<<<gridDim, blockDim>>>(d_A, d_B, d_C, M, N, K);
-```
-
-### Expected Output (1024³ on RTX 3060)
-
-```
-[Naïve] Time: 3.55 ms, GFLOPS: 604.2
-```
-
----
 
 ## Learning Checkpoints
 
@@ -210,15 +123,7 @@ After understanding this kernel, you should be able to:
 - [x] Calculate arithmetic intensity for matrix multiply
 - [x] Understand why this kernel is memory-bound
 
----
 
-## Next Steps
-
-The naïve kernel's main bottleneck is **memory bandwidth**. In the next kernel, we'll fix this using **shared memory tiling:**
-
-→ Continue to [Tiled Kernel](kernel-tiled/){: .btn .btn-primary }
-
----
 
 ## Further Reading
 
