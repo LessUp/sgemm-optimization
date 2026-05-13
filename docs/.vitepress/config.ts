@@ -43,12 +43,6 @@ export default withMermaid(defineConfig({
         sidebar: {
           '/en/': [
             {
-              text: 'Home',
-              items: [
-                { text: 'SGEMM Architecture Whitepaper Home', link: '/en/' },
-              ],
-            },
-            {
               text: 'Architecture',
               items: [
                 { text: 'Architecture Overview', link: '/en/architecture' },
@@ -83,6 +77,7 @@ export default withMermaid(defineConfig({
             {
               text: 'Support',
               items: [
+                { text: 'SGEMM Architecture Whitepaper Home', link: '/en/' },
                 { text: 'Getting Started', link: '/en/getting-started' },
               ],
             },
@@ -107,12 +102,6 @@ export default withMermaid(defineConfig({
         ],
         sidebar: {
           '/zh/': [
-            {
-              text: '首页',
-              items: [
-                { text: 'SGEMM 架构白皮书首页', link: '/zh/' },
-              ],
-            },
             {
               text: '架构',
               items: [
@@ -148,6 +137,7 @@ export default withMermaid(defineConfig({
             {
               text: '支持',
               items: [
+                { text: 'SGEMM 架构白皮书首页', link: '/zh/' },
                 { text: '快速上手', link: '/zh/getting-started' },
               ],
             },
