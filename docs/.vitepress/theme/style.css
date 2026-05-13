@@ -142,20 +142,20 @@
 }
 
 .VPHero .VPButton.medium.brand {
-  background: linear-gradient(135deg, #76B900, #5A8F00);
+  background: #76B900;
   border: none;
-  color: #000;
+  color: #fff;
 }
 
 .VPHero .VPButton.medium.brand:hover {
-  background: linear-gradient(135deg, #8FD917, #76B900);
+  background: #8FD917;
   box-shadow: 0 4px 12px rgba(118, 185, 0, 0.3);
 }
 
 .VPHero .VPButton.medium.alt {
-  border: 2px solid #76B900;
+  border: 2px solid #5A8F00;
   background: transparent;
-  color: #76B900;
+  color: #5A8F00;
 }
 
 .VPHero .VPButton.medium.alt:hover {
@@ -448,6 +448,57 @@ div[class*='language-'] {
 
 /* === Homepage Custom Components === */
 
+/* Homepage Layout Shell */
+.home-shell {
+  max-width: 1152px;
+  margin: 0 auto;
+  padding: calc(var(--vp-nav-height) + 48px) var(--spacing-lg) 48px;
+}
+
+.home-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--spacing-2xl);
+  align-items: start;
+}
+
+.home-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #76B900;
+  margin-bottom: var(--spacing-md);
+}
+
+.home-main-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: var(--vp-c-text-1);
+  margin: 0 0 var(--spacing-lg);
+  background: linear-gradient(135deg, #76B900, #00D4AA);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.home-main-subtitle {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+  margin-bottom: var(--spacing-xl);
+  max-width: 560px;
+}
+
+.home-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
 /* Performance Cards Grid */
 .perf-grid {
   display: grid;
@@ -586,8 +637,8 @@ div[class*='language-'] {
 .btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #76B900, #5A8F00);
-  color: #000;
+  background: #76B900;
+  color: #fff;
   font-weight: 600;
   border-radius: var(--radius-md);
   text-decoration: none;
@@ -599,18 +650,18 @@ div[class*='language-'] {
 .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(118, 185, 0, 0.3);
-  color: #000;
+  color: #fff;
 }
 
 .btn-outline {
   background: transparent;
   border: 2px solid #76B900;
-  color: #76B900;
+  color: #5A8F00;
 }
 
 .btn-outline:hover {
   background: #76B900;
-  color: #000;
+  color: #fff;
 }
 
 /* === Responsive Design === */
@@ -642,6 +693,18 @@ div[class*='language-'] {
   .knowledge-grid {
     grid-template-columns: 1fr;
   }
+
+  .home-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-main-title {
+    font-size: 2rem;
+  }
+
+  .home-main-subtitle {
+    font-size: 0.95rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -656,5 +719,17 @@ div[class*='language-'] {
 
   .VPFeatures .VPFeature {
     padding: var(--spacing-lg);
+  }
+
+  .home-shell {
+    padding: calc(var(--vp-nav-height) + 24px) var(--spacing-md) 24px;
+  }
+
+  .home-main-title {
+    font-size: 1.6rem;
+  }
+
+  .signal-grid {
+    grid-template-columns: 1fr;
   }
 }
