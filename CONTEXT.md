@@ -6,50 +6,19 @@
 
 ### Tensor Core 模块
 
-项目将 Tensor Core 功能拆分为三个深度模块，每个模块有独立的职责和测试面：
+**位置**: `src/kernels/tensor_core_sgemm.cuh`
 
-#### Tensor Core Capabilities
-**位置**: `src/kernels/tensor_core_capabilities.cuh`
+深层模块，提供完整的 Tensor Core SGEMM 功能：
 
-能力查询接口，提供：
-- `tensorCoresAvailable()` - 查询当前设备是否支持 WMMA 操作 (sm_70+)
-- `tensorCoreDimensionsSupported(M, K, N)` - 查询给定维度是否适合 Tensor Core 加速
-- `getTensorCoreArchName()` - 获取当前设备的 Tensor Core 架构名称
-
-#### Tensor Core Compute
-**位置**: `src/kernels/tensor_core_compute.cuh`
-
-纯 WMMA 计算路径，提供：
-- `float_to_half_kernel` - FP32 → FP16 转换内核
-- `launch_tensor_core_sgemm_fp16()` - 纯 WMMA FP16→FP32 计算入口
-- `launch_tensor_core_sgemm_fp16_fast_path()` - 快速路径（无能力检查）
-
-此模块不执行 fallback，用于单独测试 Tensor Core 计算性能。
-
-#### Tensor Core Launcher
-**位置**: `src/kernels/tensor_core_launcher.cuh`
-
-统一的 SGEMM 启动接口，提供：
-- `launch_tensor_core_sgemm_with_fallback()` - 端到端 FP32 入口点（强制显式指定 fallback）
-- `FallbackKernel` - fallback 函数类型定义
-- `kTensorCoreVerifyTolerance` - Tensor Core 验证容差
-
-此模块处理：
-- 设备能力检测
-- FP32 → FP16 类型转换
-- 不支持情况下的 fallback 到用户指定的策略
+- **能力查询**: `tensorCoresAvailable()`, `tensorCoreDimensionsSupported()`, `getTensorCoreArchName()`
+- **计算内核**: `float_to_half_kernel`, `launch_tensor_core_sgemm_fp16()`, `launch_tensor_core_sgemm_fp16_fast_path()`
+- **统一接口**: `launch_tensor_core_sgemm_with_fallback()` - 端到端 FP32 入口点（强制显式指定 fallback）
+- **容差常量**: `kTensorCoreVerifyTolerance` - Tensor Core 验证容差（FP16 中间精度）
 
 **设计原则**：
+- **深度提升**：小接口（能力查询 + 启动入口），大实现（WMMA 内核 + 类型转换 + fallback 逻辑）
 - **不提供默认 fallback**：调用者必须显式指定 fallback 策略
 - **编译期解耦**：Tensor Core 模块不依赖任何具体内核
-- **深度提升**：模块职责单一（类型转换 + Tensor Core 启动）
-
-**便利函数**：
-调用点可以使用 `defaultTensorCoreFallback()` 便利函数（定义在各自的调用位置）：
-```cpp
-launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
-    defaultTensorCoreFallback(), stream);
-```
 
 #### Tensor Core Benchmark
 **位置**: `src/kernels/tensor_core_benchmark.cuh`
@@ -57,7 +26,7 @@ launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
 Tensor Core 特有的 benchmark 功能，提供：
 - `runTensorCoreComputeOnlyBenchmark()` - 纯计算路径性能测试
 
-此模块将 Tensor Core 特定逻辑从工具层移到内核层，避免循环依赖。
+**接口设计**：只接受 `cublasHandle_t`，不依赖整个 `SGEMMBenchmark` 类，避免内核层对工具层的上穿依赖。
 
 ## 验证模块
 

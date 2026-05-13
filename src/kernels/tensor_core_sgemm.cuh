@@ -1,37 +1,299 @@
 #pragma once
 
 // ============================================================================
-// Tensor Core SGEMM - 公共接口
+// Tensor Core SGEMM - 深层模块
 // ============================================================================
 //
-// 此文件作为 Tensor Core 功能的公共入口点。
-// 内部实现拆分为多个深度模块：
-//
-// 1. tensor_core_capabilities.cuh - 能力查询接口
-//    - tensorCoresAvailable()
-//    - tensorCoreDimensionsSupported()
-//    - getTensorCoreArchName()
-//
-// 2. tensor_core_compute.cuh - 纯 WMMA 计算路径
-//    - float_to_half_kernel
-//    - launch_tensor_core_sgemm_fp16()
-//    - launch_tensor_core_sgemm_fp16_fast_path()
-//
-// 3. tensor_core_launcher.cuh - 统一启动接口（强制显式 fallback）
-//    - launch_tensor_core_sgemm_with_fallback()
-//    - FallbackKernel 类型定义
-//    - Tensor Core 容差常量
-//
-// 4. tensor_core_benchmark.cuh - Tensor Core 专用 benchmark
-//    - runTensorCoreComputeOnlyBenchmark()
+// 此模块提供完整的 Tensor Core SGEMM 功能，包括：
+// - 设备能力查询
+// - WMMA FP16→FP32 计算
+// - FP32→FP16 类型转换
+// - 统一启动接口（强制显式 fallback）
+// - 验证容差常量
 //
 // 设计原则：
+// - 深层模块：小接口，大实现
 // - 不提供默认 fallback，强制调用者显式指定
 // - 消除与具体内核的循环依赖
-// - 每个模块有独立的测试面
 // ============================================================================
 
-#include "tensor_core_benchmark.cuh"
-#include "tensor_core_capabilities.cuh"
-#include "tensor_core_compute.cuh"
-#include "tensor_core_launcher.cuh"
+#include "../utils/cuda_utils.cuh"
+#include <cuda_fp16.h>
+#include <cuda_runtime.h>
+#include <functional>
+
+// ============================================================================
+// WMMA Tile Dimensions
+// ============================================================================
+
+namespace tensor_core {
+inline constexpr int WMMA_M = 16;
+inline constexpr int WMMA_N = 16;
+inline constexpr int WMMA_K = 16;
+} // namespace tensor_core
+
+using tensor_core::WMMA_K;
+using tensor_core::WMMA_M;
+using tensor_core::WMMA_N;
+
+// ============================================================================
+// Tensor Core Capabilities - 能力查询接口
+// ============================================================================
+
+/**
+ * 检查当前设备是否支持 Tensor Core (sm_70+)
+ */
+inline bool tensorCoresAvailable() {
+    int device;
+    CUDA_CHECK(cudaGetDevice(&device));
+
+    cudaDeviceProp prop;
+    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+    return prop.major >= 7;
+}
+
+/**
+ * 检查给定维度是否适合 Tensor Core 加速
+ * 所有维度必须是 WMMA tile 大小的倍数 (16)
+ */
+inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
+    return M > 0 && K > 0 && N > 0 && M % WMMA_M == 0 && K % WMMA_K == 0 && N % WMMA_N == 0;
+}
+
+/**
+ * 获取当前设备的 Tensor Core 信息字符串
+ */
+inline const char *getTensorCoreArchName() {
+    int device;
+    CUDA_CHECK(cudaGetDevice(&device));
+
+    cudaDeviceProp prop;
+    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+
+    if (prop.major == 7) {
+        return (prop.minor == 0) ? "Volta" : (prop.minor == 5) ? "Turing" : "Unknown sm_7x";
+    } else if (prop.major == 8) {
+        return (prop.minor == 0 || prop.minor == 6) ? "Ampere" : "Ampere/Ada";
+    } else if (prop.major == 9) {
+        return "Hopper";
+    }
+    return "Unknown";
+}
+
+// ============================================================================
+// Tensor Core Verification Tolerance
+// ============================================================================
+
+// Tensor Core 使用 FP16 中间精度，需要更宽松的容差
+// 此容差定义在 Tensor Core 模块中，保持精度相关常量与其实现在一起
+inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
+
+// ============================================================================
+// Fallback 策略接口
+// ============================================================================
+
+/**
+ * Fallback 内核函数类型
+ *
+ * 签名与所有标准 SGEMM 内核一致：
+ * void(const float* A, const float* B, float* C, int M, int K, int N, cudaStream_t stream)
+ */
+using FallbackKernel =
+    std::function<void(const float *, const float *, float *, int, int, int, cudaStream_t)>;
+
+/**
+ * 默认 fallback 策略
+ *
+ * 提供一个空的 fallback（用于测试或显式配置场景）
+ */
+inline void nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t = 0) {
+    // 空实现 - 用于测试
+}
+
+// ============================================================================
+// Tensor Core Compute - 纯 WMMA 计算路径
+// ============================================================================
+
+// WMMA is only available on sm_70+
+#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
+#include <mma.h>
+#endif
+
+/**
+ * FP32 → FP16 转换内核
+ */
+__global__ void float_to_half_kernel(const float *__restrict__ input, half *__restrict__ output,
+                                     int size) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+        output[idx] = __float2half(input[idx]);
+    }
+}
+
+// WMMA kernel is only available on sm_70+
+#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
+
+/**
+ * 纯 Tensor Core WMMA 计算内核
+ *
+ * 每个 warp 计算一个 WMMA_M x WMMA_N 输出块。
+ * 输入矩阵必须是 FP16 格式，维度必须是 16 的倍数。
+ *
+ * 注意：此内核不包含边界检查，调用者必须确保：
+ * - 设备支持 sm_70+
+ * - 所有维度都是 WMMA tile 大小的倍数
+ */
+__global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
+                                              const half *__restrict__ B, float *__restrict__ C,
+                                              int M, int K, int N) {
+    int warpM = blockIdx.y;
+    int warpN = blockIdx.x;
+
+    int aRow = warpM * WMMA_M;
+    int bCol = warpN * WMMA_N;
+
+    if (aRow >= M || bCol >= N) {
+        return;
+    }
+
+    nvcuda::wmma::fragment<nvcuda::wmma::matrix_a, WMMA_M, WMMA_N, WMMA_K, half,
+                           nvcuda::wmma::row_major>
+        a_frag;
+    nvcuda::wmma::fragment<nvcuda::wmma::matrix_b, WMMA_M, WMMA_N, WMMA_K, half,
+                           nvcuda::wmma::row_major>
+        b_frag;
+    nvcuda::wmma::fragment<nvcuda::wmma::accumulator, WMMA_M, WMMA_N, WMMA_K, float> c_frag;
+
+    nvcuda::wmma::fill_fragment(c_frag, 0.0f);
+
+    for (int k = 0; k < K; k += WMMA_K) {
+        nvcuda::wmma::load_matrix_sync(a_frag, A + aRow * K + k, K);
+        nvcuda::wmma::load_matrix_sync(b_frag, B + k * N + bCol, N);
+        nvcuda::wmma::mma_sync(c_frag, a_frag, b_frag, c_frag);
+    }
+
+    nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N, nvcuda::wmma::mem_row_major);
+}
+
+/**
+ * FP16 计算路径的快速路径启动函数
+ *
+ * 前置条件：
+ * - tensorCoresAvailable() == true
+ * - tensorCoreDimensionsSupported(M, K, N) == true
+ */
+inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B, float *C, int M,
+                                                    int K, int N, cudaStream_t stream = 0) {
+    dim3 blockDim(32, 1);
+    dim3 gridDim((N + WMMA_N - 1) / WMMA_N, (M + WMMA_M - 1) / WMMA_M);
+
+    tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
+
+    CUDA_CHECK(cudaGetLastError());
+}
+
+#else
+// Stub implementations for older architectures (will not be called)
+inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, float *, int, int,
+                                                    int, cudaStream_t) {
+    // This function should never be called on pre-sm_70 GPUs
+}
+#endif
+
+/**
+ * 纯 WMMA 计算路径入口（FP16 输入）
+ *
+ * 此函数不执行 fallback，用于单独测试 Tensor Core 计算性能。
+ * 如果设备或维度不支持，抛出异常。
+ */
+inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C, int M, int K,
+                                          int N, cudaStream_t stream = 0) {
+    if (M <= 0 || K <= 0 || N <= 0) {
+        return;
+    }
+
+    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
+        throw CudaError("launch_tensor_core_sgemm_fp16 requires sm_70+ and dimensions aligned "
+                        "to 16");
+    }
+
+    launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
+}
+
+// ============================================================================
+// Tensor Core Launcher - 统一启动接口（支持自定义 fallback）
+// ============================================================================
+
+/**
+ * 安全的端到端 Tensor Core SGEMM 启动器（模板版本）
+ *
+ * 此函数是 Tensor Core 的公共 FP32 入口点：
+ * - 在支持的设备上使用 WMMA 计算
+ * - 自动处理 FP32 → FP16 类型转换
+ * - 不支持的设备或维度使用指定的 fallback 策略
+ *
+ * @tparam FallbackFunc fallback 函数类型（可调用对象）
+ * @param A FP32 输入矩阵 A (M x K)
+ * @param B FP32 输入矩阵 B (K x N)
+ * @param C FP32 输出矩阵 C (M x N)
+ * @param M, K, N 矩阵维度
+ * @param fallback fallback 内核函数（当 Tensor Core 不可用时）
+ * @param stream CUDA 流
+ */
+template <typename FallbackFunc>
+inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *B, float *C, int M,
+                                                   int K, int N, FallbackFunc fallback,
+                                                   cudaStream_t stream = 0) {
+    if (M <= 0 || K <= 0 || N <= 0) {
+        return;
+    }
+
+    // Fallback 路径：设备或维度不支持 Tensor Core
+    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
+        fallback(A, B, C, M, K, N, stream);
+        return;
+    }
+
+    // Tensor Core 快速路径：转换 FP32 → FP16 并执行 WMMA
+    size_t num_A = static_cast<size_t>(M) * K;
+    size_t num_B = static_cast<size_t>(K) * N;
+    DeviceMemory<half> d_A_fp16(num_A);
+    DeviceMemory<half> d_B_fp16(num_B);
+
+    int blockSize = 256;
+    int gridSizeA = static_cast<int>((num_A + blockSize - 1) / blockSize);
+    int gridSizeB = static_cast<int>((num_B + blockSize - 1) / blockSize);
+
+    float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
+                                                              static_cast<int>(num_A));
+    float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(),
+                                                              static_cast<int>(num_B));
+    CUDA_CHECK(cudaGetLastError());
+
+    launch_tensor_core_sgemm_fp16_fast_path(d_A_fp16.get(), d_B_fp16.get(), C, M, K, N, stream);
+}
+
+/**
+ * 重载版本：使用 std::function 作为 fallback
+ *
+ * 允许运行时选择 fallback 策略。
+ */
+inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *B, float *C, int M,
+                                                   int K, int N, const FallbackKernel &fallback,
+                                                   cudaStream_t stream = 0) {
+    launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N, fallback, stream);
+}
+
+// ============================================================================
+// 注意：不提供默认 fallback 版本
+// ============================================================================
+//
+// 此模块不提供 launch_tensor_core_sgemm() 默认入口。
+// 调用者必须显式指定 fallback 策略：
+//
+//   launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N, myFallback, stream);
+//
+// 这种设计：
+// - 消除与具体内核的循环依赖
+// - 强制调用者思考"不支持时怎么办"
+// - 保持模块职责单一（类型转换 + Tensor Core 启动）
