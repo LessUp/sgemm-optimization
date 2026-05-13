@@ -31,7 +31,7 @@
 // - 每个模块有独立的测试面
 // ============================================================================
 
+#include "tensor_core_benchmark.cuh"
 #include "tensor_core_capabilities.cuh"
 #include "tensor_core_compute.cuh"
 #include "tensor_core_launcher.cuh"
-#include "tensor_core_benchmark.cuh"

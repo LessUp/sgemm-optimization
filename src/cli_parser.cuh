@@ -42,13 +42,13 @@ const std::vector<std::tuple<int, int, int>> BenchmarkConfig::DEFAULT_CASES = {
 namespace detail {
 
 // 安全的字符串到整数转换
-inline bool safeStrToInt(const char* str, int* result, const char* argName) {
+inline bool safeStrToInt(const char *str, int *result, const char *argName) {
     if (str == nullptr || str[0] == '\0') {
         fprintf(stderr, "Error: %s requires a valid number\n", argName);
         return false;
     }
 
-    char* endptr;
+    char *endptr;
     errno = 0;
     long val = strtol(str, &endptr, 10);
 
@@ -80,7 +80,7 @@ inline bool safeStrToInt(const char* str, int* result, const char* argName) {
  */
 class CliParser {
   public:
-    CliParser(int argc, char** argv) : argc_(argc), argv_(argv) {}
+    CliParser(int argc, char **argv) : argc_(argc), argv_(argv) {}
 
     /**
      * 解析命令行参数
@@ -88,7 +88,7 @@ class CliParser {
      * @param config 输出配置对象
      * @return 0 成功，1 错误，2 显示帮助后退出
      */
-    int parse(BenchmarkConfig& config) {
+    int parse(BenchmarkConfig &config) {
         for (int i = 1; i < argc_; ++i) {
             std::string arg = argv_[i];
 
@@ -143,7 +143,7 @@ class CliParser {
         return 0;
     }
 
-    void printUsage(const char* program) const {
+    void printUsage(const char *program) const {
         printf("Usage: %s [options]\n", program);
         printf("\nOptions:\n");
         printf("  -s, --size SIZE          Benchmark one square SIZE x SIZE x SIZE case\n");
@@ -163,7 +163,7 @@ class CliParser {
     }
 
   private:
-    int parseSizeArg(int& i, BenchmarkConfig& config) {
+    int parseSizeArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: -s requires a size argument\n");
             return 1;
@@ -182,7 +182,7 @@ class CliParser {
         return 0;
     }
 
-    int parseDimsArg(int& i, BenchmarkConfig& config) {
+    int parseDimsArg(int &i, BenchmarkConfig &config) {
         if (i + 3 >= argc_) {
             fprintf(stderr, "Error: --dims requires M K N arguments\n");
             return 1;
@@ -203,7 +203,7 @@ class CliParser {
         return 0;
     }
 
-    int parseWarmupArg(int& i, BenchmarkConfig& config) {
+    int parseWarmupArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: --warmup requires a number argument\n");
             return 1;
@@ -222,7 +222,7 @@ class CliParser {
         return 0;
     }
 
-    int parseBenchmarkArg(int& i, BenchmarkConfig& config) {
+    int parseBenchmarkArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: --benchmark requires a number argument\n");
             return 1;
@@ -242,5 +242,5 @@ class CliParser {
     }
 
     int argc_;
-    char** argv_;
+    char **argv_;
 };

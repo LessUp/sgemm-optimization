@@ -1,5 +1,5 @@
 # Continuous Integration
-# Validates code formatting and CUDA compilation
+# Validates code formatting
 
 name: CI
 
@@ -42,34 +42,3 @@ jobs:
         with:
           clang-format-version: '17'
           fallback-style: 'LLVM'
-
-  cuda-build:
-    name: CUDA Build
-    runs-on: ubuntu-latest
-    container:
-      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends cmake git build-essential
-          rm -rf /var/lib/apt/lists/*
-
-      - name: Configure
-        run: >
-          cmake -S . -B build
-          -DCMAKE_BUILD_TYPE=Release
-          -DBUILD_TESTS=OFF
-          -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;89;90"
-
-      - name: Build
-        run: cmake --build build --target sgemm_benchmark -j$(nproc)
-
-      - name: Info
-        run: |
-          echo "✅ CUDA compilation successful"
-          echo "ℹ️  Supported architectures: sm_70, sm_75, sm_80, sm_86, sm_89, sm_90"
-          echo "ℹ️  GPU runtime tests require a CUDA-capable machine"

@@ -74,7 +74,7 @@ TEST_F(DeviceMemoryTest, ZeroClearsMemory) {
 
 TEST_F(DeviceMemoryTest, MoveConstructorTransfersOwnership) {
     DeviceMemory<float> mem1(test_size_);
-    float* original_ptr = mem1.get();
+    float *original_ptr = mem1.get();
 
     DeviceMemory<float> mem2(std::move(mem1));
 
@@ -88,7 +88,7 @@ TEST_F(DeviceMemoryTest, MoveAssignmentTransfersOwnership) {
     DeviceMemory<float> mem1(test_size_);
     DeviceMemory<float> mem2;
 
-    float* original_ptr = mem1.get();
+    float *original_ptr = mem1.get();
     mem2 = std::move(mem1);
 
     EXPECT_EQ(mem2.get(), original_ptr);
@@ -101,8 +101,8 @@ TEST_F(DeviceMemoryTest, MoveAssignmentReleasesOldMemory) {
     DeviceMemory<float> mem1(test_size_);
     DeviceMemory<float> mem2(test_size_ * 2);
 
-    float* ptr1 = mem1.get();
-    float* ptr2 = mem2.get();
+    float *ptr1 = mem1.get();
+    float *ptr2 = mem2.get();
 
     // mem2 原有的内存应该被释放
     mem2 = std::move(mem1);
@@ -113,7 +113,7 @@ TEST_F(DeviceMemoryTest, MoveAssignmentReleasesOldMemory) {
 
 TEST_F(DeviceMemoryTest, SelfMoveAssignmentIsSafe) {
     DeviceMemory<float> mem(test_size_);
-    float* original_ptr = mem.get();
+    float *original_ptr = mem.get();
 
     // 自赋值不应崩溃或导致双重释放
     mem = std::move(mem);
@@ -229,7 +229,7 @@ TEST_F(SGEMMVerifierTest, ComputeReferenceProducesCorrectShape) {
 
     // 不应全为零（随机输入）
     bool all_zero = true;
-    for (const auto& val : h_C_) {
+    for (const auto &val : h_C_) {
         if (val != 0.0f) {
             all_zero = false;
             break;
@@ -250,7 +250,7 @@ TEST_F(SGEMMVerifierTest, VerifyPassesForIdenticalMatrices) {
 }
 
 TEST_F(SGEMMVerifierTest, VerifyFailsForDifferentMatrices) {
-    std::vector<float> h_different(M_ * N, 1e10f);  // 显著不同的值
+    std::vector<float> h_different(M_ * N, 1e10f); // 显著不同的值
     DeviceMemory<float> d_different(M_ * N);
     d_different.copyFromHost(h_different.data(), M_ * N);
 
@@ -267,14 +267,14 @@ TEST_F(SGEMMVerifierTest, VerifyWithCustomTolerance) {
     // 创建两个略有差异的矩阵
     std::vector<float> h_test(M_ * N, 1.0f);
     std::vector<float> h_ref(M_ * N, 1.0f);
-    h_test[0] = 1.001f;  // 0.1% 差异
+    h_test[0] = 1.001f; // 0.1% 差异
 
-    VerifyResult result_strict = compareMatrices(h_test.data(), h_ref.data(), M_, N,
-                                                  {1e-4f, 1e-5f});  // 更严格的容差
+    VerifyResult result_strict =
+        compareMatrices(h_test.data(), h_ref.data(), M_, N, {1e-4f, 1e-5f}); // 更严格的容差
     EXPECT_FALSE(result_strict.passed);
 
-    VerifyResult result_relaxed = compareMatrices(h_test.data(), h_ref.data(), M_, N,
-                                                   {1e-2f, 1e-2f});  // 更宽松的容差
+    VerifyResult result_relaxed =
+        compareMatrices(h_test.data(), h_ref.data(), M_, N, {1e-2f, 1e-2f}); // 更宽松的容差
     EXPECT_TRUE(result_relaxed.passed);
 }
 
@@ -330,7 +330,7 @@ TEST_F(ToleranceTest, IsWithinToleranceWorks) {
 }
 
 TEST_F(ToleranceTest, ToleranceForValue) {
-    VerifyTolerance tol{0.01f, 0.001f};  // 1% 相对容差，0.001 绝对容差
+    VerifyTolerance tol{0.01f, 0.001f}; // 1% 相对容差，0.001 绝对容差
 
     // 小值：绝对容差主导
     EXPECT_FLOAT_EQ(toleranceForValue(0.0f, tol), 0.001f);
@@ -390,7 +390,7 @@ TEST_F(UtilsIntegrationTest, FullWorkflowWithDeviceMemory) {
 
     // 结果不应全为零
     bool has_nonzero = false;
-    for (const auto& val : h_result) {
+    for (const auto &val : h_result) {
         if (val != 0.0f) {
             has_nonzero = true;
             break;
@@ -399,7 +399,7 @@ TEST_F(UtilsIntegrationTest, FullWorkflowWithDeviceMemory) {
     EXPECT_TRUE(has_nonzero);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     printGPUInfo();
     return RUN_ALL_TESTS();

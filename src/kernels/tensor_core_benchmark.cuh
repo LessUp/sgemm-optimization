@@ -33,9 +33,10 @@
  * @param tolerance 验证容差
  * @return BenchmarkResult 包含性能数据
  */
-inline BenchmarkResult runTensorCoreComputeOnlyBenchmark(
-    SGEMMBenchmark &benchmark, int M, int K, int N, int warmup_runs = 5, int benchmark_runs = 20,
-    VerifyTolerance tolerance = kTensorCoreVerifyTolerance) {
+inline BenchmarkResult
+runTensorCoreComputeOnlyBenchmark(SGEMMBenchmark &benchmark, int M, int K, int N,
+                                  int warmup_runs = 5, int benchmark_runs = 20,
+                                  VerifyTolerance tolerance = kTensorCoreVerifyTolerance) {
 
     if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
         throw CudaError("Tensor Core compute-only benchmark requires sm_70+ and "
@@ -102,7 +103,8 @@ inline BenchmarkResult runTensorCoreComputeOnlyBenchmark(
     result.time_ms = total_time_ms / benchmark_runs;
     double flops = 2.0 * result.M * result.N * result.K;
     result.gflops = (flops / (result.time_ms * 1e-3)) / 1e9;
-    double bytes = (result.M * result.K + result.K * result.N + result.M * result.N) * sizeof(float);
+    double bytes =
+        (result.M * result.K + result.K * result.N + result.M * result.N) * sizeof(float);
     result.bandwidth_gb_s = (bytes / (result.time_ms * 1e-3)) / 1e9;
 
     d_C.copyToHost(h_C.data(), M * N);
