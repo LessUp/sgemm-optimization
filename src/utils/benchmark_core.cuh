@@ -4,14 +4,13 @@
 #include <cuda_runtime.h>
 
 // ============================================================================
-// CUDA 事件计时器
+// CUDA 性能测量器
 // ============================================================================
 
+namespace detail {
+
 /**
- * RAII 包装的 CUDA 事件计时器
- *
- * 提供精确的 GPU 时间测量，使用 CUDA 事件机制。
- * 适用于内核执行时间、数据传输时间等测量。
+ * RAII 包装的 CUDA 事件计时器（内部实现）
  */
 class CudaTimer {
   public:
@@ -45,18 +44,12 @@ class CudaTimer {
         return ms;
     }
 
-    // 获取开始和结束事件（用于手动记录）
-    cudaEvent_t startEvent() { return start_; }
-    cudaEvent_t stopEvent() { return stop_; }
-
   private:
     cudaEvent_t start_;
     cudaEvent_t stop_;
 };
 
-// ============================================================================
-// 性能测量器
-// ============================================================================
+} // namespace detail
 
 /**
  * 通用的 GPU 操作性能测量器
@@ -75,7 +68,7 @@ float measureGpuTime(RunFunc func, int warmup_runs = 5, int benchmark_runs = 20)
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // 计时运行
-    CudaTimer timer;
+    detail::CudaTimer timer;
     timer.start();
     for (int i = 0; i < benchmark_runs; ++i) {
         func();
