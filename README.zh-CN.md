@@ -15,7 +15,7 @@
 - **优化链条完整**：naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core。
 - **证据优先表达**：性能结论与正确性策略、测量范围一起呈现。
 - **接口保持一致**：FP32 kernel 使用统一 `(A, B, C, M, K, N, stream)` launcher 契约。
-- **面试友好叙事**：提供项目亮点、面试手册、参考文献三类高价值入口。
+- **面试友好叙事**：架构、方法论、验证与参考资料共同支撑同一条公共叙事。
 - **中英文镜像文档**：公开页面结构保持一致，便于传播与复用。
 
 ## 快速开始
@@ -39,8 +39,9 @@ ctest --test-dir build
 | 打开中文首页 | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
 | 打开英文首页 | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
 | 编译运行一次 | [快速上手](https://lessup.github.io/sgemm-optimization/zh/getting-started) |
-| 了解项目差异化 | [项目亮点](https://lessup.github.io/sgemm-optimization/zh/project-highlights) |
-| 准备面试表达 | [面试手册](https://lessup.github.io/sgemm-optimization/zh/interview-playbook) |
+| 了解项目差异化 | [架构概述](https://lessup.github.io/sgemm-optimization/zh/architecture/) |
+| 准备面试表达 | [方法论](https://lessup.github.io/sgemm-optimization/zh/methodology/) |
+| 查看可信边界 | [验证概览](https://lessup.github.io/sgemm-optimization/zh/validation/) |
 | 追溯技术来源 | [参考文献](https://lessup.github.io/sgemm-optimization/zh/references) |
 | 阅读规范源 | [OpenSpec 规范](openspec/specs/) |
 

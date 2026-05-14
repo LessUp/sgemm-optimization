@@ -15,7 +15,7 @@ A CUDA SGEMM engineering notebook designed for both deep learning and interview 
 - **Progressive kernel ladder**: naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core.
 - **Evidence-first reporting**: performance claims are paired with correctness policy and scope labels.
 - **Comparable interfaces**: FP32 kernels share a unified `(A, B, C, M, K, N, stream)` launcher contract.
-- **Interview-ready narrative**: dedicated pages for project highlights, interview walkthrough, and references.
+- **Interview-ready narrative**: architecture, methodology, validation, and references reinforce one public story.
 - **Bilingual mirrored docs**: English and Chinese public pages stay aligned.
 
 ## Quick start
@@ -39,8 +39,9 @@ Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is 
 | Open English home | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
 | Open Chinese home | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
 | Build and run once | [Getting Started](https://lessup.github.io/sgemm-optimization/en/getting-started) |
-| Understand differentiation | [Project Highlights](https://lessup.github.io/sgemm-optimization/en/project-highlights) |
-| Prepare interview explanation | [Interview Playbook](https://lessup.github.io/sgemm-optimization/en/interview-playbook) |
+| Understand differentiation | [Architecture Overview](https://lessup.github.io/sgemm-optimization/en/architecture/) |
+| Prepare interview explanation | [Methodology](https://lessup.github.io/sgemm-optimization/en/methodology/) |
+| Check trust boundaries | [Validation Overview](https://lessup.github.io/sgemm-optimization/en/validation/) |
 | Trace technical lineage | [References](https://lessup.github.io/sgemm-optimization/en/references) |
 | Read normative specs | [OpenSpec Specs](openspec/specs/) |
 

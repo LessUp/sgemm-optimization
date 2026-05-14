@@ -18,6 +18,12 @@ This repository is not organized as “one fast kernel plus a benchmark screensh
 
 That structure makes the project useful for learning, review, and interviews: readers can explain **why** a kernel exists before they talk about how fast it is.
 
+## What this repository is trying to prove
+
+- SGEMM optimization should read as a reasoning chain, not a bag of isolated tricks.
+- Performance claims only count when they stay attached to correctness policy and benchmark scope.
+- Tensor Core acceleration is only persuasive when constraints and fallback behavior are explicit.
+
 ## System map
 
 | Layer | Responsibility | Where to go next |
@@ -82,6 +88,14 @@ This is not just process documentation. It affects how the architecture is narra
 3. Read [Memory Flow](/en/architecture/memory-flow) to understand the data-movement logic behind the ladder.
 4. Read [Tensor Core Path](/en/architecture/tensor-core-path) before interpreting WMMA benchmark numbers.
 5. Use the existing kernel deep dives when you want implementation detail instead of system rationale.
+
+## Fast reviewer path
+
+1. Read this page for the system claim.
+2. Read [Kernel Ladder](/en/architecture/kernel-ladder) for the optimization order.
+3. Read [Validation Overview](/en/validation/) before trusting any benchmark claim.
+4. Read [Methodology](/en/methodology/) when you need the concise explanation path used in reviews or interviews.
+5. Use [Resources Hub](/en/resources/) to trace external sources and comparison points.
 
 ## Related resources
 
