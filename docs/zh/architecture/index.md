@@ -18,6 +18,12 @@ title: 架构概述
 
 这样的结构让项目同时适合学习、评审和面试：读者可以先解释 **为什么** 某个 kernel 存在，再讨论它快了多少。
 
+## 这个仓库真正想证明什么
+
+- SGEMM 优化应该被讲成一条推理链，而不是零散技巧合集。
+- 性能结论只有和正确性策略、benchmark 范围一起出现时才可信。
+- Tensor Core 加速只有在约束条件和 fallback 行为都说清楚时才有说服力。
+
 ## 系统地图
 
 | 层次 | 责任 | 下一步阅读 |
@@ -82,6 +88,14 @@ title: 架构概述
 3. 阅读 [Memory Flow](/zh/architecture/memory-flow) 理解这条链路背后的数据移动逻辑。
 4. 在解释 WMMA benchmark 前，先阅读 [Tensor Core 路径](/zh/architecture/tensor-core-path)。
 5. 当你需要实现细节而不是系统原因时，再跳转到各个 kernel 深入页。
+
+## 给评审者的快速路径
+
+1. 先看本页，确认系统主张。
+2. 再看 [Kernel 阶梯](/zh/architecture/kernel-ladder)，理解优化顺序。
+3. 在相信 benchmark 之前，先看 [验证概览](/zh/validation/)。
+4. 需要简洁的复述与答辩框架时，转到 [方法论](/zh/methodology/)。
+5. 需要技术来源与对照材料时，转到 [资源中心](/zh/resources/)。
 
 ## 相关资源
 

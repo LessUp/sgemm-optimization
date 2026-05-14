@@ -37,6 +37,23 @@ flowchart TD
 3. **Use local GPU evidence early.** Diagnosis without runtime evidence usually misclassifies the bottleneck.
 4. **Hand every speedup to Validation.** A gain only counts after correctness, scope, and reproducibility are re-checked.
 
+## Interview-ready framing
+
+Use this structure when you need to explain the project concisely in a review or interview:
+
+1. **Problem framing** — SGEMM is a useful proxy for memory hierarchy, parallel mapping, and mixed-precision trade-offs.
+2. **Optimization ladder** — each kernel changes one bottleneck class at a time.
+3. **Correctness and trust model** — cuBLAS is the oracle, tolerances differ between FP32 and WMMA, and unsupported WMMA shapes fall back explicitly.
+4. **Measurement discipline** — end-to-end and compute-only numbers are separated, and hosted CI is kept separate from local GPU proof.
+5. **Engineering maturity** — unified launcher interfaces, RAII/error handling, mirrored docs, and OpenSpec governance show the work is maintained deliberately.
+
+### High-value deep-dive questions
+
+- **Why not just use cuBLAS?** Production code should, but this repository exists to demonstrate bottleneck diagnosis and defensible optimization reasoning.
+- **Why is the Tensor Core path still behind cuBLAS?** The WMMA path here is educational and intentionally exposes staging, alignment, and fallback costs instead of hiding them behind a production-tuned stack.
+- **How do you know the performance claims are trustworthy?** The project checks correctness first, labels benchmark scope explicitly, and separates CI-safe checks from local GPU runtime evidence.
+- **What would you improve next for production work?** Architecture-specific launch tuning, deeper WMMA overlap, stronger profiler evidence, and CUTLASS-style maintainable kernels.
+
 ## Read this section in order
 
 1. [Learning Path](/en/learning-path)

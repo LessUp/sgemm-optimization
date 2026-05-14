@@ -50,3 +50,10 @@ Treat every number in this repository as **scoped evidence**, not a universal pr
 - Only then compare the number to another result.
 
 If any of those fields are missing, the number is a hint, not a claim.
+
+## Common presentation mistakes
+
+- Claiming “Tensor Core is always faster” without shape, conversion, and fallback caveats.
+- Quoting one GFLOPS number without its benchmark label or workload scope.
+- Ignoring the numerical-tolerance difference between FP32 and mixed precision.
+- Treating hosted CI success as proof of CUDA runtime correctness or performance.
