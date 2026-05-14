@@ -172,15 +172,17 @@ flowchart LR
     <h3>Benchmark Results</h3>
     <p>Use the validation entry point to interpret benchmark scope, correctness budgets, and trust boundaries.</p>
   </a>
-  <a class="knowledge-card" href="/en/learning-path">
-    <h3>Learning Path</h3>
-    <p>Use the methodology entry point to navigate the kernel ladder and staged optimization reasoning.</p>
+  <a class="knowledge-card" href="/en/getting-started">
+    <h3>Getting Started</h3>
+    <p>Use the support entry point for local setup, first build, and the repository's validation boundary.</p>
   </a>
-  <a class="knowledge-card" href="/en/references">
-    <h3>Engineering References</h3>
-    <p>Use the resource entry point to reach papers, official docs, and practical study material.</p>
+  <a class="knowledge-card" href="/en/benchmark-results">
+    <h3>Validation Boundary</h3>
+    <p>Use the validation entry point to separate what hosted CI proves from what only local GPU runs can prove.</p>
   </a>
 </div>
+
+> Legacy narrative pages are being consolidated into the canonical architecture, methodology, and validation sections. They remain available during migration but are no longer primary entry points.
 
 ## Command cockpit
 
