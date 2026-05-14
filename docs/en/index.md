@@ -14,8 +14,8 @@ title: SGEMM Optimization Lab
       </p>
       <div class="home-action-row">
         <a class="btn" href="/en/getting-started">Start in 5 minutes</a>
-        <a class="btn btn-outline" href="/en/project-highlights">See project highlights</a>
-        <a class="btn btn-outline" href="/en/interview-playbook">Interview playbook</a>
+        <a class="btn btn-outline" href="/en/architecture">Explore architecture</a>
+        <a class="btn btn-outline" href="/en/learning-path">Follow learning path</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -135,11 +135,11 @@ flowchart LR
     </div>
   </div>
   <div class="route-card">
-    <h3>Prepare interview narrative</h3>
-    <p>Use a concise storyline from architecture choices to measurable outcomes.</p>
+    <h3>Trace architecture decisions</h3>
+    <p>See how design choices, kernel stages, and benchmark evidence fit together.</p>
     <div class="route-links">
-      <a href="/en/project-highlights">Project Highlights</a>
-      <a href="/en/interview-playbook">Interview Playbook</a>
+      <a href="/en/architecture">Architecture</a>
+      <a href="/en/benchmark-results">Benchmark Results</a>
     </div>
   </div>
   <div class="route-card">
@@ -155,13 +155,13 @@ flowchart LR
 ## Knowledge hub
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/en/project-highlights">
-    <h3>Project Highlights</h3>
-    <p>What differentiates this repository from many SGEMM demos, with proof-oriented framing.</p>
+  <a class="knowledge-card" href="/en/architecture">
+    <h3>Architecture</h3>
+    <p>A guided map of kernel stages, validation boundaries, and the decisions that hold the project together.</p>
   </a>
-  <a class="knowledge-card" href="/en/interview-playbook">
-    <h3>Interview Playbook</h3>
-    <p>A practical script for explaining architecture, benchmark trust, and trade-offs under pressure.</p>
+  <a class="knowledge-card" href="/en/learning-path">
+    <h3>Learning Path</h3>
+    <p>A structured route through the kernel ladder so each optimization concept builds on the last.</p>
   </a>
   <a class="knowledge-card" href="/en/references">
     <h3>References</h3>

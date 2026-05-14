@@ -14,8 +14,8 @@ title: SGEMM 优化实验室
       </p>
       <div class="home-action-row">
         <a class="btn" href="/zh/getting-started">5 分钟开始</a>
-        <a class="btn btn-outline" href="/zh/project-highlights">查看项目亮点</a>
-        <a class="btn btn-outline" href="/zh/interview-playbook">面试手册</a>
+        <a class="btn btn-outline" href="/zh/architecture">查看架构图谱</a>
+        <a class="btn btn-outline" href="/zh/learning-path">学习路径</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -135,11 +135,11 @@ flowchart LR
     </div>
   </div>
   <div class="route-card">
-    <h3>准备面试表达</h3>
-    <p>用一条清晰叙事线讲清架构决策、验证策略和结果可信度。</p>
+    <h3>追踪架构决策</h3>
+    <p>把设计取舍、内核阶段和 benchmark 证据串成一条可核查的技术主线。</p>
     <div class="route-links">
-      <a href="/zh/project-highlights">项目亮点</a>
-      <a href="/zh/interview-playbook">面试手册</a>
+      <a href="/zh/architecture">架构说明</a>
+      <a href="/zh/benchmark-results">Benchmark 结果</a>
     </div>
   </div>
   <div class="route-card">
@@ -155,13 +155,13 @@ flowchart LR
 ## 知识补给站
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/zh/project-highlights">
-    <h3>项目亮点</h3>
-    <p>从差异化、工程规范、可验证性三个维度解释项目竞争力。</p>
+  <a class="knowledge-card" href="/zh/architecture">
+    <h3>架构说明</h3>
+    <p>集中梳理内核阶梯、验证边界与关键设计约束，帮助快速建立全局视角。</p>
   </a>
-  <a class="knowledge-card" href="/zh/interview-playbook">
-    <h3>面试手册</h3>
-    <p>覆盖“如何讲”“常见追问”“如何回应权衡”的实战模板。</p>
+  <a class="knowledge-card" href="/zh/learning-path">
+    <h3>学习路径</h3>
+    <p>按优化阶梯组织阅读顺序，让每一个性能概念都建立在前一步之上。</p>
   </a>
   <a class="knowledge-card" href="/zh/references">
     <h3>参考文献</h3>
