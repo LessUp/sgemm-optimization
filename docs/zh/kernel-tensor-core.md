@@ -51,15 +51,18 @@ Warp 矩阵乘累加 (WMMA)：
 
 
 
-## 性能特征
+## Benchmark 范围说明
 
-| 指标 | Double Buffer | Tensor Core | 改进 |
-|------|---------------|-------------|------|
-| **GFLOPS (1024³)** | 701 | 2300 | **3.3×** |
-| **vs cuBLAS** | 12.2% | 40.2% | — |
-| **精度** | FP32 | FP16→FP32 | 混合 |
-| **对齐要求** | 无 | 纯 WMMA 需要 16×；wrapper 不满足时回退 | 有 |
-| **计算单元** | CUDA Core | Tensor Core | 专用 |
+仓库里常被引用的 **40.2% cuBLAS / 2300 GFLOPS**，对应的是 **WMMA compute-only** 测量：它只代表 Tensor Core 友好 shape 下纯 WMMA 路径的上界，不等同于包含转换与 fallback 的端到端 wrapper。
+
+阅读本页时，请把下面两种数字严格分开：
+
+| 范围 | 含义 | 如何解读 |
+|------|------|----------|
+| WMMA 端到端 | 安全 FP32 wrapper，包含 FP32→FP16 转换与 fallback 处理 | 用来和 FP32 kernel 做真实调用路径对比 |
+| WMMA compute-only | 预转换 FP16 的纯 WMMA 快路径 | 用来观察原始 Tensor Core 计算上界 |
+
+关于结果解释，请配合阅读 [Benchmark 结果](/zh/benchmark-results) 与 [Benchmark 范围](/zh/validation/benchmark-scope)。
 
 
 
