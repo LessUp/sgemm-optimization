@@ -6,11 +6,12 @@ title: SGEMM Optimization Lab
 <div class="home-shell">
   <div class="home-hero-grid">
     <div>
-      <p class="home-eyebrow">CUDA SGEMM ENGINEERING NOTEBOOK</p>
-      <h1 class="home-main-title">SGEMM Optimization Lab</h1>
+      <p class="home-eyebrow">CUDA SGEMM ARCHITECTURE GUIDE</p>
+      <h1 class="home-main-title">SGEMM Architecture Whitepaper</h1>
       <p class="home-main-subtitle">
-        A bilingual CUDA SGEMM case study built for two outcomes: solid learning depth and strong interview storytelling.
-        Every optimization step is tied to correctness constraints, benchmark evidence, and explicit validation boundaries.
+        A bilingual CUDA SGEMM guide organized around architecture, optimization methodology, validation evidence,
+        and reusable engineering references. Every optimization step is tied to correctness constraints,
+        benchmark evidence, and explicit validation boundaries.
       </p>
       <div class="home-action-row">
         <a class="btn" href="/en/getting-started">Start in 5 minutes</a>

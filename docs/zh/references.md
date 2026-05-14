@@ -63,6 +63,6 @@ title: 参考文献
 
 ## 相关页面
 
-- [项目亮点](/zh/project-highlights)
-- [面试手册](/zh/interview-playbook)
+- [架构概述](/zh/architecture)
+- [Benchmark 结果](/zh/benchmark-results)
 - [优化手册](/zh/optimization-playbook)

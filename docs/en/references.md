@@ -63,6 +63,6 @@ Why this group matters:
 
 ## Related project pages
 
-- [Project Highlights](/en/project-highlights)
-- [Interview Playbook](/en/interview-playbook)
+- [Architecture Overview](/en/architecture)
+- [Benchmark Results](/en/benchmark-results)
 - [Optimization Playbook](/en/optimization-playbook)

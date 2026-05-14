@@ -6,10 +6,10 @@ title: SGEMM 优化实验室
 <div class="home-shell">
   <div class="home-hero-grid">
     <div>
-      <p class="home-eyebrow">CUDA SGEMM ENGINEERING NOTEBOOK</p>
-      <h1 class="home-main-title">SGEMM 优化实验室</h1>
+      <p class="home-eyebrow">CUDA SGEMM 架构指南</p>
+      <h1 class="home-main-title">SGEMM 架构白皮书</h1>
       <p class="home-main-subtitle">
-        这是一个面向学习与面试展示的双语 CUDA SGEMM 项目：不仅讲优化，还讲证据与边界。
+        这是一个围绕架构拆解、优化方法、验证证据与工程参考资料组织的双语 CUDA SGEMM 指南。
         每一步提速都绑定正确性约束、基准解释和可复现的验证路径。
       </p>
       <div class="home-action-row">
