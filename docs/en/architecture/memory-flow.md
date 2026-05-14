@@ -129,3 +129,4 @@ Padding away bank conflicts and keeping fallback logic explicit are both example
 - [Double Buffer](/en/kernel-double-buffer)
 - [Tensor Core WMMA](/en/kernel-tensor-core)
 - [CUDA Memory Cheat Sheet](/en/cuda-memory-cheatsheet)
+- [Resources Hub](/en/resources/)

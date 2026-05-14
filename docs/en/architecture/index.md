@@ -83,8 +83,9 @@ This is not just process documentation. It affects how the architecture is narra
 4. Read [Tensor Core Path](/en/architecture/tensor-core-path) before interpreting WMMA benchmark numbers.
 5. Use the existing kernel deep dives when you want implementation detail instead of system rationale.
 
-## Related references
+## Related resources
 
+- [Resources Hub](/en/resources/)
 - [Validation Overview](/en/validation/)
 - [Learning Path](/en/learning-path)
 - [Getting Started](/en/getting-started)

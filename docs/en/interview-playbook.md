@@ -89,4 +89,4 @@ Strong answer pattern:
 - [Kernel Ladder](/en/architecture/kernel-ladder)
 - [Validation Overview](/en/validation/)
 - [Learning Path](/en/learning-path)
-- [References](/en/references)
+- [Resources Hub](/en/resources/)

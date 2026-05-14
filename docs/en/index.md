@@ -16,9 +16,9 @@ title: SGEMM Architecture Whitepaper
         the implementation ladder and the evidence model from the homepage alone.
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/en/architecture/">Read the architecture map</a>
-        <a class="btn btn-outline" href="/en/methodology/">Follow the methodology</a>
-        <a class="btn btn-outline" href="/en/validation/">Check the validation boundary</a>
+        <a class="btn" href="./architecture/">Read the architecture map</a>
+        <a class="btn btn-outline" href="./methodology/">Follow the methodology</a>
+        <a class="btn btn-outline" href="./validation/">Check the validation boundary</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -41,7 +41,7 @@ title: SGEMM Architecture Whitepaper
       <div class="signal-card">
         <div class="signal-title">Validation Boundary</div>
         <div class="signal-value">CI is not a GPU</div>
-        <div class="signal-note">Hosted automation proves build and structure health; local hardware proves runtime and performance.</div>
+        <div class="signal-note">Hosted automation proves docs and governance health; local hardware proves CUDA runtime and performance.</div>
       </div>
       <div class="signal-card">
         <div class="signal-title">Reader Model</div>
@@ -144,32 +144,32 @@ flowchart LR
     <h3>I need the big picture first</h3>
     <p>Start with the system view of the repository, then use validation context to interpret what the architecture is allowed to claim.</p>
     <div class="route-links">
-      <a href="/en/architecture/">Architecture</a>
-      <a href="/en/validation/">Validation overview</a>
+      <a href="./architecture/">Architecture</a>
+      <a href="./validation/">Validation overview</a>
     </div>
   </div>
   <div class="route-card">
     <h3>I want to learn the optimization ladder in order</h3>
     <p>Use the staged reading path when you want each performance concept to build on the previous kernel rather than jump straight to WMMA.</p>
     <div class="route-links">
-      <a href="/en/learning-path">Learning Path</a>
-      <a href="/en/architecture/">Architecture overview</a>
+      <a href="./learning-path">Learning Path</a>
+      <a href="./architecture/">Architecture overview</a>
     </div>
   </div>
   <div class="route-card">
     <h3>I want tuning heuristics and follow-up material</h3>
     <p>Use the methodology and resource surfaces together when you need actionable optimization guidance plus technical lineage.</p>
     <div class="route-links">
-      <a href="/en/methodology/diagnosis-loop">Diagnosis Loop</a>
-      <a href="/en/references">References</a>
+      <a href="./methodology/diagnosis-loop">Diagnosis Loop</a>
+      <a href="./resources/">Resources hub</a>
     </div>
   </div>
   <div class="route-card">
     <h3>I want to reproduce or audit the claims</h3>
     <p>Use the support and validation surfaces together to understand what to run locally, what CI already proves, and how results should be interpreted.</p>
     <div class="route-links">
-      <a href="/en/getting-started">Getting Started</a>
-      <a href="/en/validation/">Validation overview</a>
+      <a href="./getting-started">Getting Started</a>
+      <a href="./validation/">Validation overview</a>
     </div>
   </div>
 </div>
@@ -177,23 +177,23 @@ flowchart LR
 ## Resource hub entry points
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/en/architecture/">
+  <a class="knowledge-card" href="./architecture/">
     <h3>Architecture</h3>
     <p>The structural map of the kernel ladder, interface boundaries, and the decisions that hold the implementation together.</p>
   </a>
-  <a class="knowledge-card" href="/en/methodology/">
+  <a class="knowledge-card" href="./methodology/">
     <h3>Methodology</h3>
     <p>The canonical optimization workflow: staged learning, benchmark discipline, and diagnosis logic tied back to the architecture.</p>
   </a>
-  <a class="knowledge-card" href="/en/references">
+  <a class="knowledge-card" href="./resources/">
     <h3>Resources</h3>
-    <p>The source trail behind the project: official docs, papers, and mature repositories mapped to concrete decisions.</p>
+    <p>A curated learning hub that explains which docs, papers, tools, and follow-up routes matter after each part of the whitepaper.</p>
   </a>
-  <a class="knowledge-card" href="/en/validation/">
+  <a class="knowledge-card" href="./validation/">
     <h3>Validation</h3>
     <p>The evidence surface for correctness budgets, benchmark scope, fallback behavior, and what the published numbers actually mean.</p>
   </a>
-  <a class="knowledge-card" href="/en/getting-started">
+  <a class="knowledge-card" href="./getting-started">
     <h3>Support</h3>
     <p>The practical entry point for cloning, building, testing, and running the project with the right local-versus-CI expectations.</p>
   </a>
