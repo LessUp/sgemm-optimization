@@ -1,6 +1,6 @@
 ---
 layout: home
-title: SGEMM 优化实验室
+title: SGEMM 架构白皮书
 ---
 
 <div class="home-shell">
@@ -129,10 +129,10 @@ flowchart LR
   <div class="route-card">
     <h3>系统学习优化阶梯</h3>
     <p>按顺序理解每一步如何改变内存行为与性能画像。</p>
-    <div class="route-links">
-      <a href="/zh/learning-path">学习路径</a>
-      <a href="/zh/kernel-naive">内核系列</a>
-    </div>
+      <div class="route-links">
+        <a href="/zh/architecture">架构概述</a>
+        <a href="/zh/learning-path">学习路径</a>
+      </div>
   </div>
   <div class="route-card">
     <h3>追踪架构决策</h3>
@@ -167,17 +167,17 @@ flowchart LR
     <h3>参考文献</h3>
     <p>按用途整理论文、官方文档和仓库，并映射到具体设计决策。</p>
   </a>
-  <a class="knowledge-card" href="/zh/optimization-playbook">
-    <h3>优化手册</h3>
-    <p>给出瓶颈归类、假设验证、实验记录的闭环方法。</p>
+  <a class="knowledge-card" href="/zh/benchmark-results">
+    <h3>Benchmark 结果</h3>
+    <p>从验证入口理解 benchmark 范围、容差预算与结果可信度边界。</p>
   </a>
-  <a class="knowledge-card" href="/zh/performance-casebook">
-    <h3>性能案例库</h3>
-    <p>按 Volta、Turing、Ampere、Ada、Hopper 总结调优优先级。</p>
+  <a class="knowledge-card" href="/zh/learning-path">
+    <h3>学习路径</h3>
+    <p>以方法论入口承接内核阶梯阅读顺序与渐进式优化推理。</p>
   </a>
-  <a class="knowledge-card" href="/zh/cuda-memory-cheatsheet">
-    <h3>CUDA 内存速查表</h3>
-    <p>内存合并访问、bank 行为、占用率与 profiler 指标快速对照。</p>
+  <a class="knowledge-card" href="/zh/references">
+    <h3>工程参考资料</h3>
+    <p>以资源入口统一承接论文、官方文档与延伸学习材料。</p>
   </a>
 </div>
 
