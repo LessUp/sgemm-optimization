@@ -17,14 +17,14 @@ int main(int argc, char **argv) {
     BenchmarkConfig config;
     CliParser parser(argc, argv);
 
-    int parse_result = parser.parse(config);
-    if (parse_result == 2) {
-        // 显示帮助后正常退出
+    ParseResult result = parser.parse(config);
+    switch (result) {
+    case ParseResult::HelpShown:
         return 0;
-    }
-    if (parse_result != 0) {
-        // 解析错误
+    case ParseResult::Error:
         return 1;
+    case ParseResult::Success:
+        break;
     }
 
     BenchmarkRunner runner(config);

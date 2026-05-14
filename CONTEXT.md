@@ -57,13 +57,6 @@ Tensor Core 特有的 benchmark 功能，提供：
 - `getTheoreticalPeakGflops()` / `getTheoreticalPeakBandwidth()` - 理论峰值查询
 - `calculateEfficiency()` / `calculateBandwidthUtilization()` - 效率计算
 
-### Benchmark cuBLAS
-**位置**: `src/utils/benchmark_cublas.cuh`
-
-cuBLAS 参考实现：
-- `CublasSgemm` - cuBLAS SGEMM 参考调用器
-- `SgemmReferenceCalculator` - 完整参考计算流程
-
 ### 高级接口
 **位置**: `src/utils/benchmark.cuh`
 

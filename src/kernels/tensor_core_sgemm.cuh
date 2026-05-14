@@ -9,15 +9,18 @@
 // - WMMA FP16→FP32 计算
 // - FP32→FP16 类型转换
 // - 统一启动接口（强制显式 fallback）
-// - 验证容差常量
 //
 // 设计原则：
 // - 深层模块：小接口，大实现
 // - 不提供默认 fallback，强制调用者显式指定
 // - 消除与具体内核的循环依赖
+//
+// 验证容差：
+// - 使用 verify.cuh 中定义的 kTensorCoreVerifyTolerance
 // ============================================================================
 
 #include "../utils/cuda_utils.cuh"
+#include "../utils/verify.cuh"
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 #include <functional>
@@ -79,14 +82,6 @@ inline const char *getTensorCoreArchName() {
     }
     return "Unknown";
 }
-
-// ============================================================================
-// Tensor Core Verification Tolerance
-// ============================================================================
-
-// Tensor Core 使用 FP16 中间精度，需要更宽松的容差
-// 此容差定义在 Tensor Core 模块中，保持精度相关常量与其实现在一起
-inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
 
 // ============================================================================
 // Fallback 策略接口

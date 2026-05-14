@@ -1,6 +1,10 @@
 #pragma once
 
 #include "tensor_core_sgemm.cuh"
+#include "../utils/benchmark_core.cuh"
+#include "../utils/benchmark_metrics.cuh"
+#include "../utils/verify.cuh"
+
 #include <cublas_v2.h>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
@@ -71,36 +75,17 @@ runTensorCoreComputeOnlyBenchmark(cublasHandle_t cublas_handle, int M, int K, in
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 
-    for (int i = 0; i < warmup_runs; ++i) {
-        d_C.zero();
-        launch_tensor_core_sgemm_fp16(d_A_fp16.get(), d_B_fp16.get(), d_C.get(), M, K, N);
-    }
-    CUDA_CHECK(cudaDeviceSynchronize());
+    // 使用统一的 measureGpuTime 计时
+    float time_ms =
+        measureGpuTime([&]() { launch_tensor_core_sgemm_fp16(d_A_fp16.get(), d_B_fp16.get(), d_C.get(), M, K, N); },
+                       warmup_runs, benchmark_runs);
 
-    cudaEvent_t start, stop;
-    CUDA_CHECK(cudaEventCreate(&start));
-    CUDA_CHECK(cudaEventCreate(&stop));
-
-    CUDA_CHECK(cudaEventRecord(start));
-    for (int i = 0; i < benchmark_runs; ++i) {
-        launch_tensor_core_sgemm_fp16(d_A_fp16.get(), d_B_fp16.get(), d_C.get(), M, K, N);
-    }
-    CUDA_CHECK(cudaEventRecord(stop));
-    CUDA_CHECK(cudaEventSynchronize(stop));
-
-    float total_time_ms;
-    CUDA_CHECK(cudaEventElapsedTime(&total_time_ms, start, stop));
-
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-
-    // 填充性能指标
-    result.time_ms = total_time_ms / benchmark_runs;
-    double flops = 2.0 * result.M * result.N * result.K;
-    result.gflops = (flops / (result.time_ms * 1e-3)) / 1e9;
-    double bytes =
-        (result.M * result.K + result.K * result.N + result.M * result.N) * sizeof(float);
-    result.bandwidth_gb_s = (bytes / (result.time_ms * 1e-3)) / 1e9;
+    // 计算指标
+    PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, time_ms);
+    result.time_ms = metrics.time_ms;
+    result.gflops = metrics.gflops;
+    result.bandwidth_gb_s = metrics.bandwidth_gb_s;
+    result.efficiency = calculateEfficiency(result.gflops, getTheoreticalPeakGflops());
 
     d_C.copyToHost(h_C.data(), M * N);
     d_C_ref.copyToHost(h_C_ref.data(), M * N);
