@@ -30,6 +30,8 @@ RTX 3060 Laptop 在 `1024 x 1024 x 1024` 的示例数据：
 |--------|-------:|----------:|
 | Tensor Core (WMMA compute-only) | 2300 | 40.2% |
 
+benchmark harness 也会输出 **WMMA 端到端** 结果，但这张压缩快照页不发布单一 headline 数字，因为 FP32→FP16 转换与 fallback 行为会强烈依赖具体本地执行路径。请把 compute-only 这一行当作上界参考，再结合 [Benchmark 范围](/zh/validation/benchmark-scope) 与本地运行结果去理解完整端到端差距。
+
 ## 如何阅读本页
 
 - 这些数字是**本地代表性快照**，不是所有 GPU 上的承诺。

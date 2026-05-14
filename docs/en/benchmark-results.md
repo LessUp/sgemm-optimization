@@ -30,6 +30,8 @@ The repository also reports a narrower fast-path measurement for Tensor Core-fri
 |--------|-------:|----------:|
 | Tensor Core (WMMA compute-only) | 2300 | 40.2% |
 
+The benchmark harness also emits **WMMA end-to-end** results, but this condensed page does not publish a single headline number for that path because FP32→FP16 conversion and fallback behavior depend strongly on the exact local execution path. Treat the compute-only row as an upper-bound reference, then use [Benchmark Scope](/en/validation/benchmark-scope) and local runs to interpret the full end-to-end gap.
+
 ## How to read this page
 
 - These numbers are a **representative local snapshot**, not a promise for every GPU.

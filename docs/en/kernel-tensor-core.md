@@ -153,9 +153,15 @@ The exact mapping is hardware-defined and managed by WMMA APIs.
 
 
 
+## Benchmark Scope Note
+
+The commonly quoted **40% of cuBLAS** figure in this repository is the **WMMA compute-only** measurement on Tensor Core-friendly shapes. It is useful as an upper-bound reference for the raw WMMA path, but it is **not** the same thing as the end-to-end FP32-facing wrapper that includes conversion and fallback behavior.
+
+Read this page together with [Benchmark Results](/en/benchmark-results) and [Benchmark Scope](/en/validation/benchmark-scope) before comparing Tensor Core numbers against FP32 kernels.
+
 ## Optimization Opportunities
 
-Our Tensor Core kernel achieves only **40% of cuBLAS** performance. The gap comes from:
+Why the compute-only WMMA path still trails cuBLAS:
 
 1. **Multi-level tiling**: Warp-level + thread-level tiles
 2. **Instruction pipelining**: Issue multiple MMAs concurrently
