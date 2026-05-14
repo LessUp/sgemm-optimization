@@ -43,7 +43,7 @@ title: SGEMM 优化实验室
       <div class="signal-card">
         <div class="signal-title">公开内容</div>
         <div class="signal-value">EN / 中文</div>
-        <div class="signal-note">教程、面试、参考资料均中英对照</div>
+        <div class="signal-note">架构、方法论与参考资料均中英对照</div>
       </div>
     </div>
   </div>
@@ -84,7 +84,7 @@ title: SGEMM 优化实验室
     <div class="perf-note">性能结论绑定正确性验证与范围标注。</div>
   </div>
   <div class="perf-card">
-    <div class="perf-label">面试价值</div>
+    <div class="perf-label">架构价值</div>
     <div class="perf-value">可讲清</div>
     <div class="perf-note">可以按工程决策链条讲出“为什么这样做”。</div>
   </div>
