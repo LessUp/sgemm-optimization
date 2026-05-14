@@ -37,5 +37,5 @@ title: 学习路径
 ## 开始之前
 
 - 确保环境符合 [快速上手](/zh/getting-started)
-- 如需先了解仓库级地图，查看 [架构概览](/zh/architecture)
+- 如需先了解仓库级地图，查看 [架构概览](/zh/architecture/)
 - 如需规范需求，参考 [规范索引](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs/)

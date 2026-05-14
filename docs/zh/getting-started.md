@@ -52,5 +52,5 @@ ctest --test-dir build
 ## 接下来去哪
 
 - [学习路径](/zh/learning-path)
-- [架构概览](/zh/architecture)
+- [架构概览](/zh/architecture/)
 - [Benchmark 结果](/zh/benchmark-results)

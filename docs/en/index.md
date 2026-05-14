@@ -16,7 +16,7 @@ title: SGEMM Architecture Whitepaper
         the implementation ladder and the evidence model from the homepage alone.
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/en/architecture">Read the architecture map</a>
+        <a class="btn" href="/en/architecture/">Read the architecture map</a>
         <a class="btn btn-outline" href="/en/learning-path">Follow the methodology</a>
         <a class="btn btn-outline" href="/en/benchmark-results">Check the validation boundary</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
@@ -144,7 +144,7 @@ flowchart LR
     <h3>I need the big picture first</h3>
     <p>Start with the system view of the repository, then use validation context to interpret what the architecture is allowed to claim.</p>
     <div class="route-links">
-      <a href="/en/architecture">Architecture</a>
+      <a href="/en/architecture/">Architecture</a>
       <a href="/en/benchmark-results">Validation and benchmark scope</a>
     </div>
   </div>
@@ -153,7 +153,7 @@ flowchart LR
     <p>Use the staged reading path when you want each performance concept to build on the previous kernel rather than jump straight to WMMA.</p>
     <div class="route-links">
       <a href="/en/learning-path">Learning Path</a>
-      <a href="/en/architecture">Architecture overview</a>
+      <a href="/en/architecture/">Architecture overview</a>
     </div>
   </div>
   <div class="route-card">
@@ -177,7 +177,7 @@ flowchart LR
 ## Resource hub entry points
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/en/architecture">
+  <a class="knowledge-card" href="/en/architecture/">
     <h3>Architecture</h3>
     <p>The structural map of the kernel ladder, interface boundaries, and the decisions that hold the implementation together.</p>
   </a>

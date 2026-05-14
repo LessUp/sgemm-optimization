@@ -4,59 +4,28 @@ title: 项目亮点
 
 # 项目亮点
 
-本页回答一个核心问题：在大量 SGEMM 学习仓库中，这个项目的差异化价值是什么。
+本页现在只保留快速导览功能。完整的“为什么会这样设计”叙事已经迁移到[架构章节](/zh/architecture/)。
 
-## 差异化对照
+## 这个仓库真正想证明什么
 
-| 维度 | 常见 SGEMM Demo | 本项目做法 |
-|------|------------------|-----------|
-| 学习结构 | 只有 1-2 个 kernel，演进链条不完整 | 五阶段优化阶梯，每一步有明确学习目标 |
-| 正确性纪律 | 偶发抽样对比或无统一 oracle | cuBLAS 对照验证，FP32/WMMA 分别设容差 |
-| 性能表达 | 只给单点数据，缺少范围说明 | 区分端到端与仅计算，并明确适用边界 |
-| 工程治理 | 文档与实现可能逐渐漂移 | 通过 OpenSpec 保持文档/流程/需求一致 |
-| 面试可讲性 | 难形成工程故事线 | 提供面试手册与证据优先首页叙事 |
+- SGEMM 优化可以被讲成一条推理链，而不是技巧清单。
+- 只有把正确性策略和 benchmark 范围绑定起来，性能结论才可信。
+- 只有明确约束与 fallback 行为，Tensor Core 加速才有解释价值。
 
-## 面试官通常在意的强信号
+## 不同问题该从哪一页开始
 
-### 1）决策链条清晰
+| 如果你想知道…… | 建议先看 |
+|----------------|-----------|
+| 为什么整个系统这样组织 | [架构概述](/zh/architecture/) |
+| 为什么 kernel 要按这个顺序出现 | [Kernel 阶梯](/zh/architecture/kernel-ladder) |
+| 数据如何在内存层级中流动 | [Memory Flow](/zh/architecture/memory-flow) |
+| WMMA 什么时候能用、什么时候会被拒绝 | [Tensor Core 路径](/zh/architecture/tensor-core-path) |
+| 面试时该如何讲这个项目 | [面试手册](/zh/interview-playbook) |
 
-优化不是“随手调参数”，而是针对瓶颈的连续决策：
+## 给评审者的快速路径
 
-- Naive：建立基线并暴露内存瓶颈
-- Tiled：引入共享内存复用
-- Bank-Free：通过填充降低 bank 冲突惩罚
-- Double Buffer：重叠加载与计算
-- Tensor Core：通过混合精度提高吞吐并保留受保护回退
-
-### 2）证据优先，而非口号优先
-
-公开叙事中，性能结论和验证结论绑定：
-
-- Benchmark 标签明确（`端到端` / `仅计算`）
-- 正确性策略明确（FP32 与 WMMA 容差不同）
-- 验证边界明确（CI 可验证内容 vs 本地 GPU 可验证内容）
-
-### 3）工程边界真实可信
-
-项目明确写出 CI 不能替代真实 GPU 运行时：
-
-- 托管 CI：格式、编译、仓库/规范结构、Pages 构建
-- 本地 GPU：运行时正确性与性能 benchmark
-
-这类边界意识在面试中是加分项，体现工程判断而非“全能 CI”幻觉。
-
-## 仓库层面的质量信号
-
-- 统一 kernel launcher 契约，便于替换与对比
-- RAII 风格 CUDA 资源管理
-- 异常式错误处理
-- 中英文镜像文档，降低公共沟通门槛
-- OpenSpec 驱动需求与变更流程
-
-## 推荐评审路径（面试官/读者）
-
-1. [快速上手](/zh/getting-started)
-2. [学习路径](/zh/learning-path)
+1. [架构概述](/zh/architecture/)
+2. [Kernel 阶梯](/zh/architecture/kernel-ladder)
 3. [Benchmark 结果](/zh/benchmark-results)
 4. [面试手册](/zh/interview-playbook)
 5. [参考文献](/zh/references)

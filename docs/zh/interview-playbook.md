@@ -85,7 +85,8 @@ title: 面试手册
 
 ## 相关页面
 
-- [项目亮点](/zh/project-highlights)
+- [架构概述](/zh/architecture/)
+- [Kernel 阶梯](/zh/architecture/kernel-ladder)
 - [Benchmark 结果](/zh/benchmark-results)
 - [学习路径](/zh/learning-path)
 - [参考文献](/zh/references)
