@@ -6,44 +6,45 @@ title: SGEMM 架构白皮书
 <div class="home-shell">
   <div class="home-hero-grid">
     <div>
-      <p class="home-eyebrow">CUDA SGEMM 架构指南</p>
-      <h1 class="home-main-title">SGEMM 架构白皮书</h1>
+      <p class="home-eyebrow">CUDA SGEMM 白皮书首页</p>
+      <h1 class="home-main-title">把 SGEMM 讲成一条技术论证链</h1>
       <p class="home-main-subtitle">
-        这是一个围绕架构拆解、优化方法、验证证据与工程参考资料组织的双语 CUDA SGEMM 指南。
-        每一步提速都绑定正确性约束、基准解释和可复现的验证路径。
+        本站把 SGEMM 项目解释为一条完整的工程论证链：从简单的 CUDA 矩阵乘法基线出发，沿着分阶段架构演进一路向上，
+        只有当正确性对照、benchmark 范围标注和验证边界同时成立时，性能结论才算站得住。架构、方法论、资源、
+        验证与支持被组织成同一个知识模型，让第一次接触仓库的技术读者仅凭首页就能看懂实现阶梯与证据模型。
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/zh/getting-started">5 分钟开始</a>
-        <a class="btn btn-outline" href="/zh/architecture">查看架构图谱</a>
-        <a class="btn btn-outline" href="/zh/learning-path">学习路径</a>
+        <a class="btn" href="/zh/architecture">先看架构图谱</a>
+        <a class="btn btn-outline" href="/zh/learning-path">按方法论阅读</a>
+        <a class="btn btn-outline" href="/zh/benchmark-results">查看验证边界</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
-        <span class="home-chip">cuBLAS 对照</span>
-        <span class="home-chip">OpenSpec 治理</span>
-        <span class="home-chip">中英镜像页面</span>
+        <span class="home-chip">5 级内核阶梯</span>
+        <span class="home-chip">cuBLAS 锚定证据</span>
+        <span class="home-chip">中英镜像结构</span>
       </div>
     </div>
     <div class="signal-grid">
       <div class="signal-card">
-        <div class="signal-title">内核阶梯</div>
-        <div class="signal-value">5</div>
-        <div class="signal-note">naive -> tiled -> bank-free -> double-buffer -> WMMA</div>
+        <div class="signal-title">核心问题</div>
+        <div class="signal-value">每个 kernel 为什么会更快？</div>
+        <div class="signal-note">每一步复杂度的增加，都应该对应内存行为或执行形态的可解释变化。</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">正确性基准</div>
-        <div class="signal-value">cuBLAS</div>
-        <div class="signal-note">FP32 与 Tensor Core 使用不同容差预算</div>
+        <div class="signal-title">证据模型</div>
+        <div class="signal-value">cuBLAS + 范围标注</div>
+        <div class="signal-note">正确性对照和 benchmark 标注让结论可解释，而不是只剩宣传口径。</div>
       </div>
       <div class="signal-card">
         <div class="signal-title">验证边界</div>
-        <div class="signal-value">CI + GPU</div>
-        <div class="signal-note">CI 保证构建健康，本地 GPU 验证运行时与性能</div>
+        <div class="signal-value">CI 不是 GPU</div>
+        <div class="signal-note">托管自动化证明构建与结构健康，本地硬件才证明运行时与性能行为。</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">公开内容</div>
-        <div class="signal-value">EN / 中文</div>
-        <div class="signal-note">架构、方法论与参考资料均中英对照</div>
+        <div class="signal-title">读者模型</div>
+        <div class="signal-value">5 个规范域</div>
+        <div class="signal-note">架构、方法论、资源、验证、支持，共同构成站点的顶层地图。</div>
       </div>
     </div>
   </div>
@@ -51,51 +52,65 @@ title: SGEMM 架构白皮书
   <div class="home-proof-strip">
     <div class="proof-grid">
       <div class="proof-item">
-        <div class="proof-label">Benchmark 范围</div>
-        <div class="proof-value">WMMA 端到端与仅计算路径分开汇报，避免混淆。</div>
+        <div class="proof-label">论点</div>
+        <div class="proof-value">这个仓库关心的是“为什么这些优化成立”，而不只是“做了多少个 kernel”。</div>
       </div>
       <div class="proof-item">
-        <div class="proof-label">数值策略</div>
-        <div class="proof-value">FP32 与 Tensor Core 按路径设定不同精度容差。</div>
+        <div class="proof-label">方法</div>
+        <div class="proof-value">一层优化对应一次瓶颈转移，也对应一次更清楚的技术解释。</div>
       </div>
       <div class="proof-item">
         <div class="proof-label">工程契约</div>
-        <div class="proof-value">统一 launcher 形态保证 kernel 可替换、可对比、可验证。</div>
+        <div class="proof-value">统一 launcher 形态与受保护的 WMMA fallback，让各个 kernel 可以互换、可比较、可验证。</div>
       </div>
       <div class="proof-item">
-        <div class="proof-label">治理一致性</div>
-        <div class="proof-value">OpenSpec 持续对齐文档、流程与实现意图。</div>
+        <div class="proof-label">结果</div>
+        <div class="proof-value">首次进入的读者可以从架构、方法论、资源、验证或支持任一入口进入，而不会丢失技术主线。</div>
       </div>
     </div>
   </div>
 </div>
 
-## 为什么这个项目值得关注
+## 论点与定位
+
+这个首页是整套白皮书式文档的入口。项目不再被呈现为功能列表，也不被包装成单纯的 benchmark 展示板；它被组织为一串关于 CUDA SGEMM 的技术主张，而每个主张都必须能回到实现结构、优化意图与验证证据上。
+
+站点的知识模型是刻意外显的：
+
+- **架构**：说明内核阶梯里有什么、各阶段如何衔接、接口约束在哪里。
+- **方法论**：说明如何阅读、学习和调优这条阶梯，而不是跳过每一步背后的逻辑。
+- **资源**：把设计选择回溯到论文、官方文档和高价值仓库。
+- **验证**：解释证据代表什么、benchmark 标签代表什么、信任边界在哪里结束。
+- **支持**：帮助读者从 clone 到本地验证，且明确 CI 与 GPU 证明能力的差异。
+
+## 为什么这很重要
 
 <div class="perf-grid">
   <div class="perf-card">
-    <div class="perf-label">学习深度</div>
-    <div class="perf-value">渐进式</div>
-    <div class="perf-note">每个内核阶段只解决一个核心性能问题。</div>
+    <div class="perf-label">可解释性</div>
+    <div class="perf-value">清楚</div>
+    <div class="perf-note">第一次阅读的人也能看出 kernel 之间到底改了什么，以及为什么这些变化值得关注。</div>
   </div>
   <div class="perf-card">
-    <div class="perf-label">证据模型</div>
-    <div class="perf-value">可追踪</div>
-    <div class="perf-note">性能结论绑定正确性验证与范围标注。</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">架构价值</div>
-    <div class="perf-value">可讲清</div>
-    <div class="perf-note">可以按工程决策链条讲出“为什么这样做”。</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">社区价值</div>
+    <div class="perf-label">可迁移性</div>
     <div class="perf-value">可复用</div>
-    <div class="perf-note">包含调优手册、架构案例与参考文献索引。</div>
+    <div class="perf-note">分阶段叙述让这个 SGEMM 实现同时成为可复用的 CUDA 优化案例。</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">Benchmark 诚实度</div>
+    <div class="perf-value">有范围</div>
+    <div class="perf-note">WMMA 端到端与仅计算路径被明确拆开，读者可以知道每个数字究竟证明了什么。</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">信任模型</div>
+    <div class="perf-value">外显</div>
+    <div class="perf-note">首页会先说明哪些结论由托管 CI 保证，哪些结论必须依赖真实 GPU 机器。</div>
   </div>
 </div>
 
-## 一张图看项目全貌
+## 架构全景图
+
+项目围绕一条渐进式内核阶梯展开，但这条阶梯之所以有意义，是因为正确性护栏、benchmark 标注和流程治理始终挂在同一条主线上。
 
 ```mermaid
 flowchart LR
@@ -108,99 +123,95 @@ flowchart LR
     F -- 是 --> G[WMMA 计算路径]
     F -- 否 --> H[受保护 FP32 回退]
 
-    T1[Google Test + cuBLAS 对照] -. 正确性护栏 .-> A
-    T1 -. 正确性护栏 .-> E
-    T2[Benchmark 标签:\n端到端 vs 仅计算] -. 证据护栏 .-> E
-    T3[OpenSpec 治理] -. 流程护栏 .-> A
-    T3 -. 流程护栏 .-> H
+    M1[架构\n内核阶梯 + 接口边界] --> M2[方法论\n学习路径 + 调优逻辑]
+    M2 --> M3[资源\n论文 + 文档 + 仓库]
+    M2 --> M4[验证\ncuBLAS 对照 + 范围标注]
+    M4 --> M5[支持\n本地编译与运行]
+
+    A -. 实现主线 .-> M1
+    E -. 实现主线 .-> M1
+    M4 -. 正确性护栏 .-> A
+    M4 -. 正确性护栏 .-> E
+    M3 -. 设计谱系 .-> H
 ```
 
-## 按目标选择入口
+## 方法论入口
 
 <div class="route-grid">
   <div class="route-card">
-    <h3>快速编译与运行</h3>
-    <p>从 clone 到 benchmark，明确本地验证与 CI 验证分工。</p>
+    <h3>我先需要全局视角</h3>
+    <p>先从仓库的系统视图入手，再用验证语境理解这些架构结论到底可以声称什么。</p>
+    <div class="route-links">
+      <a href="/zh/architecture">架构说明</a>
+      <a href="/zh/benchmark-results">验证与 benchmark 范围</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>我想按顺序学完整个优化阶梯</h3>
+    <p>当你希望每个性能概念都建立在前一个 kernel 之上，而不是直接跳到 WMMA 时，请走这条路径。</p>
+    <div class="route-links">
+      <a href="/zh/learning-path">学习路径</a>
+      <a href="/zh/architecture">架构概览</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>我需要调优启发和延展材料</h3>
+    <p>把方法论与资源入口配合使用，可以同时获得可执行的优化建议和对应的技术来源。</p>
+    <div class="route-links">
+      <a href="/zh/optimization-playbook">优化手册</a>
+      <a href="/zh/references">参考文献</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>我想复现或审查这些结论</h3>
+    <p>把支持与验证入口放在一起看，能快速弄清楚本地该跑什么、CI 已经证明了什么，以及结果应如何解读。</p>
     <div class="route-links">
       <a href="/zh/getting-started">快速上手</a>
       <a href="/zh/benchmark-results">Benchmark 结果</a>
     </div>
   </div>
-  <div class="route-card">
-    <h3>系统学习优化阶梯</h3>
-    <p>按顺序理解每一步如何改变内存行为与性能画像。</p>
-      <div class="route-links">
-        <a href="/zh/architecture">架构概述</a>
-        <a href="/zh/learning-path">学习路径</a>
-      </div>
-  </div>
-  <div class="route-card">
-    <h3>追踪架构决策</h3>
-    <p>把设计取舍、内核阶段和 benchmark 证据串成一条可核查的技术主线。</p>
-    <div class="route-links">
-      <a href="/zh/architecture">架构说明</a>
-      <a href="/zh/benchmark-results">Benchmark 结果</a>
-    </div>
-  </div>
-  <div class="route-card">
-    <h3>追溯技术来源</h3>
-    <p>从实现选择反查到官方文档、论文和高质量开源仓库。</p>
-    <div class="route-links">
-      <a href="/zh/references">参考文献</a>
-      <a href="/zh/optimization-playbook">优化手册</a>
-    </div>
-  </div>
 </div>
 
-## 知识补给站
+## 资源总入口
 
 <div class="knowledge-grid">
   <a class="knowledge-card" href="/zh/architecture">
-    <h3>架构说明</h3>
-    <p>集中梳理内核阶梯、验证边界与关键设计约束，帮助快速建立全局视角。</p>
+    <h3>架构</h3>
+    <p>系统梳理内核阶梯、接口边界，以及维系实现一致性的关键设计约束。</p>
   </a>
   <a class="knowledge-card" href="/zh/learning-path">
-    <h3>学习路径</h3>
-    <p>按优化阶梯组织阅读顺序，让每一个性能概念都建立在前一步之上。</p>
+    <h3>方法论</h3>
+    <p>按阶段组织学习路径，让优化逻辑始终与架构主线保持连接。</p>
   </a>
   <a class="knowledge-card" href="/zh/references">
-    <h3>参考文献</h3>
-    <p>按用途整理论文、官方文档和仓库，并映射到具体设计决策。</p>
+    <h3>资源</h3>
+    <p>把项目背后的官方文档、论文与成熟仓库映射回具体设计选择。</p>
   </a>
   <a class="knowledge-card" href="/zh/benchmark-results">
-    <h3>Benchmark 结果</h3>
-    <p>从验证入口理解 benchmark 范围、容差预算与结果可信度边界。</p>
+    <h3>验证</h3>
+    <p>集中解释正确性容差、benchmark 范围、fallback 行为，以及公开数字真正代表的含义。</p>
   </a>
   <a class="knowledge-card" href="/zh/getting-started">
-    <h3>快速上手</h3>
-    <p>以支持入口承接本地环境准备、首次构建与仓库验证边界说明。</p>
-  </a>
-  <a class="knowledge-card" href="/zh/benchmark-results">
-    <h3>验证边界</h3>
-    <p>以验证入口区分托管 CI 能证明什么，以及只有本地 GPU 运行才能证明什么。</p>
+    <h3>支持</h3>
+    <p>承接 clone、构建、测试与运行流程，并提前说明本地验证与托管 CI 的职责差异。</p>
   </a>
 </div>
 
-> 当前仍保留的旧叙事页面正在并入规范化的架构、方法论与验证栏目；迁移完成前它们仍可访问，但不再作为主入口呈现。
+## 验证边界
 
-## 命令驾驶舱
+验证模型被刻意拆分，目的就是避免读者高估托管自动化，也避免低估本地 GPU 证据的重要性。
 
-```bash
-# 编译
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
+| 证据表面 | 能证明什么 | 在哪里运行 |
+|----------|------------|------------|
+| OpenSpec 与仓库检查 | 规范、文档结构、流程一致性、Pages 可发布性 | 托管 CI 与本地 CLI |
+| CUDA 编译 | 代码库在已配置 CUDA 工具链中仍可构建 | 托管 CI 与本地机器 |
+| Google Test + cuBLAS 对照 | 以项目 oracle 为基准的运行时正确性 | 本地 GPU 机器 |
+| Benchmark 执行 | 性能行为、WMMA 范围差异、fallback 代价 | 本地 GPU 机器 |
 
-# 验证
-ctest --test-dir build
-openspec validate --all
+这条边界是首页的一级概念，而不是脚注：CI 负责让仓库保持健康，只有本地 GPU 执行才能验证运行时行为和性能主张。
 
-# 基准测试
-./build/bin/sgemm_benchmark -a
-./build/bin/sgemm_benchmark --dims 256 384 640
-```
-
-## 语言与入口
+## 规范入口
 
 - English mirrored home: [English Home](/en/)
-- 仓库入口: [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md)
-- OpenSpec 权威规范: [openspec/specs](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs)
+- 仓库入口： [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md)
+- 稳定流程与需求来源： [openspec/specs](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs)
