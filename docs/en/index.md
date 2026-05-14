@@ -106,7 +106,7 @@ The site's knowledge model is intentionally explicit:
   <div class="perf-card">
     <div class="perf-label">Trust model</div>
     <div class="perf-value">Explicit</div>
-    <div class="perf-note">The homepage tells you upfront which claims are validated in hosted CI and which require a real GPU machine.</div>
+    <div class="perf-note">The homepage tells you upfront which claims are checked by hosted docs/governance automation and which require a real GPU machine.</div>
   </div>
 </div>
 

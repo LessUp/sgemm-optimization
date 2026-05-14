@@ -104,7 +104,7 @@ title: SGEMM 架构白皮书
   <div class="perf-card">
     <div class="perf-label">信任模型</div>
     <div class="perf-value">外显</div>
-    <div class="perf-note">首页会先说明哪些结论由托管 CI 保证，哪些结论必须依赖真实 GPU 机器。</div>
+    <div class="perf-note">首页会先说明哪些结论由托管文档/治理自动化检查，哪些结论必须依赖真实 GPU 机器。</div>
   </div>
 </div>
 
