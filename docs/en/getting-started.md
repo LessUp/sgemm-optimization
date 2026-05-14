@@ -43,7 +43,7 @@ ctest --test-dir build
 | Environment | What to run |
 |-------------|-------------|
 | Local GPU machine | benchmark, runtime verification, `ctest` |
-| Hosted CI | formatting, compile validation, OpenSpec/repository checks, Pages |
+| Hosted CI | formatting, docs tests/build, OpenSpec/repository checks, Pages |
 
 This split is intentional: GitHub-hosted runners validate repository health, while performance and CUDA runtime correctness still require a real GPU machine.
 
@@ -53,4 +53,4 @@ This split is intentional: GitHub-hosted runners validate repository health, whi
 
 - [Learning Path](/en/learning-path)
 - [Architecture](/en/architecture/)
-- [Benchmark Results](/en/benchmark-results)
+- [Validation Overview](/en/validation/)

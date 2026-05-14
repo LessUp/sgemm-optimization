@@ -67,10 +67,10 @@ title: 架构概述
 
 | 范围 | 本地 CUDA GPU | 托管 CI |
 |------|---------------|---------|
-| CUDA 编译 | 是 | 是 |
+| CUDA 编译 | 是 | 否 |
 | 运行时正确性 | 是 | 否 |
 | Benchmark 性能 | 是 | 否 |
-| OpenSpec 与仓库完整性 | 是 | 是 |
+| 文档、OpenSpec 与仓库完整性 | 是 | 是 |
 | Pages 可构建性 | 可选 | 是 |
 
 这不仅是流程说明，也会直接影响架构叙事：性能结论必须回到正确的运行环境里解释。
@@ -85,7 +85,7 @@ title: 架构概述
 
 ## 相关参考
 
-- [Benchmark 结果](/zh/benchmark-results)
+- [验证概览](/zh/validation/)
 - [学习路径](/zh/learning-path)
 - [快速上手](/zh/getting-started)
 - [稳定架构规范](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

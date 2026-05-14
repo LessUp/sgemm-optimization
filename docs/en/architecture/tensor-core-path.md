@@ -80,5 +80,5 @@ Even though the implementation is educational rather than cuBLAS-class, the Tens
 
 - [Architecture Overview](/en/architecture/)
 - [Kernel Ladder](/en/architecture/kernel-ladder)
-- [Benchmark Results](/en/benchmark-results)
+- [Benchmark Scope](/en/validation/benchmark-scope)
 - [Tensor Core WMMA](/en/kernel-tensor-core)

@@ -26,6 +26,6 @@ title: 项目亮点
 
 1. [架构概述](/zh/architecture/)
 2. [Kernel 阶梯](/zh/architecture/kernel-ladder)
-3. [Benchmark 结果](/zh/benchmark-results)
+3. [验证概览](/zh/validation/)
 4. [面试手册](/zh/interview-playbook)
 5. [参考文献](/zh/references)

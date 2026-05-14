@@ -64,5 +64,5 @@ title: 参考文献
 ## 相关页面
 
 - [架构概述](/zh/architecture/)
-- [Benchmark 结果](/zh/benchmark-results)
-- [优化手册](/zh/optimization-playbook)
+- [验证概览](/zh/validation/)
+- [方法论概览](/zh/methodology/)

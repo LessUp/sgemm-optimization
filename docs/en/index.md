@@ -17,8 +17,8 @@ title: SGEMM Architecture Whitepaper
       </p>
       <div class="home-action-row">
         <a class="btn" href="/en/architecture/">Read the architecture map</a>
-        <a class="btn btn-outline" href="/en/learning-path">Follow the methodology</a>
-        <a class="btn btn-outline" href="/en/benchmark-results">Check the validation boundary</a>
+        <a class="btn btn-outline" href="/en/methodology/">Follow the methodology</a>
+        <a class="btn btn-outline" href="/en/validation/">Check the validation boundary</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -145,7 +145,7 @@ flowchart LR
     <p>Start with the system view of the repository, then use validation context to interpret what the architecture is allowed to claim.</p>
     <div class="route-links">
       <a href="/en/architecture/">Architecture</a>
-      <a href="/en/benchmark-results">Validation and benchmark scope</a>
+      <a href="/en/validation/">Validation overview</a>
     </div>
   </div>
   <div class="route-card">
@@ -160,7 +160,7 @@ flowchart LR
     <h3>I want tuning heuristics and follow-up material</h3>
     <p>Use the methodology and resource surfaces together when you need actionable optimization guidance plus technical lineage.</p>
     <div class="route-links">
-      <a href="/en/optimization-playbook">Optimization Playbook</a>
+      <a href="/en/methodology/diagnosis-loop">Diagnosis Loop</a>
       <a href="/en/references">References</a>
     </div>
   </div>
@@ -169,7 +169,7 @@ flowchart LR
     <p>Use the support and validation surfaces together to understand what to run locally, what CI already proves, and how results should be interpreted.</p>
     <div class="route-links">
       <a href="/en/getting-started">Getting Started</a>
-      <a href="/en/benchmark-results">Benchmark Results</a>
+      <a href="/en/validation/">Validation overview</a>
     </div>
   </div>
 </div>
@@ -181,15 +181,15 @@ flowchart LR
     <h3>Architecture</h3>
     <p>The structural map of the kernel ladder, interface boundaries, and the decisions that hold the implementation together.</p>
   </a>
-  <a class="knowledge-card" href="/en/learning-path">
+  <a class="knowledge-card" href="/en/methodology/">
     <h3>Methodology</h3>
-    <p>The guided path for learning the stages in order, with optimization logic that stays connected to the architecture.</p>
+    <p>The canonical optimization workflow: staged learning, benchmark discipline, and diagnosis logic tied back to the architecture.</p>
   </a>
   <a class="knowledge-card" href="/en/references">
     <h3>Resources</h3>
     <p>The source trail behind the project: official docs, papers, and mature repositories mapped to concrete decisions.</p>
   </a>
-  <a class="knowledge-card" href="/en/benchmark-results">
+  <a class="knowledge-card" href="/en/validation/">
     <h3>Validation</h3>
     <p>The evidence surface for correctness budgets, benchmark scope, fallback behavior, and what the published numbers actually mean.</p>
   </a>
@@ -205,8 +205,7 @@ The validation model is deliberately split so readers do not over-trust hosted a
 
 | Evidence surface | What it can prove | Where it runs |
 |------------------|-------------------|---------------|
-| OpenSpec and repository checks | Specs, documentation structure, workflow alignment, Pages fitness | Hosted CI and local CLI |
-| CUDA compilation | The codebase still builds in a configured CUDA toolchain | Hosted CI and local machines |
+| Documentation, Pages, and governance checks | Specs, docs structure, workflow alignment, and Pages fitness | Hosted CI and local CLI |
 | Google Test + cuBLAS comparisons | Runtime correctness against the project oracle | Local GPU machines |
 | Benchmark execution | Performance behavior, WMMA scope differences, fallback consequences | Local GPU machines |
 

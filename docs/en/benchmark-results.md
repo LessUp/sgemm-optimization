@@ -4,9 +4,9 @@ title: Benchmark Results
 
 # Benchmark Results
 
-Representative performance notes, not a universal promise
+Representative performance notes, not a universal promise.
 
-
+This page is now only the **results snapshot** surface. For trust policy and interpretation rules, use [Validation](/en/validation/). For experiment design, use [Methodology](/en/methodology/).
 
 ## Reference snapshot
 
@@ -21,21 +21,26 @@ Sample numbers from an RTX 3060 Laptop at `1024 x 1024 x 1024`:
 | Bank-Free | 673 | 11.8% |
 | Naive | 604 | 10.6% |
 
+## How to read this page
 
+- These numbers are a **representative local snapshot**, not a promise for every GPU.
+- Compare them only after reading [Benchmark Scope](/en/validation/benchmark-scope).
+- Treat `WMMA compute-only` as a narrow fast-path label, not a replacement for end-to-end behavior.
+- Assume hosted CI did **not** prove these numbers. Only local GPU runs can.
 
 ## Tensor Core note
 
-The benchmark reports:
+The benchmark suite reports:
 
 - **WMMA end-to-end**: the safe FP32 wrapper, including conversion and fallback handling
 - **WMMA compute-only**: the pure pre-converted FP16 path, shown only when `M`, `K`, and `N` are multiples of 16
 
-When the dimensions are not Tensor Core friendly, the implementation falls back to a safer FP32 path instead of forcing WMMA.
+When dimensions are not Tensor Core friendly, the implementation falls back to a safer FP32 path instead of forcing WMMA.
 
+## Read together with
 
-
-## Related references
-
-- [Getting Started](/en/getting-started)
-- [Learning Path](/en/learning-path)
-- [Kernel progression in README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)
+- [Validation Overview](/en/validation/)
+- [Correctness Policy](/en/validation/correctness-policy)
+- [Benchmark Scope](/en/validation/benchmark-scope)
+- [Reproducibility](/en/validation/reproducibility)
+- [Methodology](/en/methodology/)

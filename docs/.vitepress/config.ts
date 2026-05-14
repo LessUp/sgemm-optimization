@@ -35,9 +35,9 @@ export default withMermaid(defineConfig({
         nav: [
           { text: 'Home', link: '/en/', activeMatch: '^/en/$' },
           { text: 'Architecture', link: '/en/architecture/', activeMatch: '^/en/architecture' },
-          { text: 'Methodology', link: '/en/learning-path', activeMatch: '^/en/(learning-path|kernel-.*|optimization-playbook)' },
+          { text: 'Methodology', link: '/en/methodology/', activeMatch: '^/en/(methodology|learning-path|kernel-.*|optimization-playbook)' },
           { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook)' },
-          { text: 'Validation', link: '/en/benchmark-results', activeMatch: '^/en/benchmark-results' },
+          { text: 'Validation', link: '/en/validation/', activeMatch: '^/en/(validation|benchmark-results)' },
           { text: 'Support', link: '/en/getting-started', activeMatch: '^/en/getting-started' },
         ],
         sidebar: {
@@ -54,13 +54,15 @@ export default withMermaid(defineConfig({
             {
               text: 'Methodology',
               items: [
+                { text: 'Methodology Overview', link: '/en/methodology/' },
                 { text: 'Learning Path', link: '/en/learning-path' },
                 { text: 'Naive Kernel', link: '/en/kernel-naive' },
                 { text: 'Tiled Kernel', link: '/en/kernel-tiled' },
                 { text: 'Bank Conflict Free', link: '/en/kernel-bank-free' },
                 { text: 'Double Buffer', link: '/en/kernel-double-buffer' },
                 { text: 'Tensor Core WMMA', link: '/en/kernel-tensor-core' },
-                { text: 'Optimization Playbook', link: '/en/optimization-playbook' },
+                { text: 'Benchmark Discipline', link: '/en/methodology/benchmark-discipline' },
+                { text: 'Diagnosis Loop', link: '/en/methodology/diagnosis-loop' },
               ],
             },
             {
@@ -74,6 +76,10 @@ export default withMermaid(defineConfig({
             {
               text: 'Validation',
               items: [
+                { text: 'Validation Overview', link: '/en/validation/' },
+                { text: 'Correctness Policy', link: '/en/validation/correctness-policy' },
+                { text: 'Benchmark Scope', link: '/en/validation/benchmark-scope' },
+                { text: 'Reproducibility', link: '/en/validation/reproducibility' },
                 { text: 'Benchmark Results', link: '/en/benchmark-results' },
               ],
             },
@@ -98,9 +104,9 @@ export default withMermaid(defineConfig({
         nav: [
           { text: '首页', link: '/zh/', activeMatch: '^/zh/$' },
           { text: '架构', link: '/zh/architecture/', activeMatch: '^/zh/architecture' },
-          { text: '方法论', link: '/zh/learning-path', activeMatch: '^/zh/(learning-path|kernel-.*|optimization-playbook)' },
+          { text: '方法论', link: '/zh/methodology/', activeMatch: '^/zh/(methodology|learning-path|kernel-.*|optimization-playbook)' },
           { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook)' },
-          { text: '验证', link: '/zh/benchmark-results', activeMatch: '^/zh/benchmark-results' },
+          { text: '验证', link: '/zh/validation/', activeMatch: '^/zh/(validation|benchmark-results)' },
           { text: '支持', link: '/zh/getting-started', activeMatch: '^/zh/getting-started' },
         ],
         sidebar: {
@@ -117,13 +123,15 @@ export default withMermaid(defineConfig({
             {
               text: '方法论',
               items: [
+                { text: '方法论概览', link: '/zh/methodology/' },
                 { text: '学习路径', link: '/zh/learning-path' },
                 { text: '朴素内核', link: '/zh/kernel-naive' },
                 { text: '分块内核', link: '/zh/kernel-tiled' },
                 { text: '消除 Bank Conflict', link: '/zh/kernel-bank-free' },
                 { text: '双缓冲', link: '/zh/kernel-double-buffer' },
                 { text: 'Tensor Core WMMA', link: '/zh/kernel-tensor-core' },
-                { text: '优化手册', link: '/zh/optimization-playbook' },
+                { text: 'Benchmark 纪律', link: '/zh/methodology/benchmark-discipline' },
+                { text: '诊断闭环', link: '/zh/methodology/diagnosis-loop' },
               ],
             },
             {
@@ -137,6 +145,10 @@ export default withMermaid(defineConfig({
             {
               text: '验证',
               items: [
+                { text: '验证概览', link: '/zh/validation/' },
+                { text: '正确性策略', link: '/zh/validation/correctness-policy' },
+                { text: 'Benchmark 范围', link: '/zh/validation/benchmark-scope' },
+                { text: '可复现性', link: '/zh/validation/reproducibility' },
                 { text: 'Benchmark 结果', link: '/zh/benchmark-results' },
               ],
             },

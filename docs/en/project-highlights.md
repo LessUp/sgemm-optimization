@@ -26,6 +26,6 @@ This page is now a quick orientation surface. The full “why this design exists
 
 1. [Architecture Overview](/en/architecture/)
 2. [Kernel Ladder](/en/architecture/kernel-ladder)
-3. [Benchmark Results](/en/benchmark-results)
+3. [Validation Overview](/en/validation/)
 4. [Interview Playbook](/en/interview-playbook)
 5. [References](/en/references)

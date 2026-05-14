@@ -87,6 +87,6 @@ title: 面试手册
 
 - [架构概述](/zh/architecture/)
 - [Kernel 阶梯](/zh/architecture/kernel-ladder)
-- [Benchmark 结果](/zh/benchmark-results)
+- [验证概览](/zh/validation/)
 - [学习路径](/zh/learning-path)
 - [参考文献](/zh/references)
