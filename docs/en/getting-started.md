@@ -52,5 +52,5 @@ This split is intentional: GitHub-hosted runners validate repository health, whi
 ## Where to go next
 
 - [Learning Path](/en/learning-path)
-- [Architecture](/en/architecture)
+- [Architecture](/en/architecture/)
 - [Benchmark Results](/en/benchmark-results)

@@ -14,7 +14,7 @@ title: SGEMM 架构白皮书
         验证与支持被组织成同一个知识模型，让第一次接触仓库的技术读者仅凭首页就能看懂实现阶梯与证据模型。
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/zh/architecture">先看架构图谱</a>
+        <a class="btn" href="/zh/architecture/">先看架构图谱</a>
         <a class="btn btn-outline" href="/zh/learning-path">按方法论阅读</a>
         <a class="btn btn-outline" href="/zh/benchmark-results">查看验证边界</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
@@ -142,7 +142,7 @@ flowchart LR
     <h3>我先需要全局视角</h3>
     <p>先从仓库的系统视图入手，再用验证语境理解这些架构结论到底可以声称什么。</p>
     <div class="route-links">
-      <a href="/zh/architecture">架构说明</a>
+      <a href="/zh/architecture/">架构说明</a>
       <a href="/zh/benchmark-results">验证与 benchmark 范围</a>
     </div>
   </div>
@@ -151,7 +151,7 @@ flowchart LR
     <p>当你希望每个性能概念都建立在前一个 kernel 之上，而不是直接跳到 WMMA 时，请走这条路径。</p>
     <div class="route-links">
       <a href="/zh/learning-path">学习路径</a>
-      <a href="/zh/architecture">架构概览</a>
+      <a href="/zh/architecture/">架构概览</a>
     </div>
   </div>
   <div class="route-card">
@@ -175,7 +175,7 @@ flowchart LR
 ## 资源总入口
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/zh/architecture">
+  <a class="knowledge-card" href="/zh/architecture/">
     <h3>架构</h3>
     <p>系统梳理内核阶梯、接口边界，以及维系实现一致性的关键设计约束。</p>
   </a>

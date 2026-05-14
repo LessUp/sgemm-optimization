@@ -85,7 +85,8 @@ Strong answer pattern:
 
 ## Related pages
 
-- [Project Highlights](/en/project-highlights)
+- [Architecture Overview](/en/architecture/)
+- [Kernel Ladder](/en/architecture/kernel-ladder)
 - [Benchmark Results](/en/benchmark-results)
 - [Learning Path](/en/learning-path)
 - [References](/en/references)

@@ -34,7 +34,7 @@ export default withMermaid(defineConfig({
       themeConfig: {
         nav: [
           { text: 'Home', link: '/en/', activeMatch: '^/en/$' },
-          { text: 'Architecture', link: '/en/architecture', activeMatch: '^/en/architecture' },
+          { text: 'Architecture', link: '/en/architecture/', activeMatch: '^/en/architecture' },
           { text: 'Methodology', link: '/en/learning-path', activeMatch: '^/en/(learning-path|kernel-.*|optimization-playbook)' },
           { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook)' },
           { text: 'Validation', link: '/en/benchmark-results', activeMatch: '^/en/benchmark-results' },
@@ -45,7 +45,10 @@ export default withMermaid(defineConfig({
             {
               text: 'Architecture',
               items: [
-                { text: 'Architecture Overview', link: '/en/architecture' },
+                { text: 'Architecture Overview', link: '/en/architecture/' },
+                { text: 'Kernel Ladder', link: '/en/architecture/kernel-ladder' },
+                { text: 'Memory Flow', link: '/en/architecture/memory-flow' },
+                { text: 'Tensor Core Path', link: '/en/architecture/tensor-core-path' },
               ],
             },
             {
@@ -94,7 +97,7 @@ export default withMermaid(defineConfig({
       themeConfig: {
         nav: [
           { text: '首页', link: '/zh/', activeMatch: '^/zh/$' },
-          { text: '架构', link: '/zh/architecture', activeMatch: '^/zh/architecture' },
+          { text: '架构', link: '/zh/architecture/', activeMatch: '^/zh/architecture' },
           { text: '方法论', link: '/zh/learning-path', activeMatch: '^/zh/(learning-path|kernel-.*|optimization-playbook)' },
           { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook)' },
           { text: '验证', link: '/zh/benchmark-results', activeMatch: '^/zh/benchmark-results' },
@@ -105,7 +108,10 @@ export default withMermaid(defineConfig({
             {
               text: '架构',
               items: [
-                { text: '架构概述', link: '/zh/architecture' },
+                { text: '架构概述', link: '/zh/architecture/' },
+                { text: 'Kernel 阶梯', link: '/zh/architecture/kernel-ladder' },
+                { text: 'Memory Flow', link: '/zh/architecture/memory-flow' },
+                { text: 'Tensor Core 路径', link: '/zh/architecture/tensor-core-path' },
               ],
             },
             {
