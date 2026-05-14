@@ -14,9 +14,9 @@ title: SGEMM 架构白皮书
         验证与支持被组织成同一个知识模型，让第一次接触仓库的技术读者仅凭首页就能看懂实现阶梯与证据模型。
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/zh/architecture/">先看架构图谱</a>
-        <a class="btn btn-outline" href="/zh/methodology/">按方法论阅读</a>
-        <a class="btn btn-outline" href="/zh/validation/">查看验证边界</a>
+        <a class="btn" href="./architecture/">先看架构图谱</a>
+        <a class="btn btn-outline" href="./methodology/">按方法论阅读</a>
+        <a class="btn btn-outline" href="./validation/">查看验证边界</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -39,7 +39,7 @@ title: SGEMM 架构白皮书
       <div class="signal-card">
         <div class="signal-title">验证边界</div>
         <div class="signal-value">CI 不是 GPU</div>
-        <div class="signal-note">托管自动化证明构建与结构健康，本地硬件才证明运行时与性能行为。</div>
+        <div class="signal-note">托管自动化证明文档与治理健康，本地硬件才证明 CUDA 运行时与性能行为。</div>
       </div>
       <div class="signal-card">
         <div class="signal-title">读者模型</div>
@@ -142,32 +142,32 @@ flowchart LR
     <h3>我先需要全局视角</h3>
     <p>先从仓库的系统视图入手，再用验证语境理解这些架构结论到底可以声称什么。</p>
     <div class="route-links">
-      <a href="/zh/architecture/">架构说明</a>
-      <a href="/zh/validation/">验证概览</a>
+      <a href="./architecture/">架构说明</a>
+      <a href="./validation/">验证概览</a>
     </div>
   </div>
   <div class="route-card">
     <h3>我想按顺序学完整个优化阶梯</h3>
     <p>当你希望每个性能概念都建立在前一个 kernel 之上，而不是直接跳到 WMMA 时，请走这条路径。</p>
     <div class="route-links">
-      <a href="/zh/learning-path">学习路径</a>
-      <a href="/zh/architecture/">架构概览</a>
+      <a href="./learning-path">学习路径</a>
+      <a href="./architecture/">架构概览</a>
     </div>
   </div>
   <div class="route-card">
     <h3>我需要调优启发和延展材料</h3>
     <p>把方法论与资源入口配合使用，可以同时获得可执行的优化建议和对应的技术来源。</p>
     <div class="route-links">
-      <a href="/zh/methodology/diagnosis-loop">诊断闭环</a>
-      <a href="/zh/references">参考文献</a>
+      <a href="./methodology/diagnosis-loop">诊断闭环</a>
+      <a href="./resources/">资源中心</a>
     </div>
   </div>
   <div class="route-card">
     <h3>我想复现或审查这些结论</h3>
     <p>把支持与验证入口放在一起看，能快速弄清楚本地该跑什么、CI 已经证明了什么，以及结果应如何解读。</p>
     <div class="route-links">
-      <a href="/zh/getting-started">快速上手</a>
-      <a href="/zh/validation/">验证概览</a>
+      <a href="./getting-started">快速上手</a>
+      <a href="./validation/">验证概览</a>
     </div>
   </div>
 </div>
@@ -175,23 +175,23 @@ flowchart LR
 ## 资源总入口
 
 <div class="knowledge-grid">
-  <a class="knowledge-card" href="/zh/architecture/">
+  <a class="knowledge-card" href="./architecture/">
     <h3>架构</h3>
     <p>系统梳理内核阶梯、接口边界，以及维系实现一致性的关键设计约束。</p>
   </a>
-  <a class="knowledge-card" href="/zh/methodology/">
+  <a class="knowledge-card" href="./methodology/">
     <h3>方法论</h3>
     <p>规范的优化工作流入口：把阶段学习、benchmark 纪律与诊断逻辑重新系到架构主线上。</p>
   </a>
-  <a class="knowledge-card" href="/zh/references">
+  <a class="knowledge-card" href="./resources/">
     <h3>资源</h3>
-    <p>把项目背后的官方文档、论文与成熟仓库映射回具体设计选择。</p>
+    <p>一个带编辑引导的学习入口：告诉读者不同文档、论文、工具与延伸路线分别该在什么时候打开。</p>
   </a>
-  <a class="knowledge-card" href="/zh/validation/">
+  <a class="knowledge-card" href="./validation/">
     <h3>验证</h3>
     <p>集中解释正确性容差、benchmark 范围、fallback 行为，以及公开数字真正代表的含义。</p>
   </a>
-  <a class="knowledge-card" href="/zh/getting-started">
+  <a class="knowledge-card" href="./getting-started">
     <h3>支持</h3>
     <p>承接 clone、构建、测试与运行流程，并提前说明本地验证与托管 CI 的职责差异。</p>
   </a>

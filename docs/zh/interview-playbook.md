@@ -89,4 +89,4 @@ title: 面试手册
 - [Kernel 阶梯](/zh/architecture/kernel-ladder)
 - [验证概览](/zh/validation/)
 - [学习路径](/zh/learning-path)
-- [参考文献](/zh/references)
+- [资源中心](/zh/resources/)

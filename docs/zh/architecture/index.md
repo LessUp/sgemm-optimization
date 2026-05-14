@@ -83,8 +83,9 @@ title: 架构概述
 4. 在解释 WMMA benchmark 前，先阅读 [Tensor Core 路径](/zh/architecture/tensor-core-path)。
 5. 当你需要实现细节而不是系统原因时，再跳转到各个 kernel 深入页。
 
-## 相关参考
+## 相关资源
 
+- [资源中心](/zh/resources/)
 - [验证概览](/zh/validation/)
 - [学习路径](/zh/learning-path)
 - [快速上手](/zh/getting-started)

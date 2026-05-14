@@ -28,4 +28,4 @@ This page is now a quick orientation surface. The full “why this design exists
 2. [Kernel Ladder](/en/architecture/kernel-ladder)
 3. [Validation Overview](/en/validation/)
 4. [Interview Playbook](/en/interview-playbook)
-5. [References](/en/references)
+5. [Resources Hub](/en/resources/)

@@ -36,7 +36,7 @@ export default withMermaid(defineConfig({
           { text: 'Home', link: '/en/', activeMatch: '^/en/$' },
           { text: 'Architecture', link: '/en/architecture/', activeMatch: '^/en/architecture' },
           { text: 'Methodology', link: '/en/methodology/', activeMatch: '^/en/(methodology|learning-path|kernel-.*|optimization-playbook)' },
-          { text: 'Resources', link: '/en/references', activeMatch: '^/en/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: 'Resources', link: '/en/resources/', activeMatch: '^/en/(resources|references|cuda-memory-cheatsheet|performance-casebook)' },
           { text: 'Validation', link: '/en/validation/', activeMatch: '^/en/(validation|benchmark-results)' },
           { text: 'Support', link: '/en/getting-started', activeMatch: '^/en/getting-started' },
         ],
@@ -68,9 +68,11 @@ export default withMermaid(defineConfig({
             {
               text: 'Resources',
               items: [
+                { text: 'Resources Hub', link: '/en/resources/' },
+                { text: 'Further Reading Routes', link: '/en/resources/further-reading' },
                 { text: 'CUDA Memory Cheat Sheet', link: '/en/cuda-memory-cheatsheet' },
                 { text: 'Performance Casebook', link: '/en/performance-casebook' },
-                { text: 'References', link: '/en/references' },
+                { text: 'Curated References', link: '/en/references' },
               ],
             },
             {
@@ -105,7 +107,7 @@ export default withMermaid(defineConfig({
           { text: '首页', link: '/zh/', activeMatch: '^/zh/$' },
           { text: '架构', link: '/zh/architecture/', activeMatch: '^/zh/architecture' },
           { text: '方法论', link: '/zh/methodology/', activeMatch: '^/zh/(methodology|learning-path|kernel-.*|optimization-playbook)' },
-          { text: '资源', link: '/zh/references', activeMatch: '^/zh/(references|cuda-memory-cheatsheet|performance-casebook)' },
+          { text: '资源', link: '/zh/resources/', activeMatch: '^/zh/(resources|references|cuda-memory-cheatsheet|performance-casebook)' },
           { text: '验证', link: '/zh/validation/', activeMatch: '^/zh/(validation|benchmark-results)' },
           { text: '支持', link: '/zh/getting-started', activeMatch: '^/zh/getting-started' },
         ],
@@ -137,9 +139,11 @@ export default withMermaid(defineConfig({
             {
               text: '资源',
               items: [
+                { text: '资源中心', link: '/zh/resources/' },
+                { text: '延伸阅读路线', link: '/zh/resources/further-reading' },
                 { text: 'CUDA 内存速查表', link: '/zh/cuda-memory-cheatsheet' },
                 { text: '性能案例库', link: '/zh/performance-casebook' },
-                { text: '参考文献', link: '/zh/references' },
+                { text: '参考资料清单', link: '/zh/references' },
               ],
             },
             {
