@@ -1,6 +1,6 @@
 ---
 layout: home
-title: SGEMM Optimization Lab
+title: SGEMM Architecture Whitepaper
 ---
 
 <div class="home-shell">
@@ -130,10 +130,10 @@ flowchart LR
   <div class="route-card">
     <h3>Learn the optimization ladder</h3>
     <p>Understand what each stage changes in memory behavior and performance profile.</p>
-    <div class="route-links">
-      <a href="/en/learning-path">Learning Path</a>
-      <a href="/en/kernel-naive">Kernel Series</a>
-    </div>
+      <div class="route-links">
+        <a href="/en/architecture">Architecture Overview</a>
+        <a href="/en/learning-path">Learning Path</a>
+      </div>
   </div>
   <div class="route-card">
     <h3>Trace architecture decisions</h3>
@@ -168,17 +168,17 @@ flowchart LR
     <h3>References</h3>
     <p>Curated papers, official docs, and repositories mapped to concrete design decisions.</p>
   </a>
-  <a class="knowledge-card" href="/en/optimization-playbook">
-    <h3>Optimization Playbook</h3>
-    <p>A diagnosis loop for bottleneck classification, hypothesis design, and measurable experiments.</p>
+  <a class="knowledge-card" href="/en/benchmark-results">
+    <h3>Benchmark Results</h3>
+    <p>Use the validation entry point to interpret benchmark scope, correctness budgets, and trust boundaries.</p>
   </a>
-  <a class="knowledge-card" href="/en/performance-casebook">
-    <h3>Performance Casebook</h3>
-    <p>Architecture-specific tuning priorities for Volta, Turing, Ampere, Ada, and Hopper.</p>
+  <a class="knowledge-card" href="/en/learning-path">
+    <h3>Learning Path</h3>
+    <p>Use the methodology entry point to navigate the kernel ladder and staged optimization reasoning.</p>
   </a>
-  <a class="knowledge-card" href="/en/cuda-memory-cheatsheet">
-    <h3>CUDA Memory Cheat Sheet</h3>
-    <p>Coalescing, shared-memory banks, occupancy hints, and profiler-oriented reading checklist.</p>
+  <a class="knowledge-card" href="/en/references">
+    <h3>Engineering References</h3>
+    <p>Use the resource entry point to reach papers, official docs, and practical study material.</p>
   </a>
 </div>
 
