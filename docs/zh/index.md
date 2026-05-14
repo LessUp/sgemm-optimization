@@ -15,8 +15,8 @@ title: SGEMM 架构白皮书
       </p>
       <div class="home-action-row">
         <a class="btn" href="/zh/architecture/">先看架构图谱</a>
-        <a class="btn btn-outline" href="/zh/learning-path">按方法论阅读</a>
-        <a class="btn btn-outline" href="/zh/benchmark-results">查看验证边界</a>
+        <a class="btn btn-outline" href="/zh/methodology/">按方法论阅读</a>
+        <a class="btn btn-outline" href="/zh/validation/">查看验证边界</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
@@ -143,7 +143,7 @@ flowchart LR
     <p>先从仓库的系统视图入手，再用验证语境理解这些架构结论到底可以声称什么。</p>
     <div class="route-links">
       <a href="/zh/architecture/">架构说明</a>
-      <a href="/zh/benchmark-results">验证与 benchmark 范围</a>
+      <a href="/zh/validation/">验证概览</a>
     </div>
   </div>
   <div class="route-card">
@@ -158,7 +158,7 @@ flowchart LR
     <h3>我需要调优启发和延展材料</h3>
     <p>把方法论与资源入口配合使用，可以同时获得可执行的优化建议和对应的技术来源。</p>
     <div class="route-links">
-      <a href="/zh/optimization-playbook">优化手册</a>
+      <a href="/zh/methodology/diagnosis-loop">诊断闭环</a>
       <a href="/zh/references">参考文献</a>
     </div>
   </div>
@@ -167,7 +167,7 @@ flowchart LR
     <p>把支持与验证入口放在一起看，能快速弄清楚本地该跑什么、CI 已经证明了什么，以及结果应如何解读。</p>
     <div class="route-links">
       <a href="/zh/getting-started">快速上手</a>
-      <a href="/zh/benchmark-results">Benchmark 结果</a>
+      <a href="/zh/validation/">验证概览</a>
     </div>
   </div>
 </div>
@@ -179,15 +179,15 @@ flowchart LR
     <h3>架构</h3>
     <p>系统梳理内核阶梯、接口边界，以及维系实现一致性的关键设计约束。</p>
   </a>
-  <a class="knowledge-card" href="/zh/learning-path">
+  <a class="knowledge-card" href="/zh/methodology/">
     <h3>方法论</h3>
-    <p>按阶段组织学习路径，让优化逻辑始终与架构主线保持连接。</p>
+    <p>规范的优化工作流入口：把阶段学习、benchmark 纪律与诊断逻辑重新系到架构主线上。</p>
   </a>
   <a class="knowledge-card" href="/zh/references">
     <h3>资源</h3>
     <p>把项目背后的官方文档、论文与成熟仓库映射回具体设计选择。</p>
   </a>
-  <a class="knowledge-card" href="/zh/benchmark-results">
+  <a class="knowledge-card" href="/zh/validation/">
     <h3>验证</h3>
     <p>集中解释正确性容差、benchmark 范围、fallback 行为，以及公开数字真正代表的含义。</p>
   </a>
@@ -203,8 +203,7 @@ flowchart LR
 
 | 证据表面 | 能证明什么 | 在哪里运行 |
 |----------|------------|------------|
-| OpenSpec 与仓库检查 | 规范、文档结构、流程一致性、Pages 可发布性 | 托管 CI 与本地 CLI |
-| CUDA 编译 | 代码库在已配置 CUDA 工具链中仍可构建 | 托管 CI 与本地机器 |
+| 文档、Pages 与治理检查 | 规范、文档结构、流程一致性，以及 Pages 可发布性 | 托管 CI 与本地 CLI |
 | Google Test + cuBLAS 对照 | 以项目 oracle 为基准的运行时正确性 | 本地 GPU 机器 |
 | Benchmark 执行 | 性能行为、WMMA 范围差异、fallback 代价 | 本地 GPU 机器 |
 

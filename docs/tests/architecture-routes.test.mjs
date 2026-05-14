@@ -12,4 +12,11 @@ for (const locale of ['en', 'zh']) {
     assert.equal(existsSync(path.join(docsRoot, locale, 'architecture', 'index.md')), true)
     assert.equal(existsSync(path.join(docsRoot, locale, 'architecture.md')), false)
   })
+
+  test(`${locale} methodology and validation sections use canonical directory routes`, () => {
+    assert.equal(existsSync(path.join(docsRoot, locale, 'methodology', 'index.md')), true)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'methodology.md')), false)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'validation', 'index.md')), true)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'validation.md')), false)
+  })
 }

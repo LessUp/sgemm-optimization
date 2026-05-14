@@ -64,5 +64,5 @@ Why this group matters:
 ## Related project pages
 
 - [Architecture Overview](/en/architecture/)
-- [Benchmark Results](/en/benchmark-results)
-- [Optimization Playbook](/en/optimization-playbook)
+- [Validation Overview](/en/validation/)
+- [Methodology Overview](/en/methodology/)

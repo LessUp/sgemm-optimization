@@ -80,5 +80,5 @@ compute-only benchmark 会从这条流程的更后面开始：它假设输入已
 
 - [架构概述](/zh/architecture/)
 - [Kernel 阶梯](/zh/architecture/kernel-ladder)
-- [Benchmark 结果](/zh/benchmark-results)
+- [Benchmark 范围](/zh/validation/benchmark-scope)
 - [Tensor Core WMMA](/zh/kernel-tensor-core)

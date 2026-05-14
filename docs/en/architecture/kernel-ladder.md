@@ -103,4 +103,4 @@ The right question is not “which page has the biggest number?” but “which 
 - [Architecture Overview](/en/architecture/)
 - [Memory Flow](/en/architecture/memory-flow)
 - [Tensor Core Path](/en/architecture/tensor-core-path)
-- [Benchmark Results](/en/benchmark-results)
+- [Benchmark Scope](/en/validation/benchmark-scope)

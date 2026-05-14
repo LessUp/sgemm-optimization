@@ -87,6 +87,6 @@ Strong answer pattern:
 
 - [Architecture Overview](/en/architecture/)
 - [Kernel Ladder](/en/architecture/kernel-ladder)
-- [Benchmark Results](/en/benchmark-results)
+- [Validation Overview](/en/validation/)
 - [Learning Path](/en/learning-path)
 - [References](/en/references)

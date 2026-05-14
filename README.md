@@ -30,7 +30,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is limited to compile-time, formatting, repository-structure, OpenSpec, and Pages checks.
+Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is limited to formatting, repository-structure, OpenSpec/governance, and Pages checks.
 
 ## Start here (GitHub Pages)
 
@@ -48,7 +48,7 @@ Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is 
 
 | Environment | What to trust |
 |-------------|---------------|
-| Hosted CI | Formatting, compile validity, OpenSpec structure, Pages buildability |
+| Hosted CI | Formatting, docs/structure checks, OpenSpec governance, Pages buildability |
 | Local CUDA GPU | Runtime correctness verification and benchmark performance |
 
 This split is deliberate. CI keeps repository health; real GPU hardware validates runtime behavior and speed claims.

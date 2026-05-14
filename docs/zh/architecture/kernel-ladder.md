@@ -103,4 +103,4 @@ Tensor Core 被放在最后一级，是因为它依赖前面的推理基础：
 - [架构概述](/zh/architecture/)
 - [Memory Flow](/zh/architecture/memory-flow)
 - [Tensor Core 路径](/zh/architecture/tensor-core-path)
-- [Benchmark 结果](/zh/benchmark-results)
+- [Benchmark 范围](/zh/validation/benchmark-scope)

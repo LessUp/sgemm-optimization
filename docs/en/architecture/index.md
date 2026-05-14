@@ -67,10 +67,10 @@ The project deliberately separates what can be trusted in different environments
 
 | Area | Local CUDA GPU | Hosted CI |
 |------|----------------|-----------|
-| CUDA compilation | Yes | Yes |
+| CUDA compilation | Yes | No |
 | Runtime correctness | Yes | No |
 | Benchmark performance | Yes | No |
-| OpenSpec and repository integrity | Yes | Yes |
+| Docs, OpenSpec, and repository integrity | Yes | Yes |
 | Pages buildability | Optional | Yes |
 
 This is not just process documentation. It affects how the architecture is narrated: performance conclusions only count when they are tied back to the correct runtime environment.
@@ -85,7 +85,7 @@ This is not just process documentation. It affects how the architecture is narra
 
 ## Related references
 
-- [Benchmark Results](/en/benchmark-results)
+- [Validation Overview](/en/validation/)
 - [Learning Path](/en/learning-path)
 - [Getting Started](/en/getting-started)
 - [Stable architecture spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

@@ -43,7 +43,7 @@ ctest --test-dir build
 | 环境 | 运行什么 |
 |------|----------|
 | 本地 GPU 机器 | benchmark、运行时验证、`ctest` |
-| 托管 CI | 格式化、编译验证、OpenSpec/仓库检查、Pages |
+| 托管 CI | 格式化、文档测试/构建、OpenSpec/仓库检查、Pages |
 
 这种划分是刻意的：GitHub 托管 runner 验证仓库健康，而性能和 CUDA 运行时正确性仍需真正的 GPU 机器。
 
@@ -53,4 +53,4 @@ ctest --test-dir build
 
 - [学习路径](/zh/learning-path)
 - [架构概览](/zh/architecture/)
-- [Benchmark 结果](/zh/benchmark-results)
+- [验证概览](/zh/validation/)
