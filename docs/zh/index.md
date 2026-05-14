@@ -171,15 +171,17 @@ flowchart LR
     <h3>Benchmark 结果</h3>
     <p>从验证入口理解 benchmark 范围、容差预算与结果可信度边界。</p>
   </a>
-  <a class="knowledge-card" href="/zh/learning-path">
-    <h3>学习路径</h3>
-    <p>以方法论入口承接内核阶梯阅读顺序与渐进式优化推理。</p>
+  <a class="knowledge-card" href="/zh/getting-started">
+    <h3>快速上手</h3>
+    <p>以支持入口承接本地环境准备、首次构建与仓库验证边界说明。</p>
   </a>
-  <a class="knowledge-card" href="/zh/references">
-    <h3>工程参考资料</h3>
-    <p>以资源入口统一承接论文、官方文档与延伸学习材料。</p>
+  <a class="knowledge-card" href="/zh/benchmark-results">
+    <h3>验证边界</h3>
+    <p>以验证入口区分托管 CI 能证明什么，以及只有本地 GPU 运行才能证明什么。</p>
   </a>
 </div>
+
+> 当前仍保留的旧叙事页面正在并入规范化的架构、方法论与验证栏目；迁移完成前它们仍可访问，但不再作为主入口呈现。
 
 ## 命令驾驶舱
 
