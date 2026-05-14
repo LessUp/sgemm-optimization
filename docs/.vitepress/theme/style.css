@@ -52,8 +52,12 @@
   --paper-shadow: 0 10px 30px rgba(23, 31, 19, 0.04);
   --paper-shadow-strong: 0 18px 40px rgba(23, 31, 19, 0.08);
   --paper-rule: rgba(118, 185, 0, 0.22);
+  --paper-prose-width: 780px;
   --tag-bg: rgba(118, 185, 0, 0.08);
   --tag-text: #567f00;
+  --quote-bg: rgba(118, 185, 0, 0.06);
+  --quote-border: rgba(118, 185, 0, 0.34);
+  --quote-text: #33412d;
 }
 
 .dark {
@@ -83,6 +87,9 @@
   --paper-rule: rgba(139, 205, 41, 0.26);
   --tag-bg: rgba(139, 205, 41, 0.12);
   --tag-text: #b6e462;
+  --quote-bg: rgba(139, 205, 41, 0.09);
+  --quote-border: rgba(139, 205, 41, 0.36);
+  --quote-text: #dbe7d3;
 }
 
 html {
@@ -350,7 +357,7 @@ body {
 
 .VPDoc .content,
 .VPDoc .content-container {
-  max-width: 780px;
+  max-width: var(--paper-prose-width);
 }
 
 .VPDoc .main {
@@ -402,6 +409,34 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--vp-c-text-3);
+}
+
+.VPDoc blockquote,
+.VPHome .vp-doc blockquote {
+  margin: 28px 0;
+  padding: 18px 22px;
+  border: 1px solid var(--quote-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--vp-c-bg-elv) 90%, var(--quote-bg));
+  box-shadow: var(--paper-shadow);
+}
+
+.VPDoc blockquote > :first-child,
+.VPHome .vp-doc blockquote > :first-child {
+  margin-top: 0;
+}
+
+.VPDoc blockquote > :last-child,
+.VPHome .vp-doc blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.VPDoc blockquote p,
+.VPDoc blockquote li,
+.VPHome .vp-doc blockquote p,
+.VPHome .vp-doc blockquote li {
+  color: var(--quote-text);
 }
 
 .VPDoc a,
@@ -565,6 +600,70 @@ div[class*='language-'] code,
 .home-shell {
   margin: 0 auto;
   padding: calc(var(--vp-nav-height) + 56px) 24px 56px;
+}
+
+.VPHome .vp-doc > .home-shell ~ :where(h2, h3, h4, p, ul, ol, blockquote) {
+  max-width: var(--paper-prose-width);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.VPHome .vp-doc > .home-shell ~ :where(p, li) {
+  font-size: 15px;
+  line-height: 1.82;
+  color: var(--vp-c-text-2);
+}
+
+.VPHome .vp-doc > .home-shell ~ h2 {
+  margin-top: 64px;
+  margin-bottom: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--vp-c-divider);
+  border-bottom: none;
+  font-size: clamp(1.55rem, 2vw, 1.95rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--vp-c-text-1);
+}
+
+.VPHome .vp-doc > .home-shell ~ h2::before {
+  content: '';
+  display: block;
+  width: 76px;
+  height: 1px;
+  margin-bottom: 14px;
+  background: var(--paper-rule);
+}
+
+.VPHome .vp-doc > .home-shell ~ h3 {
+  margin-top: 34px;
+  margin-bottom: 12px;
+  font-size: 1.18rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--vp-c-text-1);
+}
+
+.VPHome .vp-doc > .home-shell ~ h4 {
+  margin-top: 22px;
+  margin-bottom: 10px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+}
+
+.VPHome .vp-doc > .home-shell ~ :where(.perf-grid, .route-grid, .knowledge-grid) {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.VPHome .vp-doc > .home-shell ~ :where(.mermaid, div[class*='language-'], table) {
+  max-width: min(100%, 960px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .home-hero-grid {
