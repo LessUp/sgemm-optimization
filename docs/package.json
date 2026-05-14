@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
+    "test": "node --test tests/architecture-routes.test.mjs",
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
