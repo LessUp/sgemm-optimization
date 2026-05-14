@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -18,5 +18,10 @@ for (const locale of ['en', 'zh']) {
     assert.equal(existsSync(path.join(docsRoot, locale, 'methodology.md')), false)
     assert.equal(existsSync(path.join(docsRoot, locale, 'validation', 'index.md')), true)
     assert.equal(existsSync(path.join(docsRoot, locale, 'validation.md')), false)
+  })
+
+  test(`${locale} homepage avoids root-absolute internal links`, () => {
+    const homepage = readFileSync(path.join(docsRoot, locale, 'index.md'), 'utf8')
+    assert.equal(/href="\/(?:en|zh)\//.test(homepage), false)
   })
 }
