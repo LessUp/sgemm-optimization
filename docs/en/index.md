@@ -44,7 +44,7 @@ title: SGEMM Optimization Lab
       <div class="signal-card">
         <div class="signal-title">Public Surfaces</div>
         <div class="signal-value">EN / 中文</div>
-        <div class="signal-note">mirrored pages for tutorial, interview, and references</div>
+        <div class="signal-note">mirrored pages for architecture, methodology, and references</div>
       </div>
     </div>
   </div>
@@ -85,7 +85,7 @@ title: SGEMM Optimization Lab
     <div class="perf-note">Speedup claims are attached to correctness checks and scope labels.</div>
   </div>
   <div class="perf-card">
-    <div class="perf-label">Interview Utility</div>
+    <div class="perf-label">Architecture Utility</div>
     <div class="perf-value">Practical</div>
     <div class="perf-note">The project can be explained as a clear engineering decision chain.</div>
   </div>
