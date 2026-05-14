@@ -10,22 +10,31 @@ This page is now only the **results snapshot** surface. For trust policy and int
 
 ## Reference snapshot
 
+### End-to-end snapshot
+
 Sample numbers from an RTX 3060 Laptop at `1024 x 1024 x 1024`:
 
 | Kernel | GFLOPS | vs cuBLAS |
 |--------|-------:|----------:|
 | cuBLAS | 5727 | 100.0% |
-| Tensor Core (WMMA compute-only) | 2300 | 40.2% |
 | Tiled | 753 | 13.1% |
 | Double Buffer | 701 | 12.2% |
 | Bank-Free | 673 | 11.8% |
 | Naive | 604 | 10.6% |
 
+### Compute-only WMMA snapshot
+
+The repository also reports a narrower fast-path measurement for Tensor Core-friendly shapes:
+
+| Kernel | GFLOPS | vs cuBLAS |
+|--------|-------:|----------:|
+| Tensor Core (WMMA compute-only) | 2300 | 40.2% |
+
 ## How to read this page
 
 - These numbers are a **representative local snapshot**, not a promise for every GPU.
 - Compare them only after reading [Benchmark Scope](/en/validation/benchmark-scope).
-- Treat `WMMA compute-only` as a narrow fast-path label, not a replacement for end-to-end behavior.
+- Read the end-to-end table first; treat `WMMA compute-only` as a narrow fast-path label, not a replacement for end-to-end behavior.
 - Assume hosted CI did **not** prove these numbers. Only local GPU runs can.
 
 ## Tensor Core note

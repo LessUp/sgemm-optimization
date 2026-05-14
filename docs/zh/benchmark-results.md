@@ -10,22 +10,31 @@ title: Benchmark 结果
 
 ## 参考快照
 
+### 端到端快照
+
 RTX 3060 Laptop 在 `1024 x 1024 x 1024` 的示例数据：
 
 | Kernel | GFLOPS | vs cuBLAS |
 |--------|-------:|----------:|
 | cuBLAS | 5727 | 100.0% |
-| Tensor Core (WMMA compute-only) | 2300 | 40.2% |
 | Tiled | 753 | 13.1% |
 | Double Buffer | 701 | 12.2% |
 | Bank-Free | 673 | 11.8% |
 | Naive | 604 | 10.6% |
 
+### WMMA compute-only 快照
+
+仓库也会对 Tensor Core 友好 shape 额外报告一个更窄的快路径测量值：
+
+| Kernel | GFLOPS | vs cuBLAS |
+|--------|-------:|----------:|
+| Tensor Core (WMMA compute-only) | 2300 | 40.2% |
+
 ## 如何阅读本页
 
 - 这些数字是**本地代表性快照**，不是所有 GPU 上的承诺。
 - 在比较它们之前，先阅读 [Benchmark 范围](/zh/validation/benchmark-scope)。
-- 把 `WMMA compute-only` 看成窄范围快路径标签，而不是端到端行为的替代品。
+- 先阅读端到端表，再把 `WMMA compute-only` 看成窄范围快路径标签，而不是端到端行为的替代品。
 - 默认这些数字**不是**托管 CI 证明出来的；只有本地 GPU 运行才能证明它们。
 
 ## Tensor Core 说明
