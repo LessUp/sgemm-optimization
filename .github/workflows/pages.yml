@@ -41,6 +41,10 @@ jobs:
         working-directory: docs
         run: npm ci
 
+      - name: Run docs checks
+        working-directory: docs
+        run: npm run test
+
       - name: Configure GitHub Pages
         id: pages
         uses: actions/configure-pages@v5
