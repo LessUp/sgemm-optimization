@@ -43,9 +43,8 @@ struct VerifyTolerance {
 // Standard verification tolerance for FP32 kernels
 inline constexpr VerifyTolerance kStandardVerifyTolerance{1e-3f, 1e-4f};
 
-// Tensor Core tolerance is defined in tensor_core_sgemm.cuh
-// to keep precision-related constants with their implementation.
-// Use tensor_core_sgemm.cuh for kTensorCoreVerifyTolerance.
+// Tensor Core verification tolerance (FP16 intermediate precision)
+inline constexpr VerifyTolerance kTensorCoreVerifyTolerance{5e-2f, 1e-2f};
 
 inline float toleranceForValue(float ref_val, VerifyTolerance tolerance) {
     return tolerance.atol + tolerance.rtol * std::fabs(ref_val);

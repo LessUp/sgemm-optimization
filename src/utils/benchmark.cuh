@@ -6,44 +6,20 @@
 // 此头文件聚合以下子模块：
 // - benchmark_core.cuh: CUDA 事件计时、性能测量
 // - benchmark_metrics.cuh: 指标计算、理论峰值
-// - benchmark_cublas.cuh: cuBLAS 参考实现
+// - verify.cuh: cuBLAS 参考实现和验证
 //
 // 同时提供高级 Benchmark 类，简化常见使用场景。
 // ============================================================================
 
 #include "benchmark_core.cuh"
-#include "benchmark_cublas.cuh"
 #include "benchmark_metrics.cuh"
 #include "cuda_utils.cuh"
 #include "verify.cuh"
 
-#include <cstdio>
 #include <fstream>
 #include <functional>
-#include <iomanip>
 #include <string>
 #include <vector>
-
-// ============================================================================
-// Benchmark 结果结构
-// ============================================================================
-
-struct BenchmarkResult {
-    std::string kernel_name;
-    int M, K, N;
-    float time_ms;
-    float gflops;
-    float bandwidth_gb_s;
-    bool correct;
-    float max_error;
-    float efficiency; // 理论峰值百分比
-
-    void print() const {
-        printf("  %-30s | %4d x %4d x %4d | %8.3f ms | %8.2f GFLOPS | %s | err: "
-               "%.2e\n",
-               kernel_name.c_str(), M, K, N, time_ms, gflops, correct ? "PASS" : "FAIL", max_error);
-    }
-};
 
 // ============================================================================
 // SGEMM Benchmark 类
@@ -59,15 +35,9 @@ struct BenchmarkResult {
  */
 class SGEMMBenchmark {
   public:
-    SGEMMBenchmark() {
-        CUDA_CHECK(cudaEventCreate(&start_));
-        CUDA_CHECK(cudaEventCreate(&stop_));
-        CUBLAS_CHECK(cublasCreate(&cublas_handle_));
-    }
+    SGEMMBenchmark() { CUBLAS_CHECK(cublasCreate(&cublas_handle_)); }
 
     ~SGEMMBenchmark() {
-        cudaEventDestroy(start_);
-        cudaEventDestroy(stop_);
         if (cublas_handle_) {
             cublasDestroy(cublas_handle_);
         }
@@ -112,25 +82,12 @@ class SGEMMBenchmark {
         CUBLAS_CHECK(cublasSgemm(cublas_handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
                                  d_B.get(), N, d_A.get(), K, &beta, d_C_ref.get(), N));
 
-        // 预热和计时
-        for (int i = 0; i < warmup_runs; ++i) {
-            d_C.zero();
-            kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N);
-        }
-        CUDA_CHECK(cudaDeviceSynchronize());
-
-        CUDA_CHECK(cudaEventRecord(start_));
-        for (int i = 0; i < benchmark_runs; ++i) {
-            kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N);
-        }
-        CUDA_CHECK(cudaEventRecord(stop_));
-        CUDA_CHECK(cudaEventSynchronize(stop_));
-
-        float total_time_ms;
-        CUDA_CHECK(cudaEventElapsedTime(&total_time_ms, start_, stop_));
+        // 使用统一的 measureGpuTime 计时
+        float time_ms = measureGpuTime([&]() { kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N); },
+                                       warmup_runs, benchmark_runs);
 
         // 计算指标
-        PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, total_time_ms / benchmark_runs);
+        PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, time_ms);
         result.time_ms = metrics.time_ms;
         result.gflops = metrics.gflops;
         result.bandwidth_gb_s = metrics.bandwidth_gb_s;
@@ -171,24 +128,15 @@ class SGEMMBenchmark {
 
         float alpha = 1.0f, beta = 0.0f;
 
-        for (int i = 0; i < warmup_runs; ++i) {
-            CUBLAS_CHECK(cublasSgemm(cublas_handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
-                                     d_B.get(), N, d_A.get(), K, &beta, d_C.get(), N));
-        }
-        CUDA_CHECK(cudaDeviceSynchronize());
+        // 使用统一的 measureGpuTime 计时
+        float time_ms = measureGpuTime(
+            [&]() {
+                CUBLAS_CHECK(cublasSgemm(cublas_handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
+                                         d_B.get(), N, d_A.get(), K, &beta, d_C.get(), N));
+            },
+            warmup_runs, benchmark_runs);
 
-        CUDA_CHECK(cudaEventRecord(start_));
-        for (int i = 0; i < benchmark_runs; ++i) {
-            CUBLAS_CHECK(cublasSgemm(cublas_handle_, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
-                                     d_B.get(), N, d_A.get(), K, &beta, d_C.get(), N));
-        }
-        CUDA_CHECK(cudaEventRecord(stop_));
-        CUDA_CHECK(cudaEventSynchronize(stop_));
-
-        float total_time_ms;
-        CUDA_CHECK(cudaEventElapsedTime(&total_time_ms, start_, stop_));
-
-        PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, total_time_ms / benchmark_runs);
+        PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, time_ms);
         result.time_ms = metrics.time_ms;
         result.gflops = metrics.gflops;
         result.bandwidth_gb_s = metrics.bandwidth_gb_s;
@@ -249,7 +197,6 @@ class SGEMMBenchmark {
     cublasHandle_t getCublasHandle() const { return cublas_handle_; }
 
   private:
-    cudaEvent_t start_, stop_;
     cublasHandle_t cublas_handle_;
     std::vector<BenchmarkResult> results_;
 };

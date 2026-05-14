@@ -36,6 +36,21 @@ const std::vector<std::tuple<int, int, int>> BenchmarkConfig::DEFAULT_CASES = {
 };
 
 // ============================================================================
+// CLI 解析结果
+// ============================================================================
+
+/**
+ * CLI 解析结果枚举
+ *
+ * 自文档化的返回类型，替代 int 返回码。
+ */
+enum class ParseResult {
+    Success,    // 解析成功，继续执行
+    Error,      // 解析错误，返回错误码
+    HelpShown   // 显示帮助后正常退出
+};
+
+// ============================================================================
 // CLI 解析器
 // ============================================================================
 
@@ -86,28 +101,26 @@ class CliParser {
      * 解析命令行参数
      *
      * @param config 输出配置对象
-     * @return 0 成功，1 错误，2 显示帮助后退出
+     * @return ParseResult 枚举指示解析结果
      */
-    int parse(BenchmarkConfig &config) {
+    ParseResult parse(BenchmarkConfig &config) {
         for (int i = 1; i < argc_; ++i) {
             std::string arg = argv_[i];
 
             if (arg == "-h" || arg == "--help") {
                 printUsage(argv_[0]);
-                return 2;
+                return ParseResult::HelpShown;
             }
 
             if (arg == "-s" || arg == "--size") {
-                int result = parseSizeArg(i, config);
-                if (result != 0)
-                    return result;
+                if (!parseSizeArg(i, config))
+                    return ParseResult::Error;
                 continue;
             }
 
             if (arg == "--dims") {
-                int result = parseDimsArg(i, config);
-                if (result != 0)
-                    return result;
+                if (!parseDimsArg(i, config))
+                    return ParseResult::Error;
                 continue;
             }
 
@@ -117,22 +130,20 @@ class CliParser {
             }
 
             if (arg == "--warmup") {
-                int result = parseWarmupArg(i, config);
-                if (result != 0)
-                    return result;
+                if (!parseWarmupArg(i, config))
+                    return ParseResult::Error;
                 continue;
             }
 
             if (arg == "--benchmark") {
-                int result = parseBenchmarkArg(i, config);
-                if (result != 0)
-                    return result;
+                if (!parseBenchmarkArg(i, config))
+                    return ParseResult::Error;
                 continue;
             }
 
             fprintf(stderr, "Unknown argument: %s\n", arg.c_str());
             printUsage(argv_[0]);
-            return 1;
+            return ParseResult::Error;
         }
 
         // 默认添加 1024x1024x1024
@@ -140,7 +151,7 @@ class CliParser {
             config.addCase(1024, 1024, 1024);
         }
 
-        return 0;
+        return ParseResult::Success;
     }
 
     void printUsage(const char *program) const {
@@ -163,82 +174,82 @@ class CliParser {
     }
 
   private:
-    int parseSizeArg(int &i, BenchmarkConfig &config) {
+    bool parseSizeArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: -s requires a size argument\n");
-            return 1;
+            return false;
         }
 
         int size;
         if (!detail::safeStrToInt(argv_[++i], &size, "size")) {
-            return 1;
+            return false;
         }
         if (size <= 0) {
             fprintf(stderr, "Error: Size must be positive\n");
-            return 1;
+            return false;
         }
 
         config.addCase(size, size, size);
-        return 0;
+        return true;
     }
 
-    int parseDimsArg(int &i, BenchmarkConfig &config) {
+    bool parseDimsArg(int &i, BenchmarkConfig &config) {
         if (i + 3 >= argc_) {
             fprintf(stderr, "Error: --dims requires M K N arguments\n");
-            return 1;
+            return false;
         }
 
         int M, K, N;
         if (!detail::safeStrToInt(argv_[++i], &M, "M dimension") ||
             !detail::safeStrToInt(argv_[++i], &K, "K dimension") ||
             !detail::safeStrToInt(argv_[++i], &N, "N dimension")) {
-            return 1;
+            return false;
         }
         if (M <= 0 || K <= 0 || N <= 0) {
             fprintf(stderr, "Error: Dimensions must be positive\n");
-            return 1;
+            return false;
         }
 
         config.addCase(M, K, N);
-        return 0;
+        return true;
     }
 
-    int parseWarmupArg(int &i, BenchmarkConfig &config) {
+    bool parseWarmupArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: --warmup requires a number argument\n");
-            return 1;
+            return false;
         }
 
         int warmup;
         if (!detail::safeStrToInt(argv_[++i], &warmup, "warmup")) {
-            return 1;
+            return false;
         }
         if (warmup < 0) {
             fprintf(stderr, "Error: Warmup runs must be non-negative\n");
-            return 1;
+            return false;
         }
 
         config.warmup_runs = warmup;
-        return 0;
+        return true;
     }
 
-    int parseBenchmarkArg(int &i, BenchmarkConfig &config) {
+    bool parseBenchmarkArg(int &i, BenchmarkConfig &config) {
         if (i + 1 >= argc_) {
             fprintf(stderr, "Error: --benchmark requires a number argument\n");
-            return 1;
+            return false;
         }
 
         int bench;
         if (!detail::safeStrToInt(argv_[++i], &bench, "benchmark")) {
-            return 1;
+            return false;
         }
         if (bench <= 0) {
             fprintf(stderr, "Error: Benchmark runs must be positive\n");
-            return 1;
+            return false;
         }
 
         config.benchmark_runs = bench;
-        return 0;
+        return true;
     }
 
     int argc_;

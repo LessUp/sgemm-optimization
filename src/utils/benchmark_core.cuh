@@ -1,7 +1,36 @@
 #pragma once
 
 #include "cuda_utils.cuh"
+#include <cstdio>
 #include <cuda_runtime.h>
+#include <string>
+
+// ============================================================================
+// Benchmark 结果结构
+// ============================================================================
+
+/**
+ * Benchmark 结果结构
+ *
+ * 存储单次 benchmark 运行的性能数据和验证结果。
+ * 定义在核心模块中，便于内核层直接使用，无需依赖高级编排器。
+ */
+struct BenchmarkResult {
+    std::string kernel_name;
+    int M, K, N;
+    float time_ms;
+    float gflops;
+    float bandwidth_gb_s;
+    bool correct;
+    float max_error;
+    float efficiency; // 理论峰值百分比
+
+    void print() const {
+        printf("  %-30s | %4d x %4d x %4d | %8.3f ms | %8.2f GFLOPS | %s | err: "
+               "%.2e\n",
+               kernel_name.c_str(), M, K, N, time_ms, gflops, correct ? "PASS" : "FAIL", max_error);
+    }
+};
 
 // ============================================================================
 // CUDA 性能测量器
