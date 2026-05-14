@@ -44,7 +44,7 @@ Warp 矩阵乘累加 (WMMA)：
 
 | 接口 | 输入 | 行为 |
 |------|------|------|
-| `launch_tensor_core_sgemm` | FP32 | 安全端到端 wrapper：检查设备与 16 对齐维度，转换为 FP16，不满足 WMMA 条件时回退到 FP32。 |
+| `launch_tensor_core_sgemm_with_fallback` | FP32 | 安全端到端 wrapper：检查设备与 16 对齐维度，转换为 FP16，不满足 WMMA 条件时回退到 FP32。 |
 | `launch_tensor_core_sgemm_fp16` | FP16 | 纯计算路径：要求 `sm_70+` 和 16 对齐维度，不满足条件时抛错而不是回退。 |
 
 这一区分让 benchmark 可以同时报告“包含转换/回退的端到端结果”和“纯 WMMA compute-only 结果”，避免把 fallback 当作 Tensor Core 计算性能。
