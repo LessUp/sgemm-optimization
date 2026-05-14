@@ -6,45 +6,47 @@ title: SGEMM Architecture Whitepaper
 <div class="home-shell">
   <div class="home-hero-grid">
     <div>
-      <p class="home-eyebrow">CUDA SGEMM ARCHITECTURE GUIDE</p>
-      <h1 class="home-main-title">SGEMM Architecture Whitepaper</h1>
+      <p class="home-eyebrow">CUDA SGEMM WHITEPAPER LANDING PAGE</p>
+      <h1 class="home-main-title">SGEMM as a technical argument</h1>
       <p class="home-main-subtitle">
-        A bilingual CUDA SGEMM guide organized around architecture, optimization methodology, validation evidence,
-        and reusable engineering references. Every optimization step is tied to correctness constraints,
-        benchmark evidence, and explicit validation boundaries.
+        This site explains the SGEMM project as a coherent engineering argument: begin with a simple CUDA matrix
+        multiplication baseline, climb through staged architectural changes, and only accept performance claims when
+        correctness checks, benchmark scope labels, and validation boundaries still hold. Architecture, methodology,
+        resources, validation, and support are organized as one knowledge model so a new technical reader can see both
+        the implementation ladder and the evidence model from the homepage alone.
       </p>
       <div class="home-action-row">
-        <a class="btn" href="/en/getting-started">Start in 5 minutes</a>
-        <a class="btn btn-outline" href="/en/architecture">Explore architecture</a>
-        <a class="btn btn-outline" href="/en/learning-path">Follow learning path</a>
+        <a class="btn" href="/en/architecture">Read the architecture map</a>
+        <a class="btn btn-outline" href="/en/learning-path">Follow the methodology</a>
+        <a class="btn btn-outline" href="/en/benchmark-results">Check the validation boundary</a>
         <a class="btn btn-outline" href="https://github.com/LessUp/sgemm-optimization">GitHub</a>
       </div>
       <div class="home-kicker-row">
-        <span class="home-chip">cuBLAS-verified</span>
-        <span class="home-chip">OpenSpec-governed</span>
+        <span class="home-chip">5-stage kernel ladder</span>
+        <span class="home-chip">cuBLAS-anchored evidence</span>
         <span class="home-chip">EN / ZH mirrored</span>
       </div>
     </div>
     <div class="signal-grid">
       <div class="signal-card">
-        <div class="signal-title">Kernel Ladder</div>
-        <div class="signal-value">5</div>
-        <div class="signal-note">naive -> tiled -> bank-free -> double-buffer -> WMMA</div>
+        <div class="signal-title">Core Question</div>
+        <div class="signal-value">Why is each kernel faster?</div>
+        <div class="signal-note">Every stage should earn its complexity by changing memory behavior or execution shape.</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">Correctness Oracle</div>
-        <div class="signal-value">cuBLAS</div>
-        <div class="signal-note">separate tolerances for FP32 and Tensor Core paths</div>
+        <div class="signal-title">Evidence Model</div>
+        <div class="signal-value">cuBLAS + scope labels</div>
+        <div class="signal-note">Correctness comparisons and benchmark labeling keep claims interpretable instead of promotional.</div>
       </div>
       <div class="signal-card">
         <div class="signal-title">Validation Boundary</div>
-        <div class="signal-value">CI + GPU</div>
-        <div class="signal-note">hosted CI for build health, local GPU for runtime and performance</div>
+        <div class="signal-value">CI is not a GPU</div>
+        <div class="signal-note">Hosted automation proves build and structure health; local hardware proves runtime and performance.</div>
       </div>
       <div class="signal-card">
-        <div class="signal-title">Public Surfaces</div>
-        <div class="signal-value">EN / 中文</div>
-        <div class="signal-note">mirrored pages for architecture, methodology, and references</div>
+        <div class="signal-title">Reader Model</div>
+        <div class="signal-value">5 canonical domains</div>
+        <div class="signal-note">Architecture, methodology, resources, validation, and support form the site's top-level map.</div>
       </div>
     </div>
   </div>
@@ -52,51 +54,65 @@ title: SGEMM Architecture Whitepaper
   <div class="home-proof-strip">
     <div class="proof-grid">
       <div class="proof-item">
-        <div class="proof-label">Benchmark Scope</div>
-        <div class="proof-value">End-to-end and compute-only WMMA are reported separately.</div>
+        <div class="proof-label">Thesis</div>
+        <div class="proof-value">This repository is about how optimization decisions are justified, not just how many kernels exist.</div>
       </div>
       <div class="proof-item">
-        <div class="proof-label">Numerical Policy</div>
-        <div class="proof-value">FP32 and Tensor Core paths use different tolerance budgets by design.</div>
+        <div class="proof-label">Method</div>
+        <div class="proof-value">One optimization stage, one bottleneck shift, one clearer explanation of what changed.</div>
       </div>
       <div class="proof-item">
         <div class="proof-label">Engineering Contract</div>
-        <div class="proof-value">Unified launcher signature keeps kernels swappable and testable.</div>
+        <div class="proof-value">A unified launcher shape and guarded WMMA fallback keep kernels swappable and claims comparable.</div>
       </div>
       <div class="proof-item">
-        <div class="proof-label">Governance</div>
-        <div class="proof-value">OpenSpec keeps docs, process, and implementation intent aligned.</div>
+        <div class="proof-label">Outcome</div>
+        <div class="proof-value">A first-time reader can enter from architecture, methodology, resources, validation, or support without losing the technical thread.</div>
       </div>
     </div>
   </div>
 </div>
 
-## Why this repository is worth attention
+## Thesis and positioning
+
+This homepage is the entry point to a whitepaper-style documentation set. The project is not presented as a feature list or benchmark trophy board; it is presented as a chain of technical claims about CUDA SGEMM, each claim tied to implementation structure, optimization intent, and validation evidence.
+
+The site's knowledge model is intentionally explicit:
+
+- **Architecture** explains what the kernel ladder contains, how stages relate, and where interface constraints live.
+- **Methodology** explains how to read, learn, and tune the ladder without skipping the logic behind each step.
+- **Resources** traces decisions back to papers, official docs, and high-value repositories.
+- **Validation** explains what the evidence means, what the benchmark labels mean, and where trust stops.
+- **Support** gets a reader from clone to local verification with the right expectations about CI versus GPU proof.
+
+## Why this matters
 
 <div class="perf-grid">
   <div class="perf-card">
-    <div class="perf-label">Learning Depth</div>
-    <div class="perf-value">Progressive</div>
-    <div class="perf-note">Each kernel stage teaches one specific performance concept.</div>
+    <div class="perf-label">Interpretability</div>
+    <div class="perf-value">Clear</div>
+    <div class="perf-note">A new reader can tell what changed between kernels and why the change should matter.</div>
   </div>
   <div class="perf-card">
-    <div class="perf-label">Evidence Model</div>
-    <div class="perf-value">Traceable</div>
-    <div class="perf-note">Speedup claims are attached to correctness checks and scope labels.</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">Architecture Utility</div>
-    <div class="perf-value">Practical</div>
-    <div class="perf-note">The project can be explained as a clear engineering decision chain.</div>
-  </div>
-  <div class="perf-card">
-    <div class="perf-label">Community Value</div>
+    <div class="perf-label">Transferability</div>
     <div class="perf-value">Reusable</div>
-    <div class="perf-note">Includes playbooks, references, and architecture-aware tuning guidance.</div>
+    <div class="perf-note">The staged explanation turns one SGEMM implementation into a reusable CUDA optimization case study.</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">Benchmark honesty</div>
+    <div class="perf-value">Scoped</div>
+    <div class="perf-note">End-to-end WMMA and compute-only WMMA are separated so readers know what each number actually proves.</div>
+  </div>
+  <div class="perf-card">
+    <div class="perf-label">Trust model</div>
+    <div class="perf-value">Explicit</div>
+    <div class="perf-note">The homepage tells you upfront which claims are validated in hosted CI and which require a real GPU machine.</div>
   </div>
 </div>
 
-## Project map in one diagram
+## Architecture at a glance
+
+The project revolves around a progressive kernel ladder, but the ladder is only meaningful because correctness rails, benchmark labels, and process governance stay attached to it.
 
 ```mermaid
 flowchart LR
@@ -109,99 +125,95 @@ flowchart LR
     F -- yes --> G[WMMA compute path]
     F -- no --> H[Guarded FP32 fallback]
 
-    T1[Google Test + cuBLAS comparison] -. correctness rail .-> A
-    T1 -. correctness rail .-> E
-    T2[Benchmark labels:\nend-to-end vs compute-only] -. evidence rail .-> E
-    T3[OpenSpec governance] -. process rail .-> A
-    T3 -. process rail .-> H
+    M1[Architecture\nkernel ladder + interfaces] --> M2[Methodology\nlearning path + tuning logic]
+    M2 --> M3[Resources\npapers + docs + repos]
+    M2 --> M4[Validation\ncuBLAS checks + scope labels]
+    M4 --> M5[Support\nbuild + run locally]
+
+    A -. implementation spine .-> M1
+    E -. implementation spine .-> M1
+    M4 -. correctness rail .-> A
+    M4 -. correctness rail .-> E
+    M3 -. design lineage .-> H
 ```
 
-## Choose your route
+## Methodology entry points
 
 <div class="route-grid">
   <div class="route-card">
-    <h3>Build and run quickly</h3>
-    <p>Get from clone to benchmark execution with clear local-vs-CI expectations.</p>
+    <h3>I need the big picture first</h3>
+    <p>Start with the system view of the repository, then use validation context to interpret what the architecture is allowed to claim.</p>
+    <div class="route-links">
+      <a href="/en/architecture">Architecture</a>
+      <a href="/en/benchmark-results">Validation and benchmark scope</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>I want to learn the optimization ladder in order</h3>
+    <p>Use the staged reading path when you want each performance concept to build on the previous kernel rather than jump straight to WMMA.</p>
+    <div class="route-links">
+      <a href="/en/learning-path">Learning Path</a>
+      <a href="/en/architecture">Architecture overview</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>I want tuning heuristics and follow-up material</h3>
+    <p>Use the methodology and resource surfaces together when you need actionable optimization guidance plus technical lineage.</p>
+    <div class="route-links">
+      <a href="/en/optimization-playbook">Optimization Playbook</a>
+      <a href="/en/references">References</a>
+    </div>
+  </div>
+  <div class="route-card">
+    <h3>I want to reproduce or audit the claims</h3>
+    <p>Use the support and validation surfaces together to understand what to run locally, what CI already proves, and how results should be interpreted.</p>
     <div class="route-links">
       <a href="/en/getting-started">Getting Started</a>
       <a href="/en/benchmark-results">Benchmark Results</a>
     </div>
   </div>
-  <div class="route-card">
-    <h3>Learn the optimization ladder</h3>
-    <p>Understand what each stage changes in memory behavior and performance profile.</p>
-      <div class="route-links">
-        <a href="/en/architecture">Architecture Overview</a>
-        <a href="/en/learning-path">Learning Path</a>
-      </div>
-  </div>
-  <div class="route-card">
-    <h3>Trace architecture decisions</h3>
-    <p>See how design choices, kernel stages, and benchmark evidence fit together.</p>
-    <div class="route-links">
-      <a href="/en/architecture">Architecture</a>
-      <a href="/en/benchmark-results">Benchmark Results</a>
-    </div>
-  </div>
-  <div class="route-card">
-    <h3>Validate technical lineage</h3>
-    <p>Trace implementation choices to official docs, papers, and high-quality repos.</p>
-    <div class="route-links">
-      <a href="/en/references">References</a>
-      <a href="/en/optimization-playbook">Optimization Playbook</a>
-    </div>
-  </div>
 </div>
 
-## Knowledge hub
+## Resource hub entry points
 
 <div class="knowledge-grid">
   <a class="knowledge-card" href="/en/architecture">
     <h3>Architecture</h3>
-    <p>A guided map of kernel stages, validation boundaries, and the decisions that hold the project together.</p>
+    <p>The structural map of the kernel ladder, interface boundaries, and the decisions that hold the implementation together.</p>
   </a>
   <a class="knowledge-card" href="/en/learning-path">
-    <h3>Learning Path</h3>
-    <p>A structured route through the kernel ladder so each optimization concept builds on the last.</p>
+    <h3>Methodology</h3>
+    <p>The guided path for learning the stages in order, with optimization logic that stays connected to the architecture.</p>
   </a>
   <a class="knowledge-card" href="/en/references">
-    <h3>References</h3>
-    <p>Curated papers, official docs, and repositories mapped to concrete design decisions.</p>
+    <h3>Resources</h3>
+    <p>The source trail behind the project: official docs, papers, and mature repositories mapped to concrete decisions.</p>
   </a>
   <a class="knowledge-card" href="/en/benchmark-results">
-    <h3>Benchmark Results</h3>
-    <p>Use the validation entry point to interpret benchmark scope, correctness budgets, and trust boundaries.</p>
+    <h3>Validation</h3>
+    <p>The evidence surface for correctness budgets, benchmark scope, fallback behavior, and what the published numbers actually mean.</p>
   </a>
   <a class="knowledge-card" href="/en/getting-started">
-    <h3>Getting Started</h3>
-    <p>Use the support entry point for local setup, first build, and the repository's validation boundary.</p>
-  </a>
-  <a class="knowledge-card" href="/en/benchmark-results">
-    <h3>Validation Boundary</h3>
-    <p>Use the validation entry point to separate what hosted CI proves from what only local GPU runs can prove.</p>
+    <h3>Support</h3>
+    <p>The practical entry point for cloning, building, testing, and running the project with the right local-versus-CI expectations.</p>
   </a>
 </div>
 
-> Legacy narrative pages are being consolidated into the canonical architecture, methodology, and validation sections. They remain available during migration but are no longer primary entry points.
+## Validation boundary
 
-## Command cockpit
+The validation model is deliberately split so readers do not over-trust hosted automation or under-value local GPU evidence.
 
-```bash
-# Build
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
+| Evidence surface | What it can prove | Where it runs |
+|------------------|-------------------|---------------|
+| OpenSpec and repository checks | Specs, documentation structure, workflow alignment, Pages fitness | Hosted CI and local CLI |
+| CUDA compilation | The codebase still builds in a configured CUDA toolchain | Hosted CI and local machines |
+| Google Test + cuBLAS comparisons | Runtime correctness against the project oracle | Local GPU machines |
+| Benchmark execution | Performance behavior, WMMA scope differences, fallback consequences | Local GPU machines |
 
-# Validate
-ctest --test-dir build
-openspec validate --all
+This boundary is a first-class concept, not a footnote: CI keeps the repository healthy, but only local GPU execution can validate runtime behavior and performance claims.
 
-# Benchmark
-./build/bin/sgemm_benchmark -a
-./build/bin/sgemm_benchmark --dims 256 384 640
-```
-
-## Language and entry points
+## Canonical entry points
 
 - Chinese mirrored home: [中文首页](/zh/)
-- Repository entry: [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)
-- OpenSpec source of truth: [openspec/specs](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs)
+- Repository entry point: [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)
+- Stable process and requirements: [openspec/specs](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs)
