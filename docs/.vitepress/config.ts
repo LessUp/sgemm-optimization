@@ -17,10 +17,12 @@ export default withMermaid(defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#76b900' }],
     ['meta', { property: 'og:type', content: 'website' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/sgemm-optimization/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/sgemm-optimization/favicon-32x32.png' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/sgemm-optimization/apple-touch-icon.png' }],
   ],
 
   ignoreDeadLinks: [
-    // External links that VitePress can't verify at build time
     /^https?:\/\//,
   ],
 
@@ -70,6 +72,7 @@ export default withMermaid(defineConfig({
               items: [
                 { text: 'Resources Hub', link: '/en/resources/' },
                 { text: 'Further Reading Routes', link: '/en/resources/further-reading' },
+                { text: 'Related Papers & Research', link: '/en/resources/papers' },
                 { text: 'CUDA Memory Cheat Sheet', link: '/en/cuda-memory-cheatsheet' },
                 { text: 'Performance Casebook', link: '/en/performance-casebook' },
                 { text: 'Curated References', link: '/en/references' },
@@ -141,6 +144,7 @@ export default withMermaid(defineConfig({
               items: [
                 { text: '资源中心', link: '/zh/resources/' },
                 { text: '延伸阅读路线', link: '/zh/resources/further-reading' },
+                { text: '相关论文与研究', link: '/zh/resources/papers' },
                 { text: 'CUDA 内存速查表', link: '/zh/cuda-memory-cheatsheet' },
                 { text: '性能案例库', link: '/zh/performance-casebook' },
                 { text: '参考资料清单', link: '/zh/references' },
@@ -183,5 +187,21 @@ export default withMermaid(defineConfig({
 
   vite: {
     plugins: [llmstxt()],
+  },
+
+  // Mermaid 配置 - 通过 withMermaid 传入
+  mermaid: {
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#76b900',
+      primaryTextColor: '#1b2117',
+      primaryBorderColor: '#5a9200',
+      lineColor: '#4f5b47',
+      secondaryColor: '#f3f5f1',
+      tertiaryColor: '#f0f2ed',
+      fontSize: '14px',
+      fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+    },
   },
 }))

@@ -1,6 +1,9 @@
 /**
  * SGEMM Optimization - VitePress Custom Styles
  * Whitepaper-first presentation with restrained NVIDIA accents.
+ *
+ * Changelog:
+ * - 2026-05-15: Added Mermaid theme support, GitHub icon fix, academic citation styles
  */
 
 :root {
@@ -961,4 +964,279 @@ div[class*='language-'] code,
   .VPDoc h1 {
     letter-spacing: -0.025em;
   }
+}
+
+/* === GitHub 图标深浅色适配 === */
+.VPNavBarSocialLinks a[href*="github.com"] svg {
+  fill: var(--vp-c-text-2);
+  transition: fill var(--transition-fast);
+}
+
+.VPNavBarSocialLinks a[href*="github.com"]:hover svg {
+  fill: var(--vp-c-brand-1);
+}
+
+.dark .VPNavBarSocialLinks a[href*="github.com"] svg {
+  fill: var(--vp-c-text-2);
+}
+
+/* 首页 GitHub 按钮 */
+.vp-doc a[href*="github.com"]:not(.btn):not(.btn-outline) svg {
+  fill: var(--vp-c-text-2);
+  transition: fill var(--transition-fast);
+}
+
+.vp-doc a[href*="github.com"]:not(.btn):not(.btn-outline):hover svg {
+  fill: var(--vp-c-brand-1);
+}
+
+/* === Mermaid 图表样式增强 === */
+.mermaid {
+  margin: 32px 0;
+  padding: 24px;
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--radius-lg);
+  background: var(--vp-c-bg-elv);
+  box-shadow: var(--paper-shadow);
+  text-align: center;
+  overflow-x: auto;
+}
+
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node ellipse,
+.mermaid .node polygon,
+.mermaid .node path {
+  stroke-width: 1.5px;
+}
+
+.mermaid .edgePath .path {
+  stroke-width: 1.5px;
+}
+
+.mermaid .label {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.dark .mermaid {
+  border-color: #2b3428;
+  background: var(--vp-c-bg-elv);
+}
+
+/* === 学术引用系统 === */
+.citation {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 3px solid var(--vp-c-brand-1);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--vp-c-bg-soft);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.citation-key {
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+}
+
+.citation-title {
+  font-style: italic;
+}
+
+.citation-authors {
+  color: var(--vp-c-text-2);
+}
+
+.citation-year {
+  color: var(--vp-c-text-3);
+}
+
+.citation-venue {
+  color: var(--vp-c-text-3);
+}
+
+.citation-links {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.doi-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+
+.doi-link:hover {
+  background: var(--vp-c-brand-1);
+  color: #10140f;
+}
+
+/* 参考文献列表 */
+.references-list {
+  margin: 24px 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ref-counter;
+}
+
+.references-list li {
+  position: relative;
+  padding: 12px 16px 12px 48px;
+  margin-bottom: 8px;
+  border: 1px solid var(--vp-c-border);
+  border-radius: var(--radius-md);
+  background: var(--vp-c-bg-elv);
+  counter-increment: ref-counter;
+}
+
+.references-list li::before {
+  content: '[' counter(ref-counter) ']';
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  font-size: 13px;
+}
+
+/* BibTeX 导出块 */
+.bibtex-block {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px dashed var(--vp-c-border);
+  border-radius: var(--radius-md);
+  background: var(--vp-code-block-bg);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  overflow-x: auto;
+}
+
+/* === 极客感细节 === */
+
+/* 文件名标签 */
+.filename-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--vp-code-block-bg);
+  color: var(--vp-c-text-2);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.filename-tag::before {
+  content: '📄';
+  font-size: 14px;
+}
+
+/* 技术徽章 */
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.tech-badge.cuda {
+  --tag-bg: rgba(118, 185, 0, 0.12);
+  --tag-text: #567f00;
+}
+
+.tech-badge.tensor {
+  --tag-bg: rgba(255, 152, 0, 0.12);
+  --tag-text: #c67500;
+}
+
+.tech-badge.memory {
+  --tag-bg: rgba(33, 150, 243, 0.12);
+  --tag-text: #1976d2;
+}
+
+/* 性能高亮 */
+.perf-highlight {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(118, 185, 0, 0.15);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kernel 名称样式 */
+.kernel-name {
+  font-family: ui-monospace, monospace;
+  font-weight: 600;
+  color: var(--vp-c-brand-1);
+}
+
+/* 代码行号高亮 */
+.highlight-line {
+  background: var(--vp-code-line-highlight-color);
+  border-left: 3px solid var(--vp-c-brand-1);
+  margin-left: -3px;
+  padding-left: 3px;
+}
+
+/* === 性能对比图表组件样式 === */
+.perf-compare {
+  margin: 24px 0;
+}
+
+.perf-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.perf-label {
+  width: 140px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.perf-bar-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.perf-bar {
+  height: 24px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  min-width: 4px;
+}
+
+.perf-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
