@@ -57,32 +57,11 @@ inline PerformanceMetrics calculateSgemmMetrics(int M, int K, int N, float time_
  * - 时钟频率
  */
 inline float getTheoreticalPeakGflops() {
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp prop;
-    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-
-    // 每个 SM 的核心数（基于架构）
-    // 参考: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
-    int coresPerSM;
-    if (prop.major == 7) {
-        coresPerSM = 64; // Volta (sm_70, sm_72), Turing (sm_75)
-    } else if (prop.major == 8) {
-        coresPerSM = (prop.minor == 0 || prop.minor == 6)
-                         ? 64
-                         : 128; // A100/sm_80, A10G/sm_86: 64, others: 128
-    } else if (prop.major == 9) {
-        coresPerSM = 128; // Hopper (sm_90)
-    } else {
-        coresPerSM = 64; // 默认回退
-    }
-
-    // 时钟频率 (kHz -> GHz)
-    float clockGHz = static_cast<float>(prop.clockRate) / 1e6f;
+    DeviceInfoCache &cache = DeviceInfoCache::instance();
+    const cudaDeviceProp &prop = cache.prop();
 
     // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
-    float peakGflops = prop.multiProcessorCount * coresPerSM * 2 * clockGHz * 1000;
+    float peakGflops = prop.multiProcessorCount * cache.coresPerSM() * 2 * cache.clockGHz() * 1000;
 
     return peakGflops;
 }
@@ -96,11 +75,7 @@ inline float getTheoreticalPeakGflops() {
  * - 内存总线宽度
  */
 inline float getTheoreticalPeakBandwidth() {
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp prop;
-    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+    const cudaDeviceProp &prop = DeviceInfoCache::instance().prop();
 
     // 内存时钟频率 (Hz -> MHz)
     float memoryClockMHz = static_cast<float>(prop.memoryClockRate) / 1000.0f;
@@ -139,8 +114,12 @@ inline float calculateEfficiency(float actual_gflops, float peak_gflops) {
 
 /**
  * 计算带宽利用率（相对于理论峰值的百分比）
+ *
+ * 注意：此函数为工具函数，供外部调用者使用。
+ * 内部 benchmark 流程使用 calculateEfficiency。
  */
-inline float calculateBandwidthUtilization(float actual_bandwidth, float peak_bandwidth) {
+[[maybe_unused]] inline float
+calculateBandwidthUtilization(float actual_bandwidth, float peak_bandwidth) {
     if (peak_bandwidth <= 0)
         return 0.0f;
     return (actual_bandwidth / peak_bandwidth) * 100.0f;
@@ -153,12 +132,16 @@ inline float calculateBandwidthUtilization(float actual_bandwidth, float peak_ba
 /**
  * 打印性能比较报告
  *
+ * 注意：此函数为工具函数，供外部调用者打印格式化报告。
+ * 内部 benchmark 流程使用 SGEMMBenchmark::printSummary。
+ *
  * @param kernel_name 内核名称
  * @param metrics 性能指标
  * @param baseline_gflops 基线 GFLOPS（如 cuBLAS）
  */
-inline void printPerformanceReport(const char *kernel_name, const PerformanceMetrics &metrics,
-                                   float baseline_gflops = 0.0f) {
+[[maybe_unused]] inline void
+printPerformanceReport(const char *kernel_name, const PerformanceMetrics &metrics,
+                       float baseline_gflops = 0.0f) {
     printf("  %-30s | %8.3f ms | %10.2f GFLOPS | %8.2f GB/s | AI: %.1f\n", kernel_name,
            metrics.time_ms, metrics.gflops, metrics.bandwidth_gb_s, metrics.arithmetic_intensity);
 

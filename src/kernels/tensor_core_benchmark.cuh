@@ -5,6 +5,7 @@
 #include "../utils/benchmark_metrics.cuh"
 #include "../utils/verify.cuh"
 
+#include <climits>
 #include <cublas_v2.h>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
@@ -66,9 +67,17 @@ runTensorCoreComputeOnlyBenchmark(cublasHandle_t cublas_handle, int M, int K, in
     CUBLAS_CHECK(cublasSgemm(cublas_handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha,
                              d_B.get(), N, d_A.get(), K, &beta, d_C_ref.get(), N));
 
-    int blockSize = 256;
-    int gridSizeA = (M * K + blockSize - 1) / blockSize;
-    int gridSizeB = (K * N + blockSize - 1) / blockSize;
+    int blockSize = kDefaultBlockSize;
+    // 安全计算 gridSize，检查溢出
+    auto safeGridSize = [](size_t num, int blk) -> int {
+        size_t grid = (num + blk - 1) / blk;
+        if (grid > static_cast<size_t>(INT_MAX)) {
+            throw CudaError("Grid size overflow: matrix too large for kernel launch");
+        }
+        return static_cast<int>(grid);
+    };
+    int gridSizeA = safeGridSize(static_cast<size_t>(M) * K, blockSize);
+    int gridSizeB = safeGridSize(static_cast<size_t>(K) * N, blockSize);
 
     float_to_half_kernel<<<gridSizeA, blockSize>>>(d_A.get(), d_A_fp16.get(), M * K);
     float_to_half_kernel<<<gridSizeB, blockSize>>>(d_B.get(), d_B_fp16.get(), K * N);

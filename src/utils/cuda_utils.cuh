@@ -8,6 +8,25 @@
 #include <random>
 
 // ============================================================================
+// 命名常量
+// ============================================================================
+
+namespace config {
+/// 默认 tile 大小（用于 SGEMM 内核）
+inline constexpr int kDefaultTileSize = 32;
+
+/// 默认 block 大小（用于 CUDA 内核启动）
+inline constexpr int kDefaultBlockSize = 256;
+
+/// 文件名缓冲区大小
+inline constexpr int kFilenameBufferSize = 256;
+} // namespace config
+
+using config::kDefaultBlockSize;
+using config::kDefaultTileSize;
+using config::kFilenameBufferSize;
+
+// ============================================================================
 // Error Checking Macros
 // ============================================================================
 
@@ -56,7 +75,7 @@ template <typename T> class DeviceMemory {
   public:
     DeviceMemory() : ptr_(nullptr), size_(0) {}
 
-    explicit DeviceMemory(size_t count) : size_(count) {
+    explicit DeviceMemory(size_t count) : ptr_(nullptr), size_(count) {
         CUDA_CHECK(cudaMalloc(&ptr_, count * sizeof(T)));
     }
 
@@ -169,3 +188,62 @@ inline void printGPUInfo() {
     printf("  L2 Cache Size: %d KB\n", prop.l2CacheSize / 1024);
     printf("\n");
 }
+
+// ============================================================================
+// Device Info Cache - 缓存设备属性避免重复查询
+// ============================================================================
+
+/**
+ * 设备信息缓存类（单例模式）
+ *
+ * 缓存 cudaDeviceProp 和常用计算值，避免重复调用 cudaGetDeviceProperties。
+ * 首次访问时初始化，之后返回缓存值。
+ */
+class DeviceInfoCache {
+  public:
+    /// 获取单例实例
+    static DeviceInfoCache &instance() {
+        static DeviceInfoCache cache;
+        return cache;
+    }
+
+    /// 获取缓存的设备属性
+    const cudaDeviceProp &prop() const { return prop_; }
+
+    /// 获取设备 ID
+    int deviceId() const { return device_; }
+
+    /// 检查是否支持 Tensor Core (sm_70+)
+    bool hasTensorCores() const { return prop_.major >= 7; }
+
+    /// 获取每个 SM 的 CUDA 核心数（基于架构）
+    int coresPerSM() const { return coresPerSM_; }
+
+    /// 获取时钟频率 (GHz)
+    float clockGHz() const { return clockGHz_; }
+
+  private:
+    DeviceInfoCache() {
+        CUDA_CHECK(cudaGetDevice(&device_));
+        CUDA_CHECK(cudaGetDeviceProperties(&prop_, device_));
+        coresPerSM_ = computeCoresPerSM();
+        clockGHz_ = static_cast<float>(prop_.clockRate) / 1e6f;
+    }
+
+    int computeCoresPerSM() const {
+        // 参考: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
+        if (prop_.major == 7) {
+            return 64; // Volta (sm_70, sm_72), Turing (sm_75)
+        } else if (prop_.major == 8) {
+            return (prop_.minor == 0 || prop_.minor == 6) ? 64 : 128; // A100/sm_80, A10G/sm_86: 64
+        } else if (prop_.major == 9) {
+            return 128; // Hopper (sm_90)
+        }
+        return 64; // 默认回退
+    }
+
+    int device_;
+    cudaDeviceProp prop_;
+    int coresPerSM_;
+    float clockGHz_;
+};

@@ -21,6 +21,7 @@
 
 #include "../utils/cuda_utils.cuh"
 #include "../utils/verify.cuh"
+#include <climits>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 #include <functional>
@@ -46,14 +47,7 @@ using tensor_core::WMMA_N;
 /**
  * 检查当前设备是否支持 Tensor Core (sm_70+)
  */
-inline bool tensorCoresAvailable() {
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp prop;
-    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-    return prop.major >= 7;
-}
+inline bool tensorCoresAvailable() { return DeviceInfoCache::instance().hasTensorCores(); }
 
 /**
  * 检查给定维度是否适合 Tensor Core 加速
@@ -67,11 +61,7 @@ inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
  * 获取当前设备的 Tensor Core 信息字符串
  */
 inline const char *getTensorCoreArchName() {
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
-
-    cudaDeviceProp prop;
-    CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
+    const cudaDeviceProp &prop = DeviceInfoCache::instance().prop();
 
     if (prop.major == 7) {
         return (prop.minor == 0) ? "Volta" : (prop.minor == 5) ? "Turing" : "Unknown sm_7x";
@@ -101,7 +91,8 @@ using FallbackKernel =
  *
  * 提供一个空的 fallback（用于测试或显式配置场景）
  */
-inline void nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t = 0) {
+[[maybe_unused]] inline void
+nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t = 0) {
     // 空实现 - 用于测试
 }
 
@@ -179,7 +170,7 @@ __global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
  */
 inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B, float *C, int M,
                                                     int K, int N, cudaStream_t stream = 0) {
-    dim3 blockDim(32, 1);
+    dim3 blockDim(kDefaultTileSize, 1);
     dim3 gridDim((N + WMMA_N - 1) / WMMA_N, (M + WMMA_M - 1) / WMMA_M);
 
     tensor_core_sgemm_kernel_fp16<<<gridDim, blockDim, 0, stream>>>(A, B, C, M, K, N);
@@ -255,9 +246,17 @@ inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *
     DeviceMemory<half> d_A_fp16(num_A);
     DeviceMemory<half> d_B_fp16(num_B);
 
-    int blockSize = 256;
-    int gridSizeA = static_cast<int>((num_A + blockSize - 1) / blockSize);
-    int gridSizeB = static_cast<int>((num_B + blockSize - 1) / blockSize);
+    int blockSize = kDefaultBlockSize;
+    // 安全计算 gridSize，检查溢出
+    auto safeGridSize = [](size_t num, int blk) -> int {
+        size_t grid = (num + blk - 1) / blk;
+        if (grid > static_cast<size_t>(INT_MAX)) {
+            throw CudaError("Grid size overflow: matrix too large for kernel launch");
+        }
+        return static_cast<int>(grid);
+    };
+    int gridSizeA = safeGridSize(num_A, blockSize);
+    int gridSizeB = safeGridSize(num_B, blockSize);
 
     float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
                                                               static_cast<int>(num_A));

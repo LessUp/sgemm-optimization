@@ -103,7 +103,7 @@ class BenchmarkRunner {
         printPerformanceComparison(benchmark.getResults(), cublas_gflops);
 
         // 导出 roofline 数据
-        char filename[256];
+        char filename[kFilenameBufferSize];
         snprintf(filename, sizeof(filename), "roofline_data_%d_%d_%d.csv", M, K, N);
         benchmark.exportRooflineData(filename);
     }
