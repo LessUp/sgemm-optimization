@@ -7,6 +7,12 @@
  */
 
 :root {
+  /* 断点变量 - 文档化引用，值与 breakpoints.ts 保持同步
+     注意：CSS 规范不允许在 @media 中使用 var()，
+     媒体查询必须使用字面值，变更时需同步更新 */
+  --bp-sm: 640px;
+  --bp-lg: 960px;
+
   --vp-c-brand-1: #76b900;
   --vp-c-brand-2: #679f00;
   --vp-c-brand-3: #8bcd29;
@@ -879,6 +885,7 @@ div[class*='language-'] code,
   padding: 16px 18px;
 }
 
+/* 平板/桌面断点 --bp-lg: 960px (见 breakpoints.ts) */
 @media (max-width: 960px) {
   .VPHero,
   .home-shell {
@@ -916,6 +923,7 @@ div[class*='language-'] code,
   }
 }
 
+/* 移动端断点 --bp-sm: 640px (见 breakpoints.ts) */
 @media (max-width: 640px) {
   .VPNavBar,
   .VPHero,

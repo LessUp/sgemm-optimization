@@ -4,6 +4,8 @@ import { watch, onMounted } from 'vue'
 import { useData } from 'vitepress'
 import Citation from '../components/Citation.vue'
 import PerfCompare from '../components/PerfCompare.vue'
+// 导出断点模块供组件使用
+export { useBreakpoint, BREAKPOINTS, minQuery, maxQuery } from './breakpoints'
 
 export default {
   extends: DefaultTheme,
