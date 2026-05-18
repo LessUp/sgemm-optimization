@@ -1,26 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" fill="none">
   <rect width="1200" height="520" rx="28" fill="#0F130F"/>
   <rect x="48" y="58" width="190" height="108" rx="24" fill="#23301A" stroke="#69884B"/>
-  <text x="76" y="104" fill="#E4ECD9" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Naive FP32</text>
-  <text x="76" y="136" fill="#B5C4A5" font-size="16" font-family="Inter, Arial, sans-serif">Expose cost model</text>
+  <text x="76" y="100" fill="#E4ECD9" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Naive FP32</text>
+  <text x="76" y="130" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Expose cost model</text>
   <rect x="266" y="58" width="190" height="108" rx="24" fill="#28361D" stroke="#739554"/>
-  <text x="294" y="104" fill="#E4ECD9" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Tiled FP32</text>
-  <text x="294" y="136" fill="#B5C4A5" font-size="16" font-family="Inter, Arial, sans-serif">Reuse shared tiles</text>
+  <text x="294" y="100" fill="#E4ECD9" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Tiled FP32</text>
+  <text x="294" y="130" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Reuse shared tiles</text>
   <rect x="484" y="58" width="190" height="108" rx="24" fill="#2E4021" stroke="#7CA05B"/>
-  <text x="512" y="104" fill="#E4ECD9" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Bank-free</text>
-  <text x="512" y="136" fill="#B5C4A5" font-size="16" font-family="Inter, Arial, sans-serif">Stabilize access</text>
+  <text x="512" y="100" fill="#E4ECD9" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Bank-free</text>
+  <text x="512" y="130" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Stabilize access</text>
   <rect x="702" y="58" width="190" height="108" rx="24" fill="#364C25" stroke="#85AA62"/>
-  <text x="730" y="104" fill="#E4ECD9" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Double buffer</text>
-  <text x="730" y="136" fill="#B5C4A5" font-size="16" font-family="Inter, Arial, sans-serif">Hide memory latency</text>
+  <text x="730" y="100" fill="#E4ECD9" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Double buffer</text>
+  <text x="730" y="130" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Hide memory latency</text>
   <rect x="920" y="58" width="232" height="108" rx="24" fill="#3E5928" stroke="#8EB567"/>
-  <text x="948" y="104" fill="#F0F7E6" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Tensor Core WMMA</text>
-  <text x="948" y="136" fill="#D0E0BF" font-size="16" font-family="Inter, Arial, sans-serif">Guarded mixed precision</text>
+  <text x="948" y="95" fill="#F0F7E6" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Tensor Core</text>
+  <text x="948" y="118" fill="#F0F7E6" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">WMMA</text>
+  <text x="948" y="146" fill="#D0E0BF" font-size="14" font-family="Inter, Arial, sans-serif">Guarded mixed precision</text>
   <path d="M238 112H254" stroke="#93B54C" stroke-width="4" stroke-linecap="round"/>
   <path d="M456 112H472" stroke="#93B54C" stroke-width="4" stroke-linecap="round"/>
   <path d="M674 112H690" stroke="#93B54C" stroke-width="4" stroke-linecap="round"/>
   <path d="M892 112H908" stroke="#93B54C" stroke-width="4" stroke-linecap="round"/>
-  <rect x="82" y="254" width="1036" height="182" rx="28" fill="#171D17" stroke="#303B31"/>
-  <text x="116" y="304" fill="#E4ECD9" font-size="22" font-family="Inter, Arial, sans-serif" font-weight="700">Attached rails</text>
-  <text x="116" y="340" fill="#B5C4A5" font-size="17" font-family="Inter, Arial, sans-serif">Architecture explains why each stage exists. Validation constrains what each speedup is allowed to claim. Research adds papers, repos, and historical context.</text>
-  <text x="116" y="384" fill="#B5C4A5" font-size="17" font-family="Inter, Arial, sans-serif">That combination turns a kernel ladder into a whitepaper, not just a benchmark artifact.</text>
+  <rect x="82" y="254" width="1036" height="220" rx="28" fill="#171D17" stroke="#303B31"/>
+  <text x="116" y="298" fill="#E4ECD9" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Attached rails</text>
+  <text x="116" y="330" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Architecture explains why each stage exists. Validation constrains what each speedup is allowed to claim.</text>
+  <text x="116" y="356" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">Research adds papers, repos, and historical context.</text>
+  <text x="116" y="396" fill="#B5C4A5" font-size="15" font-family="Inter, Arial, sans-serif">That combination turns a kernel ladder into a whitepaper, not just a benchmark artifact.</text>
 </svg>

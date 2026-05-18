@@ -9,17 +9,22 @@
   <rect x="422" y="98" width="356" height="560" rx="28" fill="#EEF6DB"/>
   <text x="456" y="142" fill="#24311D" font-size="24" font-family="Inter, Arial, sans-serif" font-weight="700">Kernel ladder</text>
   <rect x="456" y="174" width="286" height="58" rx="18" fill="#D9E8BA"/>
-  <text x="482" y="210" fill="#2A351F" font-size="18" font-family="Inter, Arial, sans-serif">Naive FP32, establish the cost model</text>
+  <text x="482" y="207" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">Naive FP32,</text>
+  <text x="482" y="225" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">establish the cost model</text>
   <rect x="456" y="248" width="286" height="58" rx="18" fill="#CFE0A9"/>
-  <text x="482" y="284" fill="#2A351F" font-size="18" font-family="Inter, Arial, sans-serif">Tiled FP32, shared-memory reuse</text>
+  <text x="482" y="281" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">Tiled FP32, shared-memory reuse</text>
   <rect x="456" y="322" width="286" height="58" rx="18" fill="#C2D798"/>
-  <text x="482" y="358" fill="#2A351F" font-size="18" font-family="Inter, Arial, sans-serif">Bank-free FP32, conflict mitigation</text>
+  <text x="482" y="348" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">Bank-free FP32,</text>
+  <text x="482" y="366" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">conflict mitigation</text>
   <rect x="456" y="396" width="286" height="58" rx="18" fill="#B5CE88"/>
-  <text x="482" y="432" fill="#2A351F" font-size="18" font-family="Inter, Arial, sans-serif">Double buffer, overlap load and compute</text>
+  <text x="482" y="422" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">Double buffer,</text>
+  <text x="482" y="440" fill="#2A351F" font-size="16" font-family="Inter, Arial, sans-serif">overlap load and compute</text>
   <rect x="456" y="470" width="286" height="58" rx="18" fill="#A7C578"/>
-  <text x="482" y="506" fill="#26321C" font-size="18" font-family="Inter, Arial, sans-serif">Tensor Core WMMA, guarded fast path</text>
+  <text x="482" y="496" fill="#26321C" font-size="16" font-family="Inter, Arial, sans-serif">Tensor Core WMMA,</text>
+  <text x="482" y="514" fill="#26321C" font-size="16" font-family="Inter, Arial, sans-serif">guarded fast path</text>
   <rect x="456" y="556" width="286" height="64" rx="18" fill="#1D251B" stroke="#5E7440"/>
-  <text x="482" y="594" fill="#E3EBD8" font-size="18" font-family="Inter, Arial, sans-serif">Validation and research stay attached</text>
+  <text x="482" y="587" fill="#E3EBD8" font-size="16" font-family="Inter, Arial, sans-serif">Validation and research</text>
+  <text x="482" y="607" fill="#E3EBD8" font-size="16" font-family="Inter, Arial, sans-serif">stay attached</text>
   <rect x="854" y="108" width="250" height="132" rx="24" fill="#17202A" stroke="#3B4E67"/>
   <text x="882" y="156" fill="#D6E3F8" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Validation</text>
   <text x="882" y="194" fill="#A8BCD7" font-size="16" font-family="Inter, Arial, sans-serif">Correctness policy</text>
