@@ -23,7 +23,7 @@ Methodology covers how we optimize. Validation covers the evidence boundary arou
 | Understand correctness thresholds and oracle policy | [Correctness Policy](/en/validation/correctness-policy) |
 | Interpret benchmark labels and reported numbers | [Benchmark Scope](/en/validation/benchmark-scope) |
 | Reproduce a result responsibly | [Reproducibility](/en/validation/reproducibility) |
-| See a representative snapshot of results | [Benchmark Results](/en/benchmark-results) |
+| See a representative snapshot of results | [Benchmark Results](/en/validation/benchmark-results) |
 
 ## What hosted CI proves
 

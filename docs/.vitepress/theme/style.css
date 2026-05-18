@@ -312,7 +312,8 @@ body {
 .signal-card,
 .knowledge-card,
 .route-card,
-.references-note {
+.references-note,
+.figure-frame {
   border: 1px solid var(--vp-c-border);
   border-radius: var(--radius-lg);
   background: var(--vp-c-bg-elv);
@@ -328,10 +329,40 @@ body {
 .perf-card:hover,
 .signal-card:hover,
 .knowledge-card:hover,
-.route-card:hover {
+.route-card:hover,
+.figure-frame:hover {
   border-color: var(--paper-rule);
   transform: translateY(-2px);
   box-shadow: var(--paper-shadow-strong);
+}
+
+.figure-frame {
+  padding: 18px;
+}
+
+.figure-frame-wide {
+  margin: 24px 0 8px;
+}
+
+.hero-figure {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--radius-lg) - 6px);
+}
+
+.figure-note {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+}
+
+.thesis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 28px 0 0;
 }
 
 .VPFeature .icon {
@@ -897,6 +928,7 @@ div[class*='language-'] code,
   }
 
   .home-hero-grid,
+  .thesis-grid,
   .route-grid,
   .knowledge-grid {
     grid-template-columns: 1fr;

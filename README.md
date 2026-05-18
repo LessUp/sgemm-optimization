@@ -8,15 +8,14 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A CUDA SGEMM engineering notebook designed for both deep learning and interview presentation: from readable FP32 baselines to guarded Tensor Core WMMA, with cuBLAS-backed verification and explicit benchmark boundaries.
+This repository is a CUDA SGEMM case study presented as a technical whitepaper and kernel academy. It starts from readable FP32 baselines, climbs through tiled, bank-conflict-aware, double-buffer, and guarded Tensor Core WMMA paths, then frames every performance claim with explicit validation boundaries.
 
-## Why this project stands out
+## Why it stands out
 
-- **Progressive kernel ladder**: naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core.
-- **Evidence-first reporting**: performance claims are paired with correctness policy and scope labels.
-- **Comparable interfaces**: FP32 kernels share a unified `(A, B, C, M, K, N, stream)` launcher contract.
-- **Interview-ready narrative**: architecture, methodology, validation, and references reinforce one public story.
-- **Bilingual mirrored docs**: English and Chinese public pages stay aligned.
+- **Readable optimization ladder**: every kernel stage exists to expose one bottleneck shift.
+- **Evidence-first public story**: correctness policy, benchmark scope, and local-versus-CI trust boundaries stay attached to every claim.
+- **Interview-grade positioning**: the Pages site is written so the project can be explained, defended, and audited under technical pressure.
+- **Bilingual mirrored docs**: English and Chinese routes stay structurally aligned across the full public site.
 
 ## Quick start
 
@@ -30,29 +29,31 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-Runtime tests and benchmarks require a CUDA-capable local machine. Hosted CI is limited to formatting, repository-structure, OpenSpec/governance, and Pages checks.
+Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI covers repository integrity, documentation, OpenSpec validation, and Pages buildability.
 
-## Start here (GitHub Pages)
+## GitHub Pages entry points
+
+The README is the executive summary. The long-form technical narrative lives on Pages.
 
 | Goal | Entry point |
 |------|-------------|
-| Open English home | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
+| Open English home | [English Home](https://lessup.github.io/sgemm-optimization/en/) |
 | Open Chinese home | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
-| Build and run once | [Getting Started](https://lessup.github.io/sgemm-optimization/en/getting-started) |
-| Understand differentiation | [Architecture Overview](https://lessup.github.io/sgemm-optimization/en/architecture/) |
-| Prepare interview explanation | [Methodology](https://lessup.github.io/sgemm-optimization/en/methodology/) |
-| Check trust boundaries | [Validation Overview](https://lessup.github.io/sgemm-optimization/en/validation/) |
-| Trace technical lineage | [References](https://lessup.github.io/sgemm-optimization/en/references) |
-| Read normative specs | [OpenSpec Specs](openspec/specs/) |
+| Get oriented quickly | [Project Guide](https://lessup.github.io/sgemm-optimization/en/overview/) |
+| Inspect system structure | [Architecture](https://lessup.github.io/sgemm-optimization/en/architecture/) |
+| Study the kernel ladder | [Academy](https://lessup.github.io/sgemm-optimization/en/academy/) |
+| Check what the evidence proves | [Validation](https://lessup.github.io/sgemm-optimization/en/validation/) |
+| Trace papers and related repos | [Research Desk](https://lessup.github.io/sgemm-optimization/en/research/) |
+| Read normative repository requirements | [OpenSpec Specs](openspec/specs/) |
 
 ## Validation boundary
 
-| Environment | What to trust |
-|-------------|---------------|
-| Hosted CI | Formatting, docs/structure checks, OpenSpec governance, Pages buildability |
-| Local CUDA GPU | Runtime correctness verification and benchmark performance |
+| Environment | What it can prove |
+|-------------|-------------------|
+| Hosted CI | Docs structure, route integrity, OpenSpec consistency, Pages buildability |
+| Local CUDA GPU | Runtime correctness, fallback behavior, benchmark performance |
 
-This split is deliberate. CI keeps repository health; real GPU hardware validates runtime behavior and speed claims.
+This split is deliberate. CI keeps the repository coherent, but only local GPU execution can validate runtime behavior and speed claims.
 
 ## Source map
 
@@ -61,7 +62,7 @@ src/kernels/   CUDA SGEMM implementations
 src/utils/     CUDA RAII, verification, benchmark helpers
 src/main.cu    benchmark CLI
 tests/         Google Test coverage against cuBLAS
-docs/          learning documentation mirrored on Pages
+docs/          VitePress whitepaper and academy, mirrored under /en and /zh
 openspec/      stable specs and change workflow
 ```
 

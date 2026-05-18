@@ -6,6 +6,14 @@ title: Architecture Overview
 
 This section is the canonical map of the SGEMM system: why the design exists, how data moves, when each kernel strategy appears, and where Tensor Core acceleration is allowed to take over.
 
+<div class="figure-frame figure-frame-wide">
+  <picture>
+    <source srcset="/figures/kernel-ladder-dark.svg" media="(prefers-color-scheme: dark)" />
+    <img class="hero-figure" src="/figures/kernel-ladder-light.svg" alt="Kernel ladder diagram showing naive FP32, tiled FP32, bank-free FP32, double buffer, and Tensor Core WMMA with attached architecture, validation, and research rails." />
+  </picture>
+  <p class="figure-note">The architecture page uses the same controlled figure system as the home page so the ladder remains readable in both themes.</p>
+</div>
+
 ## Why this design exists
 
 This repository is not organized as “one fast kernel plus a benchmark screenshot.” It is organized as an engineering reasoning chain:
@@ -31,7 +39,7 @@ That structure makes the project useful for learning, review, and interviews: re
 | Kernel ladder | Explains the optimization chain from naïve FP32 to WMMA | [Kernel Ladder](/en/architecture/kernel-ladder) |
 | Memory flow | Explains global-memory access, shared-memory reuse, bank conflicts, and double buffering as one data-movement story | [Memory Flow](/en/architecture/memory-flow) |
 | Tensor Core path | Explains WMMA selection, FP32→FP16 staging, shape guards, and fallback behavior | [Tensor Core Path](/en/architecture/tensor-core-path) |
-| Deep kernel pages | Explains each kernel implementation in isolation | [Naïve](/en/kernel-naive), [Tiled](/en/kernel-tiled), [Bank-Free](/en/kernel-bank-free), [Double Buffer](/en/kernel-double-buffer), [Tensor Core WMMA](/en/kernel-tensor-core) |
+| Deep kernel pages | Explains each kernel implementation in isolation | [Naïve](/en/academy/kernel-naive), [Tiled](/en/academy/kernel-tiled), [Bank-Free](/en/academy/kernel-bank-free), [Double Buffer](/en/academy/kernel-double-buffer), [Tensor Core WMMA](/en/academy/kernel-tensor-core) |
 
 ## Architectural decisions that shape the repository
 
@@ -94,13 +102,13 @@ This is not just process documentation. It affects how the architecture is narra
 1. Read this page for the system claim.
 2. Read [Kernel Ladder](/en/architecture/kernel-ladder) for the optimization order.
 3. Read [Validation Overview](/en/validation/) before trusting any benchmark claim.
-4. Read [Methodology](/en/methodology/) when you need the concise explanation path used in reviews or interviews.
-5. Use [Resources Hub](/en/resources/) to trace external sources and comparison points.
+4. Read [Academy](/en/academy/) when you need the ordered explanation path used in reviews or interviews.
+5. Use [Research Desk](/en/research/) to trace external sources and comparison points.
 
 ## Related resources
 
-- [Resources Hub](/en/resources/)
+- [Research Desk](/en/research/)
 - [Validation Overview](/en/validation/)
-- [Learning Path](/en/learning-path)
-- [Getting Started](/en/getting-started)
+- [Learning Path](/en/academy/learning-path)
+- [Getting Started](/en/overview/getting-started)
 - [Stable architecture spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

@@ -23,7 +23,7 @@ title: 验证
 | 理解正确性阈值与 oracle 策略 | [正确性策略](/zh/validation/correctness-policy) |
 | 解释 benchmark 标签与公开数字 | [Benchmark 范围](/zh/validation/benchmark-scope) |
 | 负责任地复现结果 | [可复现性](/zh/validation/reproducibility) |
-| 查看代表性 benchmark 快照 | [Benchmark 结果](/zh/benchmark-results) |
+| 查看代表性 benchmark 快照 | [Benchmark 结果](/zh/validation/benchmark-results) |
 
 ## 托管 CI 能证明什么
 

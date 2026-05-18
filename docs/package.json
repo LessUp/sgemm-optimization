@@ -1,7 +1,6 @@
 {
   "name": "sgemm-optimization-docs",
-  "version": "1.0.0",
-  "description": "SGEMM Optimization Documentation",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
@@ -9,8 +8,10 @@
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
+  },
   "dependencies": {
-    "vitepress": "^1.5.0",
     "vitepress-plugin-mermaid": "^2.0.17",
     "mermaid": "^11.12.2",
     "vitepress-plugin-llms": "^1.10.0"

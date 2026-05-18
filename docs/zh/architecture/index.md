@@ -6,6 +6,14 @@ title: 架构概述
 
 本节是 SGEMM 系统的规范化地图：解释为什么要这样设计、数据如何流动、每一级 kernel 为什么出现，以及 Tensor Core 何时可以接管计算。
 
+<div class="figure-frame figure-frame-wide">
+  <picture>
+    <source srcset="/figures/kernel-ladder-dark.svg" media="(prefers-color-scheme: dark)" />
+    <img class="hero-figure" src="/figures/kernel-ladder-light.svg" alt="展示 naive FP32、tiled FP32、bank-free FP32、double buffer、Tensor Core WMMA，并连接架构、验证与研究辅助轨的 kernel 阶梯图。" />
+  </picture>
+  <p class="figure-note">架构页和首页共用同一套受控图示体系，让阶梯在浅色和深色模式下都保持清晰。</p>
+</div>
+
 ## 为什么会有这套设计
 
 这个仓库不是“放一个快 kernel 再贴一张跑分图”。它被组织成一条工程推理链：
@@ -31,7 +39,7 @@ title: 架构概述
 | Kernel 阶梯 | 解释从朴素 FP32 到 WMMA 的优化链路 | [Kernel 阶梯](/zh/architecture/kernel-ladder) |
 | Memory Flow | 用一个系统视角解释全局内存访问、共享内存复用、bank 冲突与双缓冲 | [Memory Flow](/zh/architecture/memory-flow) |
 | Tensor Core 路径 | 解释 WMMA 选择逻辑、FP32→FP16 staging、shape guard 与 fallback 行为 | [Tensor Core 路径](/zh/architecture/tensor-core-path) |
-| Kernel 深入页 | 单独解释每个 kernel 的实现细节 | [朴素](/zh/kernel-naive)、[分块](/zh/kernel-tiled)、[消除 Bank Conflict](/zh/kernel-bank-free)、[双缓冲](/zh/kernel-double-buffer)、[Tensor Core WMMA](/zh/kernel-tensor-core) |
+| Kernel 深入页 | 单独解释每个 kernel 的实现细节 | [朴素](/zh/academy/kernel-naive)、[分块](/zh/academy/kernel-tiled)、[消除 Bank Conflict](/zh/academy/kernel-bank-free)、[双缓冲](/zh/academy/kernel-double-buffer)、[Tensor Core WMMA](/zh/academy/kernel-tensor-core) |
 
 ## 影响仓库结构的架构决策
 
@@ -94,13 +102,13 @@ title: 架构概述
 1. 先看本页，确认系统主张。
 2. 再看 [Kernel 阶梯](/zh/architecture/kernel-ladder)，理解优化顺序。
 3. 在相信 benchmark 之前，先看 [验证概览](/zh/validation/)。
-4. 需要简洁的复述与答辩框架时，转到 [方法论](/zh/methodology/)。
-5. 需要技术来源与对照材料时，转到 [资源中心](/zh/resources/)。
+4. 需要简洁的复述与答辩框架时，转到 [学院](/zh/academy/)。
+5. 需要技术来源与对照材料时，转到 [研究总览](/zh/research/)。
 
 ## 相关资源
 
-- [资源中心](/zh/resources/)
+- [研究总览](/zh/research/)
 - [验证概览](/zh/validation/)
-- [学习路径](/zh/learning-path)
-- [快速上手](/zh/getting-started)
+- [学习路径](/zh/academy/learning-path)
+- [快速上手](/zh/overview/getting-started)
 - [稳定架构规范](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)

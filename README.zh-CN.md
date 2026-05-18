@@ -8,15 +8,14 @@
 
 [English](README.md) | 简体中文
 
-这是一个面向学习与面试展示的 CUDA SGEMM 工程化项目：从可读的 FP32 baseline kernel 演进到带保护回退的 Tensor Core WMMA，并通过 cuBLAS 对照建立可信验证。
+这是一个被包装成技术白皮书和 Kernel 学院的 CUDA SGEMM 案例仓库。它从可读的 FP32 基线出发，沿着 tiled、bank-conflict-aware、double-buffer、带保护的 Tensor Core WMMA 路径逐级推进，并且把每一个性能结论都放回明确的验证边界里解释。
 
-## 为什么它更有竞争力
+## 为什么它更强
 
-- **优化链条完整**：naive -> tiled -> bank-conflict-free -> double-buffer -> Tensor Core。
-- **证据优先表达**：性能结论与正确性策略、测量范围一起呈现。
-- **接口保持一致**：FP32 kernel 使用统一 `(A, B, C, M, K, N, stream)` launcher 契约。
-- **面试友好叙事**：架构、方法论、验证与参考资料共同支撑同一条公共叙事。
-- **中英文镜像文档**：公开页面结构保持一致，便于传播与复用。
+- **优化阶梯可讲清楚**：每一级 kernel 都对应一次明确的瓶颈转移。
+- **公共叙事以证据为先**：正确性策略、benchmark 范围和本地 GPU / 托管 CI 的信任边界始终跟着结论走。
+- **面试表达友好**：Pages 站点被写成可解释、可答辩、可审查的技术叙事。
+- **中英镜像完整**：英文与中文公共路由在整站范围内保持结构一致。
 
 ## 快速开始
 
@@ -30,29 +29,31 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 只覆盖格式、仓库结构、OpenSpec / 治理，以及 Pages 构建检查。
+运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 主要负责仓库完整性、文档结构、OpenSpec 校验，以及 Pages 可构建性。
 
-## 推荐入口（GitHub Pages）
+## GitHub Pages 入口
+
+README 是执行摘要，长篇技术叙事在 GitHub Pages 上。
 
 | 目标 | 入口 |
 |------|------|
+| 打开英文首页 | [English Home](https://lessup.github.io/sgemm-optimization/en/) |
 | 打开中文首页 | [中文首页](https://lessup.github.io/sgemm-optimization/zh/) |
-| 打开英文首页 | [Docs Home](https://lessup.github.io/sgemm-optimization/en/) |
-| 编译运行一次 | [快速上手](https://lessup.github.io/sgemm-optimization/zh/getting-started) |
-| 了解项目差异化 | [架构概述](https://lessup.github.io/sgemm-optimization/zh/architecture/) |
-| 准备面试表达 | [方法论](https://lessup.github.io/sgemm-optimization/zh/methodology/) |
-| 查看可信边界 | [验证概览](https://lessup.github.io/sgemm-optimization/zh/validation/) |
-| 追溯技术来源 | [参考文献](https://lessup.github.io/sgemm-optimization/zh/references) |
-| 阅读规范源 | [OpenSpec 规范](openspec/specs/) |
+| 快速建立全局认知 | [项目导读](https://lessup.github.io/sgemm-optimization/zh/overview/) |
+| 查看系统结构 | [架构](https://lessup.github.io/sgemm-optimization/zh/architecture/) |
+| 系统学习 kernel 阶梯 | [学院](https://lessup.github.io/sgemm-optimization/zh/academy/) |
+| 核对证据到底证明什么 | [验证](https://lessup.github.io/sgemm-optimization/zh/validation/) |
+| 追溯论文和相关仓库 | [研究资料台](https://lessup.github.io/sgemm-optimization/zh/research/) |
+| 阅读仓库规范来源 | [OpenSpec 规范](openspec/specs/) |
 
 ## 验证边界
 
-| 环境 | 可以信任什么 |
-|------|--------------|
-| 托管 CI | 格式、文档/结构检查、OpenSpec 治理、Pages 可构建性 |
-| 本地 CUDA GPU | 运行时正确性与 benchmark 性能 |
+| 环境 | 能证明什么 |
+|------|------------|
+| 托管 CI | 文档结构、路由完整性、OpenSpec 一致性、Pages 可构建性 |
+| 本地 CUDA GPU | 运行时正确性、fallback 行为、benchmark 性能 |
 
-这种拆分是刻意设计：CI 负责仓库健康，真实 GPU 负责运行时与性能结论。
+这种拆分是刻意设计。CI 负责让仓库保持连贯，只有本地 GPU 执行才能验证运行时行为和速度结论。
 
 ## 源码地图
 
@@ -61,7 +62,7 @@ src/kernels/   CUDA SGEMM kernel 实现
 src/utils/     CUDA RAII、验证与 benchmark 工具
 src/main.cu    benchmark CLI
 tests/         基于 cuBLAS 的 Google Test 覆盖
-docs/          中英文 Pages 文档（含 /en 与 /zh）
+docs/          VitePress 白皮书与学院，公开镜像位于 /en 和 /zh
 openspec/      稳定 specs 与变更工作流
 ```
 

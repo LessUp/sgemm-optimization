@@ -124,9 +124,9 @@ Padding away bank conflicts and keeping fallback logic explicit are both example
 
 ## Deep links
 
-- [Tiled Kernel](/en/kernel-tiled)
-- [Bank Conflict Free](/en/kernel-bank-free)
-- [Double Buffer](/en/kernel-double-buffer)
-- [Tensor Core WMMA](/en/kernel-tensor-core)
-- [CUDA Memory Cheat Sheet](/en/cuda-memory-cheatsheet)
-- [Resources Hub](/en/resources/)
+- [Tiled Kernel](/en/academy/kernel-tiled)
+- [Bank Conflict Free](/en/academy/kernel-bank-free)
+- [Double Buffer](/en/academy/kernel-double-buffer)
+- [Tensor Core WMMA](/en/academy/kernel-tensor-core)
+- [CUDA Memory Cheat Sheet](/en/academy/cuda-memory-cheatsheet)
+- [Resources Hub](/en/research/)

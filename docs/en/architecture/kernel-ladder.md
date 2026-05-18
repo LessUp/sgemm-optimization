@@ -10,11 +10,11 @@ The kernel ladder is the repository's main reasoning chain. Each rung exists bec
 
 | Stage | Main bottleneck exposed | Architectural move | Trade-off | Deep dive |
 |------|--------------------------|--------------------|-----------|-----------|
-| Naïve | Repeated global-memory traffic, poor reuse | One thread computes one output element | Readable but memory-bound | [Naïve Kernel](/en/kernel-naive) |
-| Tiled | Global-memory bandwidth pressure | Shared-memory tiling and block-level reuse | Requires barriers and tile-size choices | [Tiled Kernel](/en/kernel-tiled) |
-| Bank-Free | Shared-memory contention | Pad tiles to remove bank-conflict patterns | Slightly higher shared-memory footprint | [Bank Conflict Free](/en/kernel-bank-free) |
-| Double Buffer | Load/compute serialization | Ping-pong shared-memory buffers | More shared memory and more scheduling complexity | [Double Buffer](/en/kernel-double-buffer) |
-| Tensor Core | CUDA-core throughput ceiling | Warp-level WMMA on Tensor Cores | FP16 staging, shape guards, and fallback policy | [Tensor Core WMMA](/en/kernel-tensor-core) |
+| Naïve | Repeated global-memory traffic, poor reuse | One thread computes one output element | Readable but memory-bound | [Naïve Kernel](/en/academy/kernel-naive) |
+| Tiled | Global-memory bandwidth pressure | Shared-memory tiling and block-level reuse | Requires barriers and tile-size choices | [Tiled Kernel](/en/academy/kernel-tiled) |
+| Bank-Free | Shared-memory contention | Pad tiles to remove bank-conflict patterns | Slightly higher shared-memory footprint | [Bank Conflict Free](/en/academy/kernel-bank-free) |
+| Double Buffer | Load/compute serialization | Ping-pong shared-memory buffers | More shared memory and more scheduling complexity | [Double Buffer](/en/academy/kernel-double-buffer) |
+| Tensor Core | CUDA-core throughput ceiling | Warp-level WMMA on Tensor Cores | FP16 staging, shape guards, and fallback policy | [Tensor Core WMMA](/en/academy/kernel-tensor-core) |
 
 ## Why the ladder matters
 
