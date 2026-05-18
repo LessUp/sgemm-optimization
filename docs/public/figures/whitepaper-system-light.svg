@@ -1,43 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
-  <rect width="1200" height="760" rx="32" fill="#F6F7F2"/>
-  <rect x="48" y="48" width="1104" height="664" rx="28" fill="#FCFCFA" stroke="#DADFD4"/>
-  <rect x="96" y="108" width="250" height="178" rx="24" fill="#EFF3E3" stroke="#B8C69C"/>
-  <text x="124" y="156" fill="#2C3722" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Project thesis</text>
-  <text x="124" y="194" fill="#48563A" font-size="16" font-family="Inter, Arial, sans-serif">Readable SGEMM ladder</text>
-  <text x="124" y="220" fill="#48563A" font-size="16" font-family="Inter, Arial, sans-serif">Explicit trust boundary</text>
-  <text x="124" y="246" fill="#48563A" font-size="16" font-family="Inter, Arial, sans-serif">Interview-grade explanation</text>
-  <rect x="422" y="98" width="356" height="560" rx="28" fill="#12180F"/>
-  <text x="456" y="142" fill="#E9EFDF" font-size="24" font-family="Inter, Arial, sans-serif" font-weight="700">Kernel ladder</text>
-  <rect x="456" y="174" width="286" height="58" rx="18" fill="#212C18"/>
-  <text x="482" y="207" fill="#CFE4AA" font-size="16" font-family="Inter, Arial, sans-serif">Naive FP32,</text>
-  <text x="482" y="225" fill="#CFE4AA" font-size="16" font-family="Inter, Arial, sans-serif">establish the cost model</text>
-  <rect x="456" y="248" width="286" height="58" rx="18" fill="#27361A"/>
-  <text x="482" y="281" fill="#D7EEB1" font-size="16" font-family="Inter, Arial, sans-serif">Tiled FP32, shared-memory reuse</text>
-  <rect x="456" y="322" width="286" height="58" rx="18" fill="#30421D"/>
-  <text x="482" y="348" fill="#E0F4BB" font-size="16" font-family="Inter, Arial, sans-serif">Bank-free FP32,</text>
-  <text x="482" y="366" fill="#E0F4BB" font-size="16" font-family="Inter, Arial, sans-serif">conflict mitigation</text>
-  <rect x="456" y="396" width="286" height="58" rx="18" fill="#39501F"/>
-  <text x="482" y="422" fill="#E8F9C8" font-size="16" font-family="Inter, Arial, sans-serif">Double buffer,</text>
-  <text x="482" y="440" fill="#E8F9C8" font-size="16" font-family="Inter, Arial, sans-serif">overlap load and compute</text>
-  <rect x="456" y="470" width="286" height="58" rx="18" fill="#456323"/>
-  <text x="482" y="496" fill="#F0FCD4" font-size="16" font-family="Inter, Arial, sans-serif">Tensor Core WMMA,</text>
-  <text x="482" y="514" fill="#F0FCD4" font-size="16" font-family="Inter, Arial, sans-serif">guarded fast path</text>
-  <rect x="456" y="556" width="286" height="64" rx="18" fill="#EFF3E3" stroke="#93A66B"/>
-  <text x="482" y="587" fill="#2D3821" font-size="16" font-family="Inter, Arial, sans-serif">Validation and research</text>
-  <text x="482" y="607" fill="#2D3821" font-size="16" font-family="Inter, Arial, sans-serif">stay attached</text>
-  <rect x="854" y="108" width="250" height="132" rx="24" fill="#EEF1F9" stroke="#C5D0E8"/>
-  <text x="882" y="156" fill="#24314A" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Validation</text>
-  <text x="882" y="194" fill="#4A5772" font-size="16" font-family="Inter, Arial, sans-serif">Correctness policy</text>
-  <text x="882" y="220" fill="#4A5772" font-size="16" font-family="Inter, Arial, sans-serif">Benchmark scope</text>
-  <rect x="854" y="268" width="250" height="132" rx="24" fill="#F4EFE6" stroke="#DCC7A1"/>
-  <text x="882" y="316" fill="#4A3723" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Research</text>
-  <text x="882" y="354" fill="#72593A" font-size="16" font-family="Inter, Arial, sans-serif">References and papers</text>
-  <text x="882" y="380" fill="#72593A" font-size="16" font-family="Inter, Arial, sans-serif">Related projects and evolution</text>
-  <rect x="854" y="428" width="250" height="132" rx="24" fill="#F2EFF7" stroke="#CEC3E1"/>
-  <text x="882" y="476" fill="#3F2F53" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Overview</text>
-  <text x="882" y="514" fill="#64507C" font-size="16" font-family="Inter, Arial, sans-serif">Guide, quick paths, repo alignment</text>
-  <path d="M346 196H394" stroke="#8BAA44" stroke-width="4" stroke-linecap="round"/>
-  <path d="M778 176H826" stroke="#7A9A3D" stroke-width="4" stroke-linecap="round"/>
-  <path d="M778 330H826" stroke="#7A9A3D" stroke-width="4" stroke-linecap="round"/>
-  <path d="M778 490H826" stroke="#7A9A3D" stroke-width="4" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="660" rx="20" fill="#F7F8F5"/>
+
+  <!-- Central column: Kernel Ladder -->
+  <rect x="420" y="40" width="360" height="580" rx="18" fill="#181F14" stroke="#2E3D24" stroke-width="1"/>
+  <text x="600" y="78" fill="#B8D87A" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" letter-spacing="0.12em" text-anchor="middle">KERNEL LADDER</text>
+
+  <!-- Ladder steps -->
+  <rect x="444" y="96" width="312" height="72" rx="12" fill="#1E2B17"/>
+  <text x="476" y="127" fill="#D4EE9A" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">① Naïve FP32</text>
+  <text x="476" y="148" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Establish the cost model</text>
+
+  <rect x="444" y="180" width="312" height="72" rx="12" fill="#233018"/>
+  <text x="476" y="211" fill="#D9F0A0" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">② Tiled FP32</text>
+  <text x="476" y="232" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Shared-memory reuse</text>
+
+  <rect x="444" y="264" width="312" height="72" rx="12" fill="#293A1A"/>
+  <text x="476" y="295" fill="#DEFAA8" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">③ Bank-Free FP32</text>
+  <text x="476" y="316" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Padding eliminates bank conflicts</text>
+
+  <rect x="444" y="348" width="312" height="72" rx="12" fill="#2F431B"/>
+  <text x="476" y="379" fill="#E3FAB0" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">④ Double Buffer</text>
+  <text x="476" y="400" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Overlap staging and compute</text>
+
+  <rect x="444" y="432" width="312" height="72" rx="12" fill="#3A541E"/>
+  <text x="476" y="463" fill="#EDFCC0" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">⑤ Tensor Core WMMA</text>
+  <text x="476" y="484" fill="#8FC050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Guarded throughput ceiling</text>
+
+  <!-- Validation + Research rail -->
+  <rect x="444" y="520" width="312" height="64" rx="12" fill="#EFF3E8" stroke="#B0C880" stroke-width="1"/>
+  <text x="600" y="547" fill="#3A4D28" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Validation</text>
+  <text x="600" y="567" fill="#6A7F4A" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Correctness · Benchmark scope · Reproducibility</text>
+
+  <!-- Left panel: Thesis -->
+  <rect x="44" y="40" width="340" height="230" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="72" y="80" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Project thesis</text>
+  <line x1="72" y1="92" x2="356" y2="92" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="72" y="116" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Optimization must stay explainable.</text>
+  <text x="72" y="140" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Each kernel shifts one bottleneck</text>
+  <text x="72" y="160" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">class for a clear reason.</text>
+  <text x="72" y="196" fill="#75816F" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Readable · Defendable · Bounded</text>
+
+  <!-- Left panel: Audience -->
+  <rect x="44" y="290" width="340" height="170" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="72" y="328" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Audience contract</text>
+  <line x1="72" y1="340" x2="356" y2="340" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="72" y="365" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Interviewer: audit system clarity</text>
+  <text x="72" y="387" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Candidate: defend the ladder</text>
+  <text x="72" y="409" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">CUDA learner: trace each shift</text>
+
+  <!-- Left panel: Trust model -->
+  <rect x="44" y="478" width="340" height="130" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="72" y="514" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Trust model</text>
+  <line x1="72" y1="526" x2="356" y2="526" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="72" y="551" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">CI: structure and governance</text>
+  <text x="72" y="573" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">GPU: correctness and performance</text>
+
+  <!-- Right panel: Research -->
+  <rect x="816" y="40" width="340" height="170" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="844" y="80" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Research desk</text>
+  <line x1="844" y1="92" x2="1128" y2="92" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="844" y="117" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Papers · Related projects</text>
+  <text x="844" y="139" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Evolution notes · References</text>
+  <text x="844" y="161" fill="#75816F" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Lineage · Comparative context</text>
+
+  <!-- Right panel: Academy -->
+  <rect x="816" y="228" width="340" height="230" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="844" y="268" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Academy</text>
+  <line x1="844" y1="280" x2="1128" y2="280" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="844" y="305" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Ordered kernel study</text>
+  <text x="844" y="327" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Benchmark discipline</text>
+  <text x="844" y="349" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Diagnosis loop</text>
+  <text x="844" y="371" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Optimization playbook</text>
+  <text x="844" y="415" fill="#75816F" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Teaching sequence · Interview-ready</text>
+
+  <!-- Right panel: Architecture -->
+  <rect x="816" y="476" width="340" height="132" rx="16" fill="#FFFFFF" stroke="#D8DFD2" stroke-width="1"/>
+  <text x="844" y="516" fill="#1B2117" font-size="16" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700">Architecture</text>
+  <line x1="844" y1="528" x2="1128" y2="528" stroke="#E0E7D8" stroke-width="1"/>
+  <text x="844" y="552" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">System map · Memory flow</text>
+  <text x="844" y="574" fill="#4F5B47" font-size="13" font-family="Inter,ui-sans-serif,sans-serif">Tensor Core path · Blueprint</text>
+
+  <!-- Connectors left -->
+  <line x1="384" y1="155" x2="420" y2="155" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="384" y1="375" x2="420" y2="375" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="384" y1="543" x2="420" y2="543" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+  <!-- Connectors right -->
+  <line x1="780" y1="132" x2="816" y2="132" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="780" y1="343" x2="816" y2="343" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="780" y1="542" x2="816" y2="542" stroke="#C8D8A0" stroke-width="1.5" stroke-dasharray="4 3"/>
 </svg>

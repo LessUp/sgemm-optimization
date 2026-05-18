@@ -1,28 +1,96 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" fill="none">
-  <rect width="1200" height="520" rx="28" fill="#F7F8F4"/>
-  <rect x="48" y="58" width="190" height="108" rx="24" fill="#E8EFDA" stroke="#B5C48B"/>
-  <text x="76" y="100" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Naive FP32</text>
-  <text x="76" y="130" fill="#4A593A" font-size="15" font-family="Inter, Arial, sans-serif">Expose cost model</text>
-  <rect x="266" y="58" width="190" height="108" rx="24" fill="#E2ECD0" stroke="#ADBF7D"/>
-  <text x="294" y="100" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Tiled FP32</text>
-  <text x="294" y="130" fill="#4A593A" font-size="15" font-family="Inter, Arial, sans-serif">Reuse shared tiles</text>
-  <rect x="484" y="58" width="190" height="108" rx="24" fill="#DBE8C5" stroke="#A6BA73"/>
-  <text x="512" y="100" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Bank-free</text>
-  <text x="512" y="130" fill="#4A593A" font-size="15" font-family="Inter, Arial, sans-serif">Stabilize access</text>
-  <rect x="702" y="58" width="190" height="108" rx="24" fill="#D5E4BA" stroke="#9FB468"/>
-  <text x="730" y="100" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Double buffer</text>
-  <text x="730" y="130" fill="#4A593A" font-size="15" font-family="Inter, Arial, sans-serif">Hide memory latency</text>
-  <rect x="920" y="58" width="232" height="108" rx="24" fill="#CEDFAF" stroke="#97AE5D"/>
-  <text x="948" y="95" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Tensor Core</text>
-  <text x="948" y="118" fill="#28321E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">WMMA</text>
-  <text x="948" y="146" fill="#4A593A" font-size="14" font-family="Inter, Arial, sans-serif">Guarded mixed precision</text>
-  <path d="M238 112H254" stroke="#81A03D" stroke-width="4" stroke-linecap="round"/>
-  <path d="M456 112H472" stroke="#81A03D" stroke-width="4" stroke-linecap="round"/>
-  <path d="M674 112H690" stroke="#81A03D" stroke-width="4" stroke-linecap="round"/>
-  <path d="M892 112H908" stroke="#81A03D" stroke-width="4" stroke-linecap="round"/>
-  <rect x="82" y="254" width="1036" height="220" rx="28" fill="#FBFBF8" stroke="#D3D9CE"/>
-  <text x="116" y="298" fill="#27311E" font-size="20" font-family="Inter, Arial, sans-serif" font-weight="700">Attached rails</text>
-  <text x="116" y="330" fill="#4C5940" font-size="15" font-family="Inter, Arial, sans-serif">Architecture explains why each stage exists. Validation constrains what each speedup is allowed to claim.</text>
-  <text x="116" y="356" fill="#4C5940" font-size="15" font-family="Inter, Arial, sans-serif">Research adds papers, repos, and historical context.</text>
-  <text x="116" y="396" fill="#4C5940" font-size="15" font-family="Inter, Arial, sans-serif">That combination turns a kernel ladder into a whitepaper, not just a benchmark artifact.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" fill="none">
+  <!-- Background -->
+  <rect width="900" height="520" rx="16" fill="#F7F8F5"/>
+
+  <!-- Title -->
+  <text x="450" y="44" fill="#2A3520" font-size="13" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" letter-spacing="0.10em" text-anchor="middle">FIVE-STAGE OPTIMIZATION LADDER</text>
+
+  <!-- Stage bars — stacked left-to-right columns -->
+  <!-- Col 1: Naive -->
+  <rect x="60" y="72" width="148" height="388" rx="14" fill="#FFFFFF" stroke="#D5DFD0" stroke-width="1"/>
+  <rect x="60" y="72" width="148" height="42" rx="14" fill="#DFF0C0"/>
+  <rect x="60" y="100" width="148" height="14" fill="#DFF0C0"/>
+  <text x="134" y="99" fill="#3A5020" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" text-anchor="middle">① NAÏVE</text>
+  <text x="134" y="140" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Global loads</text>
+  <text x="134" y="162" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">every access</text>
+  <line x1="84" y1="188" x2="184" y2="188" stroke="#E0EACE" stroke-width="1"/>
+  <text x="134" y="214" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Bottleneck:</text>
+  <text x="134" y="232" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">DRAM bandwidth</text>
+  <line x1="84" y1="260" x2="184" y2="260" stroke="#E0EACE" stroke-width="1"/>
+  <text x="134" y="285" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Shift target:</text>
+  <text x="134" y="304" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">SMEM reuse</text>
+
+  <!-- Ladder step arrow right -->
+  <text x="218" y="276" fill="#8FA870" font-size="22" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">→</text>
+
+  <!-- Col 2: Tiled -->
+  <rect x="226" y="72" width="148" height="388" rx="14" fill="#FFFFFF" stroke="#D5DFD0" stroke-width="1"/>
+  <rect x="226" y="72" width="148" height="42" rx="14" fill="#CCE8A0"/>
+  <rect x="226" y="100" width="148" height="14" fill="#CCE8A0"/>
+  <text x="300" y="99" fill="#3A5020" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" text-anchor="middle">② TILED</text>
+  <text x="300" y="140" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Tile-cooperative</text>
+  <text x="300" y="162" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">SMEM loads</text>
+  <line x1="250" y1="188" x2="350" y2="188" stroke="#E0EACE" stroke-width="1"/>
+  <text x="300" y="214" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Bottleneck:</text>
+  <text x="300" y="232" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Bank conflicts</text>
+  <line x1="250" y1="260" x2="350" y2="260" stroke="#E0EACE" stroke-width="1"/>
+  <text x="300" y="285" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Shift target:</text>
+  <text x="300" y="304" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Conflict-free pad</text>
+
+  <text x="384" y="276" fill="#8FA870" font-size="22" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">→</text>
+
+  <!-- Col 3: Bank-Free -->
+  <rect x="392" y="72" width="148" height="388" rx="14" fill="#FFFFFF" stroke="#D5DFD0" stroke-width="1"/>
+  <rect x="392" y="72" width="148" height="42" rx="14" fill="#BAE080"/>
+  <rect x="392" y="100" width="148" height="14" fill="#BAE080"/>
+  <text x="466" y="99" fill="#3A5020" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" text-anchor="middle">③ BANK-FREE</text>
+  <text x="466" y="140" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">+1 pad column</text>
+  <text x="466" y="162" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">eliminates stalls</text>
+  <line x1="416" y1="188" x2="516" y2="188" stroke="#E0EACE" stroke-width="1"/>
+  <text x="466" y="214" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Bottleneck:</text>
+  <text x="466" y="232" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Load/compute overlap</text>
+  <line x1="416" y1="260" x2="516" y2="260" stroke="#E0EACE" stroke-width="1"/>
+  <text x="466" y="285" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Shift target:</text>
+  <text x="466" y="304" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Double buffer</text>
+
+  <text x="550" y="276" fill="#8FA870" font-size="22" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">→</text>
+
+  <!-- Col 4: Double Buffer -->
+  <rect x="558" y="72" width="148" height="388" rx="14" fill="#FFFFFF" stroke="#D5DFD0" stroke-width="1"/>
+  <rect x="558" y="72" width="148" height="42" rx="14" fill="#A8D860"/>
+  <rect x="558" y="100" width="148" height="14" fill="#A8D860"/>
+  <text x="632" y="99" fill="#3A5020" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" text-anchor="middle">④ DBL BUFFER</text>
+  <text x="632" y="140" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Async prefetch</text>
+  <text x="632" y="162" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">hides latency</text>
+  <line x1="582" y1="188" x2="682" y2="188" stroke="#E0EACE" stroke-width="1"/>
+  <text x="632" y="214" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Bottleneck:</text>
+  <text x="632" y="232" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">FP32 throughput</text>
+  <line x1="582" y1="260" x2="682" y2="260" stroke="#E0EACE" stroke-width="1"/>
+  <text x="632" y="285" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Shift target:</text>
+  <text x="632" y="304" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Tensor Core path</text>
+
+  <text x="716" y="276" fill="#8FA870" font-size="22" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">→</text>
+
+  <!-- Col 5: Tensor Core -->
+  <rect x="724" y="72" width="148" height="388" rx="14" fill="#FFFFFF" stroke="#B8D870" stroke-width="1.5"/>
+  <rect x="724" y="72" width="148" height="42" rx="14" fill="#90C840"/>
+  <rect x="724" y="100" width="148" height="14" fill="#90C840"/>
+  <text x="798" y="99" fill="#3A5020" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" font-weight="700" text-anchor="middle">⑤ TENSOR CORE</text>
+  <text x="798" y="140" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">WMMA fragment</text>
+  <text x="798" y="162" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">tile execution</text>
+  <line x1="748" y1="188" x2="848" y2="188" stroke="#C0D880" stroke-width="1"/>
+  <text x="798" y="214" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Bottleneck:</text>
+  <text x="798" y="232" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">WMMA constraints</text>
+  <line x1="748" y1="260" x2="848" y2="260" stroke="#C0D880" stroke-width="1"/>
+  <text x="798" y="285" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">Terminal stage</text>
+  <text x="798" y="304" fill="#4A5A3A" font-size="12" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600" text-anchor="middle">Ceiling achieved</text>
+
+  <!-- Perf bar legend at bottom -->
+  <rect x="60" y="488" width="832" height="6" rx="3" fill="#E8F0D8"/>
+  <rect x="60" y="488" width="166" height="6" rx="3" fill="#B8D880"/>
+  <rect x="60" y="488" width="332" height="6" rx="3" fill="#9ACC60"/>
+  <rect x="60" y="488" width="498" height="6" rx="3" fill="#7EC040"/>
+  <rect x="60" y="488" width="664" height="6" rx="3" fill="#60B420"/>
+  <rect x="60" y="488" width="832" height="6" rx="3" fill="#48A800"/>
+  <text x="450" y="514" fill="#75816F" font-size="11" font-family="Inter,ui-sans-serif,sans-serif" text-anchor="middle">relative throughput  ————▶  increasing</text>
 </svg>

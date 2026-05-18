@@ -25,13 +25,12 @@ title: SGEMM Whitepaper
         <span class="home-chip">EN / ZH mirrored routes</span>
       </div>
     </div>
-    <div class="figure-frame">
-      <picture>
-        <source srcset="/figures/whitepaper-system-dark.svg" media="(prefers-color-scheme: dark)" />
-        <img class="hero-figure" src="/figures/whitepaper-system-light.svg" alt="Whitepaper map connecting overview, architecture, academy, validation, and research around the SGEMM kernel ladder." />
-      </picture>
-      <p class="figure-note">The public narrative is organized like a technical argument: thesis, architecture, academy, proof, then lineage.</p>
-    </div>
+    <ThemedFigure
+      light="/figures/whitepaper-system-light.svg"
+      dark="/figures/whitepaper-system-dark.svg"
+      alt="Whitepaper map connecting overview, architecture, academy, validation, and research around the SGEMM kernel ladder."
+      caption="The public narrative is organized like a technical argument: thesis, architecture, academy, proof, then lineage."
+    />
   </div>
 
   <div class="thesis-grid">
@@ -102,13 +101,13 @@ title: SGEMM Whitepaper
 
 ## Architecture, rendered as a controlled figure
 
-<div class="figure-frame figure-frame-wide">
-  <picture>
-    <source srcset="/figures/kernel-ladder-dark.svg" media="(prefers-color-scheme: dark)" />
-    <img class="hero-figure" src="/figures/kernel-ladder-light.svg" alt="Kernel ladder moving from naive FP32 to tiled, bank-free, double-buffer, and Tensor Core WMMA, with architecture, validation, and research rails." />
-  </picture>
-  <p class="figure-note">The ladder is not a trophy rack. It is a map of bottleneck shifts, interface constraints, and evidence requirements.</p>
-</div>
+<ThemedFigure
+  :wide="true"
+  light="/figures/kernel-ladder-light.svg"
+  dark="/figures/kernel-ladder-dark.svg"
+  alt="Kernel ladder moving from naive FP32 to tiled, bank-free, double-buffer, and Tensor Core WMMA, with architecture, validation, and research rails."
+  caption="The ladder is not a trophy rack. It is a map of bottleneck shifts, interface constraints, and evidence requirements."
+/>
 
 ## What makes this presentation different
 

@@ -4,111 +4,125 @@ title: Architecture Overview
 
 # Architecture Overview
 
-This section is the canonical map of the SGEMM system: why the design exists, how data moves, when each kernel strategy appears, and where Tensor Core acceleration is allowed to take over.
+This section is the normative map of the SGEMM system. It records: what each component does, how data moves through the memory hierarchy, when kernel selection logic fires, and where the system's invariants and boundaries lie. Read it before trusting any benchmark claim or interview statement about this project.
 
-<div class="figure-frame figure-frame-wide">
-  <picture>
-    <source srcset="/figures/kernel-ladder-dark.svg" media="(prefers-color-scheme: dark)" />
-    <img class="hero-figure" src="/figures/kernel-ladder-light.svg" alt="Kernel ladder diagram showing naive FP32, tiled FP32, bank-free FP32, double buffer, and Tensor Core WMMA with attached architecture, validation, and research rails." />
-  </picture>
-  <p class="figure-note">The architecture page uses the same controlled figure system as the home page so the ladder remains readable in both themes.</p>
-</div>
+<ThemedFigure
+  :wide="true"
+  light="/figures/kernel-ladder-light.svg"
+  dark="/figures/kernel-ladder-dark.svg"
+  alt="Kernel ladder diagram showing naive FP32, tiled FP32, bank-free FP32, double buffer, and Tensor Core WMMA with attached architecture, validation, and research rails."
+  caption="The ladder is a map of bottleneck shifts, not a trophy rack. Each stage exists because the previous one exposed a new limit."
+/>
 
-## Why this design exists
+## Technical thesis
 
-This repository is not organized as “one fast kernel plus a benchmark screenshot.” It is organized as an engineering reasoning chain:
+SGEMM optimization on modern NVIDIA hardware is a sequence of bottleneck-class migrations. Moving from naïve FP32 to Tensor Core WMMA requires solving four distinct problems in order: DRAM saturation, shared-memory bank conflicts, staging–compute overlap, and WMMA hardware constraints. This repository structures its kernel implementations to surface one problem per stage, hold the prior stages fixed, and make the performance effect of each architectural decision independently observable.
 
-- start from a readable FP32 baseline
-- expose the next bottleneck instead of hiding it
-- add one architectural idea at a time
-- keep correctness and benchmark scope explicit
-- preserve a safe path when Tensor Core constraints are not met
+## Component inventory
 
-That structure makes the project useful for learning, review, and interviews: readers can explain **why** a kernel exists before they talk about how fast it is.
+| Component | Layer | Primary responsibility |
+|-----------|-------|------------------------|
+| `src/main.cu` | Driver | Entry point that delegates CLI parsing and benchmark orchestration |
+| `src/cli_parser.cuh` | Driver support | Parses mode flags, shapes, and runtime options into `BenchmarkConfig` |
+| `src/benchmark_runner.cuh` | Driver support | Runs configured benchmark and verification flows through one binary |
+| `src/kernels/naive_sgemm.cuh` | Kernel | FP32 baseline with full global-memory load cost |
+| `src/kernels/tiled_sgemm.cuh` | Kernel | Cooperative tile load into shared memory; SMEM reuse |
+| `src/kernels/bank_conflict_free_sgemm.cuh` | Kernel | Padding eliminates shared-memory bank conflicts |
+| `src/kernels/double_buffer_sgemm.cuh` | Kernel | Overlaps next-tile staging with active compute |
+| `src/kernels/tensor_core_sgemm.cuh` | Kernel | WMMA fragment accumulation on hardware-aligned tiles |
+| `src/utils/cuda_utils.cuh` | Utility | CUDA error macros, RAII device-memory wrappers, device metadata |
+| `src/utils/verify.cuh` | Utility | cuBLAS-backed correctness verification and tolerance policy |
+| `tests/test_sgemm.cu` | Test | GPU-side correctness verification under cuBLAS reference tolerance |
 
-## What this repository is trying to prove
+## Memory-hierarchy data flow
 
-- SGEMM optimization should read as a reasoning chain, not a bag of isolated tricks.
-- Performance claims only count when they stay attached to correctness policy and benchmark scope.
-- Tensor Core acceleration is only persuasive when constraints and fallback behavior are explicit.
+Each kernel optimization step corresponds to a change in which memory level dominates access cost:
 
-## System map
+```
+Naïve:       [Global memory]  → registers         (DRAM-bound)
+Tiled:       [Global memory]  → SMEM → registers  (SMEM reuse, conflict risk)
+Bank-Free:   [Global memory]  → SMEM+pad → regs   (conflict-free, latency exposed)
+Dbl-Buffer:  [Global memory]  → double-SMEM → regs (staging hidden behind compute)
+Tensor Core: [Global memory]  → SMEM → WMMA frags  (hardware-accelerated accumulation)
+```
 
-| Layer | Responsibility | Where to go next |
-|------|----------------|------------------|
-| Kernel ladder | Explains the optimization chain from naïve FP32 to WMMA | [Kernel Ladder](/en/architecture/kernel-ladder) |
-| Memory flow | Explains global-memory access, shared-memory reuse, bank conflicts, and double buffering as one data-movement story | [Memory Flow](/en/architecture/memory-flow) |
-| Tensor Core path | Explains WMMA selection, FP32→FP16 staging, shape guards, and fallback behavior | [Tensor Core Path](/en/architecture/tensor-core-path) |
-| Deep kernel pages | Explains each kernel implementation in isolation | [Naïve](/en/academy/kernel-naive), [Tiled](/en/academy/kernel-tiled), [Bank-Free](/en/academy/kernel-bank-free), [Double Buffer](/en/academy/kernel-double-buffer), [Tensor Core WMMA](/en/academy/kernel-tensor-core) |
+The memory-flow page makes this concrete: addresses, strides, tile dimensions, and the exact load patterns used at each stage.
 
-## Architectural decisions that shape the repository
+## Design invariants
 
-### 1. Optimization is presented as a ladder, not a bag of tricks
+These properties are held constant across all kernel stages and are part of the architecture's correctness contract:
 
-Each kernel solves a specific bottleneck class:
+1. **Row-major layout throughout.** All matrices A, B, and C use row-major storage. No kernel silently assumes column-major order.
+2. **Float4 granularity for vectorized loads.** Kernels that benefit from wider loads use `float4` to maximize per-instruction memory bandwidth.
+3. **Fallback on unsatisfied constraints.** The Tensor Core entry path falls back to the FP32 path when shape guards are not met. Benchmark numbers are never reported from a fallback-activated run.
+4. **Epsilon-bounded correctness.** Test harnesses verify outputs against a cuBLAS reference with a per-element tolerance of `1e-3`. Kernel correctness is not assumed; it is measured.
+5. **Timing outside CUDA graph bounds.** Benchmark timing wraps the full device call including synchronization. Cold-start and warm-up behavior is documented per benchmark result.
 
-1. **Naïve** establishes the cost model and exposes poor reuse.
-2. **Tiled** trades extra coordination for shared-memory reuse.
-3. **Bank-Free** stabilizes shared-memory access by padding away avoidable conflicts.
-4. **Double Buffer** overlaps staging and compute to hide part of memory latency.
-5. **Tensor Core** raises the throughput ceiling, but only under explicit device and shape constraints.
+## Kernel selection and fallback logic
 
-The goal is not “every later kernel must beat every earlier kernel on every GPU.” The goal is that each step has a clear reason to exist and a measurable architectural effect.
+The entry path in `src/main.cu` selects a kernel tier based on device capability queries and matrix dimension checks:
 
-### 2. Data movement is the main system story
+| Condition | Path selected |
+|-----------|---------------|
+| Any GPU, any shape | FP32 ladder (naïve → double buffer) |
+| SM ≥ 7.0, shape divisible by WMMA tile | Tensor Core WMMA path |
+| SM ≥ 7.0, shape not WMMA-aligned | FP32 path (fallback) |
+| SM < 7.0 | FP32 path (fallback) |
 
-SGEMM performance here is framed around where data lives and when it moves:
+The pure benchmark invokes the Tensor Core kernel directly on a pre-validated shape. The safe entry path uses runtime guards.
 
-- from global memory into the SM
-- from global memory into shared tiles
-- from shared memory into registers or WMMA fragments
-- from staged tiles back into output matrix C
+## Architectural decisions
 
-That is why the architecture section treats memory flow as a first-class topic instead of leaving it scattered across per-kernel notes.
+### 1. The ladder, not the bag of tricks
 
-### 3. Tensor Core is an optional fast path, not the only path
+Each kernel solves one bottleneck class:
 
-The repository exposes both:
+1. **Naïve** establishes the arithmetic-intensity bound and exposes DRAM saturation.
+2. **Tiled** moves data into shared memory cooperatively, exposing bank conflict as the next limit.
+3. **Bank-Free** pads shared-memory arrays to remove conflict, exposing staging latency.
+4. **Double Buffer** overlaps next-tile staging with active compute to reduce stall cycles.
+5. **Tensor Core** uses hardware-fused matrix accumulation under strict alignment and device constraints.
 
-- a **safe FP32 entry path** that may convert inputs and fall back when WMMA is unsupported
-- a **pure compute-only WMMA path** used to measure raw Tensor Core behavior under friendly shapes
+The point is that each stage has a single reason to exist and a single architectural effect that can be measured.
 
-This keeps benchmark claims honest. Unsupported dimensions are not silently reported as Tensor Core wins.
+### 2. Validation as an architectural first class
 
-### 4. Validation boundaries are part of the architecture
+The project separates what two different environments can prove:
 
-The project deliberately separates what can be trusted in different environments:
+| Claim | Local CUDA GPU | Hosted CI |
+|-------|----------------|-----------|
+| Compilation succeeds | ✓ | ✗ |
+| Output correctness vs. cuBLAS | ✓ | ✗ |
+| Benchmark performance claims | ✓ | ✗ |
+| Repository structure and docs | ✓ | ✓ |
+| VitePress Pages buildability | ✓ | ✓ |
 
-| Area | Local CUDA GPU | Hosted CI |
-|------|----------------|-----------|
-| CUDA compilation | Yes | No |
-| Runtime correctness | Yes | No |
-| Benchmark performance | Yes | No |
-| Docs, OpenSpec, and repository integrity | Yes | Yes |
-| Pages buildability | Optional | Yes |
+This is not just process hygiene. It affects which claims a reader can trust from CI green status alone.
 
-This is not just process documentation. It affects how the architecture is narrated: performance conclusions only count when they are tied back to the correct runtime environment.
+### 3. Tensor Core as an explicit fast path
 
-## Recommended reading path
+The FP32 ladder and the Tensor Core path are independent tiers. The repository exposes both so that:
 
-1. Start here for the system map.
-2. Read [Kernel Ladder](/en/architecture/kernel-ladder) to understand the optimization chain.
-3. Read [Memory Flow](/en/architecture/memory-flow) to understand the data-movement logic behind the ladder.
-4. Read [Tensor Core Path](/en/architecture/tensor-core-path) before interpreting WMMA benchmark numbers.
-5. Use the existing kernel deep dives when you want implementation detail instead of system rationale.
+- Benchmark claims for WMMA are only made on aligned shapes with SM ≥ 7.0 devices.
+- The FP32 ladder remains a complete, self-contained teaching path that does not require Tensor Core hardware.
+- Fallback behavior is tested, not assumed.
+
+## System map and reading paths
+
+| Need | Go to |
+|------|-------|
+| Full component and data-flow diagram | [System Blueprint](./system-blueprint) |
+| Kernel-by-kernel explanation of bottleneck shifts | [Kernel Ladder](./kernel-ladder) |
+| Memory hierarchy and load-pattern analysis | [Memory Flow](./memory-flow) |
+| WMMA selection, shape guards, fallback | [Tensor Core Path](./tensor-core-path) |
+| Ordered teaching path, interview framing | [Academy](../academy/) |
+| Correctness policy and benchmark scope | [Validation](../validation/) |
+| External references and comparisons | [Research](../research/) |
 
 ## Fast reviewer path
 
-1. Read this page for the system claim.
-2. Read [Kernel Ladder](/en/architecture/kernel-ladder) for the optimization order.
-3. Read [Validation Overview](/en/validation/) before trusting any benchmark claim.
-4. Read [Academy](/en/academy/) when you need the ordered explanation path used in reviews or interviews.
-5. Use [Research Desk](/en/research/) to trace external sources and comparison points.
-
-## Related resources
-
-- [Research Desk](/en/research/)
-- [Validation Overview](/en/validation/)
-- [Learning Path](/en/academy/learning-path)
-- [Getting Started](/en/overview/getting-started)
-- [Stable architecture spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/architecture/spec.md)
+1. This page: architectural thesis and invariants.
+2. [System Blueprint](./system-blueprint): full component inventory with data flow.
+3. [Validation Overview](../validation/): what the evidence can and cannot prove.
+4. [Benchmark Results](../validation/benchmark-results): numbers with scope attached.
+5. [Academy](../academy/): the ordered explanation for interview defense.

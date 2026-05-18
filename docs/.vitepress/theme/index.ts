@@ -4,6 +4,7 @@ import { watch, onMounted } from 'vue'
 import { useData } from 'vitepress'
 import Citation from '../components/Citation.vue'
 import PerfCompare from '../components/PerfCompare.vue'
+import ThemedFigure from '../components/ThemedFigure.vue'
 // 导出断点模块供组件使用
 export { useBreakpoint, BREAKPOINTS, minQuery, maxQuery } from './breakpoints'
 
@@ -12,6 +13,7 @@ export default {
   enhanceApp({ app }) {
     app.component('Citation', Citation)
     app.component('PerfCompare', PerfCompare)
+    app.component('ThemedFigure', ThemedFigure)
   },
   setup() {
     const { isDark } = useData()

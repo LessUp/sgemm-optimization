@@ -153,6 +153,13 @@ class BenchmarkRunner {
             return;
         }
 
+        if (!tensorCoreDimensionsSupported(M, K, N)) {
+            printf("Skipping Tensor Core benchmarks for %d x %d x %d "
+                   "(requires positive dimensions aligned to 16, fallback would mislabel FP32 as WMMA).\n",
+                   M, K, N);
+            return;
+        }
+
         printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
                "conversion/fallback)...\n");
         benchmark.run(
@@ -163,16 +170,11 @@ class BenchmarkRunner {
             },
             M, K, N, config_.warmup_runs, config_.benchmark_runs, kTensorCoreVerifyTolerance);
 
-        if (tensorCoreDimensionsSupported(M, K, N)) {
-            printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
-            BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
-                benchmark.getCublasHandle(), M, K, N, config_.warmup_runs, config_.benchmark_runs,
-                kTensorCoreVerifyTolerance);
-            tc_result.print();
-        } else {
-            printf("Skipping Tensor Core compute-only benchmark (requires positive "
-                   "dimensions aligned to 16).\n");
-        }
+        printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
+        BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
+            benchmark.getCublasHandle(), M, K, N, config_.warmup_runs, config_.benchmark_runs,
+            kTensorCoreVerifyTolerance);
+        tc_result.print();
     }
 
     BenchmarkConfig config_;

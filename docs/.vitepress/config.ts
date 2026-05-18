@@ -9,6 +9,8 @@ const base = rawBase
     : `/${rawBase}/`
   : '/sgemm-optimization/'
 
+const asset = (relativePath: string) => `${base}${relativePath.replace(/^\/+/, '')}`
+
 function localeNav(prefix: '/en/' | '/zh/') {
   if (prefix === '/en/') {
     return [
@@ -37,6 +39,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
           text: 'Overview',
           items: [
             { text: 'Project Guide', link: '/en/overview/' },
+            { text: 'Reader Map', link: '/en/overview/reader-map' },
             { text: 'Getting Started', link: '/en/overview/getting-started' },
           ],
         },
@@ -46,6 +49,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
           text: 'Architecture',
           items: [
             { text: 'Architecture Overview', link: '/en/architecture/' },
+            { text: 'System Blueprint', link: '/en/architecture/system-blueprint' },
             { text: 'Kernel Ladder', link: '/en/architecture/kernel-ladder' },
             { text: 'Memory Flow', link: '/en/architecture/memory-flow' },
             { text: 'Tensor Core Path', link: '/en/architecture/tensor-core-path' },
@@ -75,6 +79,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
           text: 'Validation',
           items: [
             { text: 'Validation Overview', link: '/en/validation/' },
+            { text: 'Performance Model', link: '/en/validation/performance-model' },
             { text: 'Correctness Policy', link: '/en/validation/correctness-policy' },
             { text: 'Benchmark Scope', link: '/en/validation/benchmark-scope' },
             { text: 'Reproducibility', link: '/en/validation/reproducibility' },
@@ -87,6 +92,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
           text: 'Research',
           items: [
             { text: 'Research Desk', link: '/en/research/' },
+            { text: 'Reference Map', link: '/en/research/reference-map' },
             { text: 'Curated References', link: '/en/research/references' },
             { text: 'Related Projects', link: '/en/research/related-projects' },
             { text: 'Evolution Notes', link: '/en/research/evolution' },
@@ -105,6 +111,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
         text: '导读',
         items: [
           { text: '项目导读', link: '/zh/overview/' },
+          { text: '阅读地图', link: '/zh/overview/reader-map' },
           { text: '快速上手', link: '/zh/overview/getting-started' },
         ],
       },
@@ -114,6 +121,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
         text: '架构',
         items: [
           { text: '架构概述', link: '/zh/architecture/' },
+          { text: '系统蓝图', link: '/zh/architecture/system-blueprint' },
           { text: 'Kernel 阶梯', link: '/zh/architecture/kernel-ladder' },
           { text: 'Memory Flow', link: '/zh/architecture/memory-flow' },
           { text: 'Tensor Core 路径', link: '/zh/architecture/tensor-core-path' },
@@ -143,6 +151,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
         text: '验证',
         items: [
           { text: '验证概览', link: '/zh/validation/' },
+          { text: '性能模型', link: '/zh/validation/performance-model' },
           { text: '正确性策略', link: '/zh/validation/correctness-policy' },
           { text: 'Benchmark 范围', link: '/zh/validation/benchmark-scope' },
           { text: '可复现性', link: '/zh/validation/reproducibility' },
@@ -155,6 +164,7 @@ function localeSidebar(prefix: '/en/' | '/zh/') {
         text: '研究',
         items: [
           { text: '研究总览', link: '/zh/research/' },
+          { text: '参考文献地图', link: '/zh/research/reference-map' },
           { text: '参考资料清单', link: '/zh/research/references' },
           { text: '相关开源项目', link: '/zh/research/related-projects' },
           { text: '演进思考', link: '/zh/research/evolution' },
@@ -175,9 +185,9 @@ export default withMermaid(defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#76b900' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/sgemm-optimization/favicon.svg' }],
-    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/sgemm-optimization/favicon-32x32.png' }],
-    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/sgemm-optimization/apple-touch-icon.png' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: asset('favicon.svg') }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: asset('favicon-32x32.png') }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: asset('apple-touch-icon.png') }],
   ],
 
   ignoreDeadLinks: [
