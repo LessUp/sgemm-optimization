@@ -9,6 +9,8 @@ const base = rawBase
     : `/${rawBase}/`
   : '/sgemm-optimization/'
 
+const asset = (relativePath: string) => `${base}${relativePath.replace(/^\/+/, '')}`
+
 function localeNav(prefix: '/en/' | '/zh/') {
   if (prefix === '/en/') {
     return [
@@ -183,9 +185,9 @@ export default withMermaid(defineConfig({
   head: [
     ['meta', { name: 'theme-color', content: '#76b900' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/sgemm-optimization/favicon.svg' }],
-    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/sgemm-optimization/favicon-32x32.png' }],
-    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: '/sgemm-optimization/apple-touch-icon.png' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: asset('favicon.svg') }],
+    ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: asset('favicon-32x32.png') }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: asset('apple-touch-icon.png') }],
   ],
 
   ignoreDeadLinks: [

@@ -16,7 +16,7 @@
   <text x="476" y="232" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Shared-memory reuse</text>
 
   <rect x="444" y="264" width="312" height="72" rx="12" fill="#293A1A"/>
-  <text x="476" y="295" fill="#DEFA A8" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">③ Bank-Free FP32</text>
+  <text x="476" y="295" fill="#DEFAA8" font-size="14" font-family="Inter,ui-sans-serif,sans-serif" font-weight="600">③ Bank-Free FP32</text>
   <text x="476" y="316" fill="#7FA050" font-size="12" font-family="Inter,ui-sans-serif,sans-serif">Padding eliminates bank conflicts</text>
 
   <rect x="444" y="348" width="312" height="72" rx="12" fill="#2F431B"/>

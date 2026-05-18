@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -47,11 +47,14 @@ for (const locale of ['en', 'zh']) {
   test(`${locale} curated figures use the shared theme-aware component`, () => {
     const homepage = readFileSync(path.join(docsRoot, locale, 'index.md'), 'utf8')
     const architecture = readFileSync(path.join(docsRoot, locale, 'architecture', 'index.md'), 'utf8')
+    const blueprint = readFileSync(path.join(docsRoot, locale, 'architecture', 'system-blueprint.md'), 'utf8')
 
     assert.equal(homepage.includes('<ThemedFigure'), true)
     assert.equal(architecture.includes('<ThemedFigure'), true)
+    assert.equal(blueprint.includes('<ThemedFigure'), true)
     assert.equal(homepage.includes('<picture>'), false)
     assert.equal(architecture.includes('<picture>'), false)
+    assert.equal(blueprint.includes('<picture>'), false)
   })
 }
 
@@ -64,4 +67,16 @@ test('whitepaper figure assets exist for both light and dark themes', () => {
 
 test('shared theme-aware figure component exists', () => {
   assert.equal(existsSync(path.join(docsRoot, '.vitepress', 'components', 'ThemedFigure.vue')), true)
+})
+
+test('figure SVGs do not contain malformed spaced hex colors', () => {
+  const figureDir = path.join(docsRoot, 'public', 'figures')
+
+  for (const file of readdirSync(figureDir)) {
+    if (!file.endsWith('.svg'))
+      continue
+
+    const svg = readFileSync(path.join(figureDir, file), 'utf8')
+    assert.equal(/#[0-9A-Fa-f]{2,}\s+[0-9A-Fa-f]+/.test(svg), false, `${file} contains a malformed hex color`)
+  }
 })

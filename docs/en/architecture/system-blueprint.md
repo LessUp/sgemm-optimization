@@ -18,14 +18,17 @@ This page is a full component-level blueprint of the SGEMM optimization system. 
 
 | Component | Role | Constraints |
 |---|---|---|
-| `main.cu` entry | Parses arguments, selects kernel variant, routes to benchmarking or correctness check | Must not hard-code a variant; selection is runtime |
-| `kernels/sgemm_naive.cuh` | Baseline FP32, one thread per output element | Establishes the cost model; no shared memory |
-| `kernels/sgemm_tiled.cuh` | Tiled FP32 with shared-memory staging | Tile size is a compile-time template parameter |
-| `kernels/sgemm_bank_free.cuh` | Tiled FP32 with padding to eliminate bank conflicts | Padding is the only structural difference from tiled |
-| `kernels/sgemm_double_buffer.cuh` | Overlapped staging and compute using double buffering | Requires at least two staging buffers in shared memory |
-| `kernels/sgemm_tensor_core.cuh` | WMMA-based computation with FP32 entry path | Guarded by device capability and shape divisibility |
-| `utils/cuda_check.h` | RAII-based error propagation for CUDA API and kernel calls | Throws `std::runtime_error` on failure; no silent returns |
-| `utils/matrix.h` | Host-side matrix initialization and reference computation | Row-major layout; reference uses CPU BLAS or naive FP64 loop |
+| `src/main.cu` | Parses arguments, delegates to `CliParser` and `BenchmarkRunner` | Must keep one runtime-controlled entry path |
+| `src/cli_parser.cuh` | Maps CLI flags to benchmark/verification modes | Shape labels and mode switches stay centralized |
+| `src/benchmark_runner.cuh` | Routes each configured run through benchmarking and reporting | Shared host orchestration keeps cross-kernel comparisons consistent |
+| `src/kernels/naive_sgemm.cuh` | Baseline FP32, one thread per output element | Establishes the cost model; no shared memory |
+| `src/kernels/tiled_sgemm.cuh` | Tiled FP32 with shared-memory staging | Tile size is a compile-time template parameter |
+| `src/kernels/bank_conflict_free_sgemm.cuh` | Tiled FP32 with padding to eliminate bank conflicts | Padding is the only structural difference from tiled |
+| `src/kernels/double_buffer_sgemm.cuh` | Overlapped staging and compute using double buffering | Requires two staging buffers in shared memory |
+| `src/kernels/tensor_core_sgemm.cuh` | WMMA-based computation for aligned Tensor Core shapes | Guarded by device capability and shape divisibility |
+| `src/kernels/tensor_core_fallback.cuh` | Safe mixed-precision entry and fallback logic | Must preserve FP32 correctness on unsupported shapes |
+| `src/utils/cuda_utils.cuh` | CUDA error macros, RAII device memory, device metadata | Uses `CUDA_CHECK` / `CUBLAS_CHECK`; no silent failure path |
+| `src/utils/verify.cuh` | cuBLAS-backed oracle verification and tolerance policy | Reference is computed against cuBLAS on the active GPU |
 | `tests/test_sgemm.cu` | cuBLAS-backed oracle correctness suite | Runs only on GPU; not included in hosted CI |
 | Docs site | Narrative layer — architecture, academy, validation, research | VitePress with bilingual routes; no runtime GPU dependency |
 
@@ -56,7 +59,7 @@ Correctness check against cuBLAS oracle (local GPU only)
 
 ### RAII error handling
 
-All CUDA API calls and kernel launches are wrapped in `cudaCheck()`. This ensures that any failure path immediately terminates with a traceable error rather than silently propagating incorrect results through the pipeline.
+All CUDA API calls and kernel launches are wrapped in `CUDA_CHECK`, and cuBLAS calls are wrapped in `CUBLAS_CHECK`. This ensures that any failure path immediately terminates with a traceable error rather than silently propagating incorrect results through the pipeline.
 
 **Consequence:** Test code cannot accidentally swallow an error and then compare incorrect output against the cuBLAS oracle, which would make a failing kernel appear to pass.
 
@@ -85,7 +88,7 @@ The blueprint explicitly separates compile-time-verifiable invariants from runti
 | Invariant class | Verifiable where |
 |---|---|
 | File structure, docs, OpenSpec alignment | Hosted CI |
-| CUDA code compiles without warning | Hosted CI (compile-only) |
+| CUDA code compiles and runs on a real CUDA toolchain | Local GPU-capable machine |
 | Correctness under cuBLAS oracle | Local GPU run |
 | Benchmark numbers and speedup ratios | Local GPU run with named hardware |
 

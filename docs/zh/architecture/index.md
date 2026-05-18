@@ -22,14 +22,17 @@ title: 架构概述
 
 | 组件 | 层次 | 主要职责 |
 |------|------|----------|
-| `src/main.cu` | 驱动层 | 分发、尺寸验证、计时框架、输出 |
-| `src/kernels/naive.cuh` | Kernel | FP32 基线，承受完整全局内存加载代价 |
-| `src/kernels/tiled.cuh` | Kernel | 协作式 tile 加载入共享内存；SMEM 复用 |
-| `src/kernels/bank_free.cuh` | Kernel | Padding 消除共享内存 bank 冲突 |
-| `src/kernels/double_buffer.cuh` | Kernel | 异步预取将下一 tile 的 staging 与当前计算重叠 |
-| `src/kernels/tensor_core.cuh` | Kernel | 在硬件对齐的 tile 上执行 WMMA fragment 累加 |
-| `src/utils/cuda_check.cuh` | 工具 | CUDA 错误检查与 RAII 设备资源守卫 |
-| `tests/test_sgemm.cu` | 测试 | 在参考误差容限内验证正确性 |
+| `src/main.cu` | 驱动层 | 程序入口，负责把 CLI 解析和 benchmark 编排接起来 |
+| `src/cli_parser.cuh` | 驱动支撑 | 把模式标志、shape 和运行参数解析成 `BenchmarkConfig` |
+| `src/benchmark_runner.cuh` | 驱动支撑 | 用同一个二进制执行 benchmark 与 verification 流程 |
+| `src/kernels/naive_sgemm.cuh` | Kernel | FP32 基线，承受完整全局内存加载代价 |
+| `src/kernels/tiled_sgemm.cuh` | Kernel | 协作式 tile 加载入共享内存；SMEM 复用 |
+| `src/kernels/bank_conflict_free_sgemm.cuh` | Kernel | Padding 消除共享内存 bank 冲突 |
+| `src/kernels/double_buffer_sgemm.cuh` | Kernel | 将下一 tile 的 staging 与当前计算重叠 |
+| `src/kernels/tensor_core_sgemm.cuh` | Kernel | 在硬件对齐的 tile 上执行 WMMA fragment 累加 |
+| `src/utils/cuda_utils.cuh` | 工具 | CUDA 错误宏、RAII 设备内存封装与设备信息 |
+| `src/utils/verify.cuh` | 工具 | 基于 cuBLAS 的正确性校验与容差策略 |
+| `tests/test_sgemm.cu` | 测试 | 基于 GPU 和 cuBLAS 参考的正确性测试 |
 
 ## 内存层级数据流
 
@@ -88,7 +91,7 @@ Memory Flow 页面将以具体的地址、stride、tile 维度和加载模式呈
 
 | 主张 | 本地 CUDA GPU | 托管 CI |
 |------|---------------|---------|
-| 编译成功 | ✓ | ✓（仅结构检查）|
+| 编译成功 | ✓ | ✗ |
 | 输出正确性 vs. cuBLAS | ✓ | ✗ |
 | Benchmark 性能结论 | ✓ | ✗ |
 | 仓库结构与文档 | ✓ | ✓ |

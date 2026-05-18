@@ -22,14 +22,17 @@ SGEMM optimization on modern NVIDIA hardware is a sequence of bottleneck-class m
 
 | Component | Layer | Primary responsibility |
 |-----------|-------|------------------------|
-| `src/main.cu` | Driver | Dispatch, size validation, timing harness, output |
-| `src/kernels/naive.cuh` | Kernel | FP32 baseline with full global-memory load cost |
-| `src/kernels/tiled.cuh` | Kernel | Cooperative tile load into shared memory; SMEM reuse |
-| `src/kernels/bank_free.cuh` | Kernel | Padding eliminates shared-memory bank conflicts |
-| `src/kernels/double_buffer.cuh` | Kernel | Async prefetch overlaps next-tile staging with active compute |
-| `src/kernels/tensor_core.cuh` | Kernel | WMMA fragment accumulation on hardware-aligned tiles |
-| `src/utils/cuda_check.cuh` | Utility | CUDA error checking and RAII device-resource guards |
-| `tests/test_sgemm.cu` | Test | Correctness verification under reference tolerance |
+| `src/main.cu` | Driver | Entry point that delegates CLI parsing and benchmark orchestration |
+| `src/cli_parser.cuh` | Driver support | Parses mode flags, shapes, and runtime options into `BenchmarkConfig` |
+| `src/benchmark_runner.cuh` | Driver support | Runs configured benchmark and verification flows through one binary |
+| `src/kernels/naive_sgemm.cuh` | Kernel | FP32 baseline with full global-memory load cost |
+| `src/kernels/tiled_sgemm.cuh` | Kernel | Cooperative tile load into shared memory; SMEM reuse |
+| `src/kernels/bank_conflict_free_sgemm.cuh` | Kernel | Padding eliminates shared-memory bank conflicts |
+| `src/kernels/double_buffer_sgemm.cuh` | Kernel | Overlaps next-tile staging with active compute |
+| `src/kernels/tensor_core_sgemm.cuh` | Kernel | WMMA fragment accumulation on hardware-aligned tiles |
+| `src/utils/cuda_utils.cuh` | Utility | CUDA error macros, RAII device-memory wrappers, device metadata |
+| `src/utils/verify.cuh` | Utility | cuBLAS-backed correctness verification and tolerance policy |
+| `tests/test_sgemm.cu` | Test | GPU-side correctness verification under cuBLAS reference tolerance |
 
 ## Memory-hierarchy data flow
 
@@ -88,7 +91,7 @@ The project separates what two different environments can prove:
 
 | Claim | Local CUDA GPU | Hosted CI |
 |-------|----------------|-----------|
-| Compilation succeeds | ✓ | ✓ (structure check only) |
+| Compilation succeeds | ✓ | ✗ |
 | Output correctness vs. cuBLAS | ✓ | ✗ |
 | Benchmark performance claims | ✓ | ✗ |
 | Repository structure and docs | ✓ | ✓ |
