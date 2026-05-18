@@ -24,13 +24,12 @@ title: SGEMM 白皮书
         <span class="home-chip">中英镜像路由</span>
       </div>
     </div>
-    <div class="figure-frame">
-      <picture>
-        <source srcset="/figures/whitepaper-system-dark.svg" media="(prefers-color-scheme: dark)" />
-        <img class="hero-figure" src="/figures/whitepaper-system-light.svg" alt="连接项目导读、架构、学院、验证与研究资料台的 SGEMM 白皮书总图。" />
-      </picture>
-      <p class="figure-note">公共叙事被刻意组织成技术论证链：先给论点，再给架构、课程、证据，最后给技术谱系。</p>
-    </div>
+    <ThemedFigure
+      light="/figures/whitepaper-system-light.svg"
+      dark="/figures/whitepaper-system-dark.svg"
+      alt="连接项目导读、架构、学院、验证与研究资料台的 SGEMM 白皮书总图。"
+      caption="公共叙事被刻意组织成技术论证链：先给论点，再给架构、课程、证据，最后给技术谱系。"
+    />
   </div>
 
   <div class="thesis-grid">
@@ -101,13 +100,13 @@ title: SGEMM 白皮书
 
 ## 用受控图示表达架构主线
 
-<div class="figure-frame figure-frame-wide">
-  <picture>
-    <source srcset="/figures/kernel-ladder-dark.svg" media="(prefers-color-scheme: dark)" />
-    <img class="hero-figure" src="/figures/kernel-ladder-light.svg" alt="从 naive FP32 到 tiled、bank-free、double-buffer、Tensor Core WMMA 的 kernel 阶梯，并联接架构、验证和研究三条辅助轨。" />
-  </picture>
-  <p class="figure-note">这条阶梯不是奖杯陈列架，而是一张瓶颈转移、接口约束与证据要求的地图。</p>
-</div>
+<ThemedFigure
+  :wide="true"
+  light="/figures/kernel-ladder-light.svg"
+  dark="/figures/kernel-ladder-dark.svg"
+  alt="从 naive FP32 到 tiled、bank-free、double-buffer、Tensor Core WMMA 的 kernel 阶梯，并联接架构、验证和研究三条辅助轨。"
+  caption="这条阶梯不是奖杯陈列架，而是一张瓶颈转移、接口约束与证据要求的地图。"
+/>
 
 ## 为什么这套呈现方式更强
 

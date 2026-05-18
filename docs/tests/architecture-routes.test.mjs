@@ -36,6 +36,23 @@ for (const locale of ['en', 'zh']) {
     assert.equal(homepage.includes('./academy/'), true)
     assert.equal(homepage.includes('./research/'), true)
   })
+
+  test(`${locale} whitepaper route additions exist`, () => {
+    assert.equal(existsSync(path.join(docsRoot, locale, 'overview', 'reader-map.md')), true)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'architecture', 'system-blueprint.md')), true)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'validation', 'performance-model.md')), true)
+    assert.equal(existsSync(path.join(docsRoot, locale, 'research', 'reference-map.md')), true)
+  })
+
+  test(`${locale} curated figures use the shared theme-aware component`, () => {
+    const homepage = readFileSync(path.join(docsRoot, locale, 'index.md'), 'utf8')
+    const architecture = readFileSync(path.join(docsRoot, locale, 'architecture', 'index.md'), 'utf8')
+
+    assert.equal(homepage.includes('<ThemedFigure'), true)
+    assert.equal(architecture.includes('<ThemedFigure'), true)
+    assert.equal(homepage.includes('<picture>'), false)
+    assert.equal(architecture.includes('<picture>'), false)
+  })
 }
 
 test('whitepaper figure assets exist for both light and dark themes', () => {
@@ -43,4 +60,8 @@ test('whitepaper figure assets exist for both light and dark themes', () => {
   assert.equal(existsSync(path.join(docsRoot, 'public', 'figures', 'whitepaper-system-dark.svg')), true)
   assert.equal(existsSync(path.join(docsRoot, 'public', 'figures', 'kernel-ladder-light.svg')), true)
   assert.equal(existsSync(path.join(docsRoot, 'public', 'figures', 'kernel-ladder-dark.svg')), true)
+})
+
+test('shared theme-aware figure component exists', () => {
+  assert.equal(existsSync(path.join(docsRoot, '.vitepress', 'components', 'ThemedFigure.vue')), true)
 })
