@@ -60,7 +60,6 @@ void computeReference(cublasHandle_t handle, const float *d_A, const float *d_B,
     CUBLAS_CHECK(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K,
                              &beta, d_C, N));
 }
-} // namespace
 
 class ErrorDetectionTest : public ::testing::Test {
   protected:

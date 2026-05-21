@@ -65,17 +65,28 @@ class SGEMMBenchmark {
         result.N = N;
 
         // 初始化数据
-        std::vector<float> h_A(M * K), h_B(K * N), h_C(M * N), h_C_ref(M * N);
-        DeviceMemory<float> d_A(M * K);
-        DeviceMemory<float> d_B(K * N);
-        DeviceMemory<float> d_C(M * N);
-        DeviceMemory<float> d_C_ref(M * N);
+        // 安全计算矩阵大小，避免整数溢出
+        size_t size_A = static_cast<size_t>(M) * K;
+        size_t size_B = static_cast<size_t>(K) * N;
+        size_t size_C = static_cast<size_t>(M) * N;
+
+        // 检查是否超过 size_t 范围（实际上是检查是否合理）
+        if (size_A > static_cast<size_t>(INT_MAX) || size_B > static_cast<size_t>(INT_MAX) ||
+            size_C > static_cast<size_t>(INT_MAX)) {
+            throw CudaError("Matrix dimensions too large for benchmark");
+        }
+
+        std::vector<float> h_A(size_A), h_B(size_B), h_C(size_C), h_C_ref(size_C);
+        DeviceMemory<float> d_A(size_A);
+        DeviceMemory<float> d_B(size_B);
+        DeviceMemory<float> d_C(size_C);
+        DeviceMemory<float> d_C_ref(size_C);
 
         initRandomMatrix(h_A.data(), M, K, -1.0f, 1.0f, 42);
         initRandomMatrix(h_B.data(), K, N, -1.0f, 1.0f, 123);
 
-        d_A.copyFromHost(h_A.data(), M * K);
-        d_B.copyFromHost(h_B.data(), K * N);
+        d_A.copyFromHost(h_A.data(), size_A);
+        d_B.copyFromHost(h_B.data(), size_B);
 
         // 计算参考结果
         float alpha = 1.0f, beta = 0.0f;
@@ -94,8 +105,8 @@ class SGEMMBenchmark {
         result.efficiency = calculateEfficiency(result.gflops, getTheoreticalPeakGflops());
 
         // 验证正确性
-        d_C.copyToHost(h_C.data(), M * N);
-        d_C_ref.copyToHost(h_C_ref.data(), M * N);
+        d_C.copyToHost(h_C.data(), size_C);
+        d_C_ref.copyToHost(h_C_ref.data(), size_C);
 
         VerifyResult verify_result = compareMatrices(h_C.data(), h_C_ref.data(), M, N, tolerance);
         result.correct = verify_result.passed;
@@ -115,16 +126,27 @@ class SGEMMBenchmark {
         result.K = K;
         result.N = N;
 
-        std::vector<float> h_A(M * K), h_B(K * N);
-        DeviceMemory<float> d_A(M * K);
-        DeviceMemory<float> d_B(K * N);
-        DeviceMemory<float> d_C(M * N);
+        // 安全计算矩阵大小，避免整数溢出
+        size_t size_A = static_cast<size_t>(M) * K;
+        size_t size_B = static_cast<size_t>(K) * N;
+        size_t size_C = static_cast<size_t>(M) * N;
+
+        // 检查是否超过 size_t 范围
+        if (size_A > static_cast<size_t>(INT_MAX) || size_B > static_cast<size_t>(INT_MAX) ||
+            size_C > static_cast<size_t>(INT_MAX)) {
+            throw CudaError("Matrix dimensions too large for benchmark");
+        }
+
+        std::vector<float> h_A(size_A), h_B(size_B);
+        DeviceMemory<float> d_A(size_A);
+        DeviceMemory<float> d_B(size_B);
+        DeviceMemory<float> d_C(size_C);
 
         initRandomMatrix(h_A.data(), M, K, -1.0f, 1.0f, 42);
         initRandomMatrix(h_B.data(), K, N, -1.0f, 1.0f, 123);
 
-        d_A.copyFromHost(h_A.data(), M * K);
-        d_B.copyFromHost(h_B.data(), K * N);
+        d_A.copyFromHost(h_A.data(), size_A);
+        d_B.copyFromHost(h_B.data(), size_B);
 
         float alpha = 1.0f, beta = 0.0f;
 

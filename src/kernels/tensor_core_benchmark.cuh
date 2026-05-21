@@ -79,8 +79,19 @@ runTensorCoreComputeOnlyBenchmark(cublasHandle_t cublas_handle, int M, int K, in
     int gridSizeA = safeGridSize(static_cast<size_t>(M) * K, blockSize);
     int gridSizeB = safeGridSize(static_cast<size_t>(K) * N, blockSize);
 
-    float_to_half_kernel<<<gridSizeA, blockSize>>>(d_A.get(), d_A_fp16.get(), M * K);
-    float_to_half_kernel<<<gridSizeB, blockSize>>>(d_B.get(), d_B_fp16.get(), K * N);
+    size_t num_A = static_cast<size_t>(M) * K;
+    size_t num_B = static_cast<size_t>(K) * N;
+
+    // 检查矩阵元素数量是否超过 int 最大值
+    if (num_A > static_cast<size_t>(INT_MAX)) {
+        throw CudaError("Matrix A size overflow: too many elements for int parameter");
+    }
+    if (num_B > static_cast<size_t>(INT_MAX)) {
+        throw CudaError("Matrix B size overflow: too many elements for int parameter");
+    }
+
+    float_to_half_kernel<<<gridSizeA, blockSize>>>(d_A.get(), d_A_fp16.get(), static_cast<int>(num_A));
+    float_to_half_kernel<<<gridSizeB, blockSize>>>(d_B.get(), d_B_fp16.get(), static_cast<int>(num_B));
     CUDA_CHECK(cudaGetLastError());
     CUDA_CHECK(cudaDeviceSynchronize());
 

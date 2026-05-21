@@ -258,6 +258,14 @@ inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *
     int gridSizeA = safeGridSize(num_A, blockSize);
     int gridSizeB = safeGridSize(num_B, blockSize);
 
+    // 检查矩阵元素数量是否超过 int 最大值
+    if (num_A > static_cast<size_t>(INT_MAX)) {
+        throw CudaError("Matrix A size overflow: too many elements for int parameter");
+    }
+    if (num_B > static_cast<size_t>(INT_MAX)) {
+        throw CudaError("Matrix B size overflow: too many elements for int parameter");
+    }
+
     float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
                                                               static_cast<int>(num_A));
     float_to_half_kernel<<<gridSizeB, blockSize, 0, stream>>>(B, d_B_fp16.get(),
