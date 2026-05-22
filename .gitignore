@@ -60,3 +60,6 @@ _bmad-output/
 
 # Git worktrees
 .worktrees/
+
+# Claude Code plans (AI-generated planning drafts)
+.claude/plans/
