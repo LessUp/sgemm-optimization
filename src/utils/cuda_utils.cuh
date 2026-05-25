@@ -168,8 +168,30 @@ inline void initRandomMatrix(float *data, int rows, int cols, float min_val = -1
 // Utility Functions
 // ============================================================================
 
+inline bool cudaDeviceAvailable() {
+    int device_count = 0;
+    cudaError_t status = cudaGetDeviceCount(&device_count);
+    if (status == cudaSuccess) {
+        return device_count > 0;
+    }
+
+    if (status == cudaErrorNoDevice || status == cudaErrorInsufficientDriver ||
+        status == cudaErrorInitializationError || status == cudaErrorSystemDriverMismatch) {
+        cudaGetLastError();
+        return false;
+    }
+
+    cudaGetLastError();
+    return false;
+}
+
 // Get GPU device properties
 inline void printGPUInfo() {
+    if (!cudaDeviceAvailable()) {
+        printf("GPU Device: unavailable (no CUDA-capable device detected)\n\n");
+        return;
+    }
+
     int device;
     CUDA_CHECK(cudaGetDevice(&device));
 

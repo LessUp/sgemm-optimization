@@ -13,6 +13,7 @@
 #include <tuple>
 #include <vector>
 
+#include "gtest_cuda_environment.cuh"
 #include "kernels/bank_conflict_free_sgemm.cuh"
 #include "kernels/double_buffer_sgemm.cuh"
 #include "kernels/naive_sgemm.cuh"
@@ -333,15 +334,23 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
                                        << " with dimensions " << M << "x" << K << "x" << N;
         };
 
-        testKernel("Naive", launch_naive_sgemm<>);
-        testKernel("Tiled", launch_tiled_sgemm<32>);
-        testKernel("BankConflictFree", launch_bank_conflict_free_sgemm<32>);
-        testKernel("DoubleBuffer", launch_double_buffer_sgemm<32>);
+        testKernel("Naive", [](const float *A, const float *B, float *C, int m, int k, int n) {
+            launch_naive_sgemm<>(A, B, C, m, k, n);
+        });
+        testKernel("Tiled", [](const float *A, const float *B, float *C, int m, int k, int n) {
+            launch_tiled_sgemm<32>(A, B, C, m, k, n);
+        });
+        testKernel("BankConflictFree",
+                   [](const float *A, const float *B, float *C, int m, int k, int n) {
+                       launch_bank_conflict_free_sgemm<32>(A, B, C, m, k, n);
+                   });
+        testKernel("DoubleBuffer",
+                   [](const float *A, const float *B, float *C, int m, int k, int n) {
+                       launch_double_buffer_sgemm<32>(A, B, C, m, k, n);
+                   });
     }
 }
 
 int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    printGPUInfo();
-    return RUN_ALL_TESTS();
+    return runCudaAwareTests(argc, argv);
 }
