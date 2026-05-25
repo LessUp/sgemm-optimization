@@ -10,9 +10,12 @@
 
 #include <cuda_runtime.h>
 #include <gtest/gtest.h>
+#include <cmath>
+#include <limits>
 #include <memory>
 #include <vector>
 
+#include "gtest_cuda_environment.cuh"
 #include "utils/cuda_utils.cuh"
 #include "utils/verify.cuh"
 
@@ -250,11 +253,11 @@ TEST_F(SGEMMVerifierTest, VerifyPassesForIdenticalMatrices) {
 }
 
 TEST_F(SGEMMVerifierTest, VerifyFailsForDifferentMatrices) {
-    std::vector<float> h_different(M_ * N, 1e10f); // 显著不同的值
-    DeviceMemory<float> d_different(M_ * N);
-    d_different.copyFromHost(h_different.data(), M_ * N);
+    std::vector<float> h_different(M_ * N_, 1e10f); // 显著不同的值
+    DeviceMemory<float> d_different(M_ * N_);
+    d_different.copyFromHost(h_different.data(), M_ * N_);
 
-    DeviceMemory<float> d_zeros(M_ * N);
+    DeviceMemory<float> d_zeros(M_ * N_);
     d_zeros.zero();
 
     VerifyResult result = verifier_.verifyDevice(d_different.get(), d_zeros.get(), M_, N_);
@@ -265,26 +268,26 @@ TEST_F(SGEMMVerifierTest, VerifyFailsForDifferentMatrices) {
 
 TEST_F(SGEMMVerifierTest, VerifyWithCustomTolerance) {
     // 创建两个略有差异的矩阵
-    std::vector<float> h_test(M_ * N, 1.0f);
-    std::vector<float> h_ref(M_ * N, 1.0f);
+    std::vector<float> h_test(M_ * N_, 1.0f);
+    std::vector<float> h_ref(M_ * N_, 1.0f);
     h_test[0] = 1.001f; // 0.1% 差异
 
     VerifyResult result_strict =
-        compareMatrices(h_test.data(), h_ref.data(), M_, N, {1e-4f, 1e-5f}); // 更严格的容差
+        compareMatrices(h_test.data(), h_ref.data(), M_, N_, {1e-4f, 1e-5f}); // 更严格的容差
     EXPECT_FALSE(result_strict.passed);
 
     VerifyResult result_relaxed =
-        compareMatrices(h_test.data(), h_ref.data(), M_, N, {1e-2f, 1e-2f}); // 更宽松的容差
+        compareMatrices(h_test.data(), h_ref.data(), M_, N_, {1e-2f, 1e-2f}); // 更宽松的容差
     EXPECT_TRUE(result_relaxed.passed);
 }
 
 TEST_F(SGEMMVerifierTest, VerifyHandlesNanCorrectly) {
-    std::vector<float> h_with_nan(M_ * N, 1.0f);
+    std::vector<float> h_with_nan(M_ * N_, 1.0f);
     h_with_nan[0] = std::nanf("");
 
-    std::vector<float> h_ref(M_ * N, 1.0f);
+    std::vector<float> h_ref(M_ * N_, 1.0f);
 
-    VerifyResult result = compareMatrices(h_with_nan.data(), h_ref.data(), M_, N);
+    VerifyResult result = compareMatrices(h_with_nan.data(), h_ref.data(), M_, N_);
 
     EXPECT_FALSE(result.passed);
     EXPECT_GT(result.error_count, 0);
@@ -292,12 +295,12 @@ TEST_F(SGEMMVerifierTest, VerifyHandlesNanCorrectly) {
 }
 
 TEST_F(SGEMMVerifierTest, VerifyHandlesInfCorrectly) {
-    std::vector<float> h_with_inf(M_ * N, 1.0f);
+    std::vector<float> h_with_inf(M_ * N_, 1.0f);
     h_with_inf[0] = std::numeric_limits<float>::infinity();
 
-    std::vector<float> h_ref(M_ * N, 1.0f);
+    std::vector<float> h_ref(M_ * N_, 1.0f);
 
-    VerifyResult result = compareMatrices(h_with_inf.data(), h_ref.data(), M_, N);
+    VerifyResult result = compareMatrices(h_with_inf.data(), h_ref.data(), M_, N_);
 
     EXPECT_FALSE(result.passed);
     EXPECT_GT(result.error_count, 0);
@@ -400,7 +403,5 @@ TEST_F(UtilsIntegrationTest, FullWorkflowWithDeviceMemory) {
 }
 
 int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    printGPUInfo();
-    return RUN_ALL_TESTS();
+    return runCudaAwareTests(argc, argv);
 }

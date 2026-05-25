@@ -60,8 +60,8 @@ inline float getTheoreticalPeakGflops() {
     DeviceInfoCache &cache = DeviceInfoCache::instance();
     const cudaDeviceProp &prop = cache.prop();
 
-    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
-    float peakGflops = prop.multiProcessorCount * cache.coresPerSM() * 2 * cache.clockGHz() * 1000;
+    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz)
+    float peakGflops = prop.multiProcessorCount * cache.coresPerSM() * 2 * cache.clockGHz();
 
     return peakGflops;
 }
