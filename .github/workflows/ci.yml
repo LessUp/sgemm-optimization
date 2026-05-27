@@ -1,5 +1,10 @@
 # Continuous Integration
-# Validates code formatting and CUDA compilation
+# Validates code formatting and CUDA compilation of all targets (benchmark + tests)
+#
+# Workflow separation:
+# - This workflow: formatting + CUDA compile-time checks (no GPU runtime)
+# - openspec-validation.yml: OpenSpec governance structure validation
+# - pages.yml: GitHub Pages buildability + Markdown formatting
 
 name: CI
 
@@ -56,12 +61,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
 
       - name: Build
-        run: cmake --build build --target sgemm_benchmark -j2
+        run: cmake --build build -j2
 
       - name: Info
         run: |
-          echo "✅ CUDA compilation successful"
+          echo "✅ CUDA compilation successful for all targets (benchmark + tests)"
           echo "ℹ️  GPU runtime tests require a CUDA-capable machine"
