@@ -233,6 +233,26 @@ export default withMermaid(defineConfig({
 
   vite: {
     plugins: [llmstxt()],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // Split mermaid and related dependencies into separate chunk
+            if (id.includes('mermaid') || id.includes('cytoscape')) {
+              return 'mermaid-vendor'
+            }
+            // Split search/fuse dependencies into separate chunk
+            if (id.includes('fuse') || id.includes('minisearch')) {
+              return 'search-vendor'
+            }
+            // Split katex/markdown-it math dependencies
+            if (id.includes('katex') || id.includes('markdown-it')) {
+              return 'markdown-vendor'
+            }
+          },
+        },
+      },
+    },
   },
 
   // Mermaid 配置 - 通过 withMermaid 传入
