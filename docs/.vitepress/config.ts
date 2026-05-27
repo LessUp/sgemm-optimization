@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
-import llmstxt from 'vitepress-plugin-llms'
 
 const rawBase = process.env.VITEPRESS_BASE
 const base = rawBase
@@ -229,10 +228,6 @@ export default withMermaid(defineConfig({
       message: 'MIT Licensed',
       copyright: 'Copyright © 2026 LessUp',
     },
-  },
-
-  vite: {
-    plugins: [llmstxt()],
   },
 
   // Mermaid 配置 - 通过 withMermaid 传入

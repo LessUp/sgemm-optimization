@@ -7,30 +7,18 @@ permalink: /CONTRIBUTING/
 
 # Contributing
 
-Focused improvements are welcome. For this repository, the goal is clarity, correctness, and compactness rather than feature sprawl.
+Keep changes tight, evidence-based, and easy to audit. This repository favors simplification over framework layering.
 
-## When to use OpenSpec
+## Working principles
 
-Use the OpenSpec workflow for any non-trivial change that affects:
-
-- repository structure
-- documentation roles or public positioning
-- validation rules or workflows
-- kernel behavior or engineering requirements
-
-Stable specs live under `openspec/specs/`. Active changes live under `openspec/changes/<change>/`.
-
-## Recommended flow
-
-1. `/opsx:explore` for scope and trade-offs
-2. `/opsx:propose "description"` for the actual change
-3. `/opsx:apply` to execute the task list
-4. `/review` before major deletions, workflow changes, or archive
-5. `/opsx:archive` once tasks, docs, specs, and validation all agree
+- Preserve the SGEMM kernel ladder as the core teaching surface.
+- Prefer one authoritative explanation over duplicated docs.
+- Remove stale or duplicate files instead of keeping placeholders.
+- Keep public docs, README, and workflows aligned when behavior changes.
 
 ## Branch model
 
-`master` is the only long-lived branch. Use a short-lived local branch or worktree only when a task needs isolation, then merge it back to `master` and delete the temporary branch/worktree before closeout. Do not introduce release/version branch automation for routine changes.
+`master` is the only long-lived branch. Temporary local branches are fine for isolation, but merge them back quickly and delete them once the work lands.
 
 ## Validation
 
@@ -38,22 +26,16 @@ Stable specs live under `openspec/specs/`. Active changes live under `openspec/c
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 ctest --test-dir build
-openspec validate --all
+npm --prefix docs test
+npm --prefix docs run build
 ```
 
-- Hosted CI covers formatting, CUDA compile validation, OpenSpec/repository checks, and Pages.
-- Runtime verification and benchmarking still require a local GPU-capable machine.
+- Hosted CI covers formatting and docs-site checks.
+- Local CUDA-capable machines remain the source of truth for building, runtime correctness, and benchmarking.
 
-## Code and doc expectations
+## Code and docs
 
-- Keep the existing kernel launcher interface shape intact unless the specs require a change.
-- Preserve RAII-based CUDA resource management and exception-style error handling.
-- Avoid adding generic governance boilerplate or duplicate docs.
-- If two files serve the same purpose, prefer one authoritative file over two partially-overlapping ones.
-
-## Tooling notes
-
-- CMake is the primary build path.
-- `clangd` plus `compile_commands.json` is the shared LSP baseline.
-- Use `gh` for repository metadata, Actions, issues, and PR operations.
-- Install the lightweight local hooks with `scripts/install-hooks.sh` if you want repository-specific guardrails before commit.
+- Keep kernel launcher interfaces consistent unless the behavior itself changes.
+- Preserve RAII-based CUDA resource management and explicit error reporting.
+- Use CMake as the supported build path.
+- Keep docs compact and repository-specific.

@@ -1,6 +1,3 @@
-# Continuous Integration
-# Validates code formatting
-
 name: CI
 
 on:
@@ -9,17 +6,11 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
-      - 'index.md'
-      - '_config.yml'
-      - 'openspec/**'
   pull_request:
     branches: [master]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
-      - 'index.md'
-      - '_config.yml'
-      - 'openspec/**'
   workflow_dispatch:
 
 permissions:

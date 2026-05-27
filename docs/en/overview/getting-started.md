@@ -43,7 +43,7 @@ ctest --test-dir build
 | Environment | What to run |
 |-------------|-------------|
 | Local GPU machine | benchmark, runtime verification, `ctest` |
-| Hosted CI | formatting, docs tests/build, OpenSpec/repository checks, Pages |
+| Hosted CI | formatting, docs tests/build, Pages |
 
 This split is intentional: GitHub-hosted runners validate repository health, while performance and CUDA runtime correctness still require a real GPU machine.
 

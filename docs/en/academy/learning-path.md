@@ -38,4 +38,4 @@ Follow the optimization ladder in the order the repository was designed to teach
 
 - Make sure your environment follows [Getting Started](/en/overview/getting-started)
 - Use the [Architecture](/en/architecture/) page if you want the repository-level map first
-- Keep the [Specifications Index](https://github.com/LessUp/sgemm-optimization/tree/master/openspec/specs/) nearby if you want the normative requirements
+- Keep [Getting Started](/en/overview/getting-started) and [Validation](/en/validation/) nearby if you want the repository-level constraints and evidence boundary

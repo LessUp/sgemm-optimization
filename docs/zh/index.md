@@ -46,7 +46,7 @@ title: SGEMM 白皮书
     <div class="signal-card">
       <div class="signal-title">信任模型</div>
       <div class="signal-value">CI 负责结构，GPU 负责证据</div>
-      <div class="signal-note">自动化负责仓库健康、Pages 构建与规范一致性，运行时正确性和性能仍然属于真实 GPU。</div>
+      <div class="signal-note">自动化负责仓库健康、文档检查与 Pages 构建，运行时正确性和性能仍然属于真实 GPU。</div>
     </div>
   </div>
 </div>
@@ -118,4 +118,4 @@ title: SGEMM 白皮书
 
 - 英文仓库摘要： [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)
 - 中文仓库入口： [README.zh-CN](https://github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md)
-- 稳定需求来源： [OpenSpec 项目呈现规范](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/project-presentation/spec.md)
+- 构建与验证说明： [CONTRIBUTING](https://github.com/LessUp/sgemm-optimization/blob/master/CONTRIBUTING.md)

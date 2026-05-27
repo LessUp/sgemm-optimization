@@ -16,15 +16,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 ### Fixed
 - Integer overflow risk in `verify.cuh` and `tensor_core_sgemm.cuh` for large matrices (use `size_t`)
 - Command-line parsing now uses `strtol()` with proper error handling instead of `atoi()`
+- Benchmark startup now fails cleanly instead of crashing when no CUDA device is available
+- Compute-only Tensor Core benchmark results now flow through the shared summary/export path
 
 ### Changed
-- Consolidated repository governance around `openspec/specs/`, updated agent instructions, and simplified documentation roles.
-- Reworked README, GitHub Pages content, and supporting docs into clearer repository-entry and learning surfaces.
-- Began pruning redundant release-history and engineering guidance artifacts in favor of fewer authoritative files.
+- Simplified repository maintenance around README, CONTRIBUTING, root workflows, and the docs site.
+- Reworked README, GitHub Pages content, and supporting docs into clearer SGEMM-focused entry surfaces.
+- Standardized on a single CMake build path and removed duplicate maintenance surfaces.
 
 ### Removed
 - Duplicate `LICENSE` file (kept `LICENSE.md` with third-party info)
-- Legacy `_bmad/` and `_bmad-output/` directories (replaced by OpenSpec)
+- OpenSpec, Claude-specific command/skill files, and other repository-resident AI workflow scaffolding
+- Duplicate Makefile-based build path and unused performance-baseline scaffolding
 
 ### Added
 - `.clang-tidy` configuration for static analysis

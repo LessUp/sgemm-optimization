@@ -29,7 +29,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI covers repository integrity, documentation, OpenSpec validation, and Pages buildability.
+Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI covers formatting plus docs-site checks and Pages buildability.
 
 ## GitHub Pages entry points
 
@@ -44,16 +44,16 @@ The README is the executive summary. The long-form technical narrative lives on 
 | Study the kernel ladder | [Academy](https://lessup.github.io/sgemm-optimization/en/academy/) |
 | Check what the evidence proves | [Validation](https://lessup.github.io/sgemm-optimization/en/validation/) |
 | Trace papers and related repos | [Research Desk](https://lessup.github.io/sgemm-optimization/en/research/) |
-| Read normative repository requirements | [OpenSpec Specs](openspec/specs/) |
+| Read contributor workflow and validation commands | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ## Validation boundary
 
 | Environment | What it can prove |
 |-------------|-------------------|
-| Hosted CI | Docs structure, route integrity, OpenSpec consistency, Pages buildability |
-| Local CUDA GPU | Runtime correctness, fallback behavior, benchmark performance |
+| Hosted CI | Formatting, docs structure, route integrity, Pages buildability |
+| Local CUDA GPU | CMake build validity, runtime correctness, fallback behavior, benchmark performance |
 
-This split is deliberate. CI keeps the repository coherent, but only local GPU execution can validate runtime behavior and speed claims.
+This split is deliberate. CI keeps the repository surface coherent, but only a local CUDA environment can validate the executable, runtime behavior, and speed claims.
 
 ## Source map
 
@@ -63,7 +63,6 @@ src/utils/     CUDA RAII, verification, benchmark helpers
 src/main.cu    benchmark CLI
 tests/         Google Test coverage against cuBLAS
 docs/          VitePress whitepaper and academy, mirrored under /en and /zh
-openspec/      stable specs and change workflow
 ```
 
 ## License

@@ -10,7 +10,6 @@ cmake-build-*/
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
-Makefile
 compile_commands.json
 CMakeUserPresets.json
 
@@ -51,15 +50,5 @@ docs/.vitepress/cache/
 .DS_Store
 Thumbs.db
 
-# BMad Method V6
-_bmad/
-_bmad-output/
-
-# oh-my-claudecode (local tool config)
-.omc/
-
 # Git worktrees
 .worktrees/
-
-# Claude Code plans (AI-generated planning drafts)
-.claude/plans/
