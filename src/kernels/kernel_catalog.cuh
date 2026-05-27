@@ -62,28 +62,28 @@ inline const std::vector<KernelCatalogEntry>& getKernelCatalog() {
     static const std::vector<KernelCatalogEntry> catalog = {
         // Standard FP32 kernels
         {
-            "Naive SGEMM",
+            "Naive",
             KernelType::Standard,
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_naive_sgemm<32>(A, B, C, M, K, N);
             }
         },
         {
-            "Tiled SGEMM",
+            "Tiled (32x32)",
             KernelType::Standard,
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_tiled_sgemm<32>(A, B, C, M, K, N);
             }
         },
         {
-            "Bank Conflict Free SGEMM",
+            "Bank Conflict Free",
             KernelType::Standard,
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N);
             }
         },
         {
-            "Double Buffer SGEMM",
+            "Double Buffer",
             KernelType::Standard,
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_double_buffer_sgemm<32>(A, B, C, M, K, N);
@@ -91,7 +91,7 @@ inline const std::vector<KernelCatalogEntry>& getKernelCatalog() {
         },
         // Tensor Core end-to-end kernel
         {
-            "Tensor Core SGEMM (end-to-end",
+            "Tensor Core (WMMA end-to-end)",
             KernelType::TensorCore,
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,

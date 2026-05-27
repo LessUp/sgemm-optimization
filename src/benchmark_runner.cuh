@@ -117,7 +117,14 @@ class BenchmarkRunner {
             
             VerifyTolerance tolerance = config_.settings.toleranceForKernel(entry.type);
             
-            printf("Running %s...\n", entry.name.c_str());
+            // Strip tile size annotation for console message (keep result name as-is)
+            std::string console_name = entry.name;
+            size_t paren_pos = console_name.find(" (");
+            if (paren_pos != std::string::npos) {
+                console_name = console_name.substr(0, paren_pos);
+            }
+            
+            printf("Running %s SGEMM...\n", console_name.c_str());
             benchmark.run(
                 entry.name,
                 entry.launcher,
@@ -155,8 +162,8 @@ class BenchmarkRunner {
             
             VerifyTolerance tolerance = config_.settings.toleranceForKernel(entry.type);
             
-            printf("Running %s, includes FP32->FP16 "
-                   "conversion/fallback)...\n", entry.name.c_str());
+            printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
+                   "conversion/fallback)...\n");
             benchmark.run(
                 entry.name,
                 entry.launcher,
