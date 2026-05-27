@@ -36,23 +36,30 @@ TEST(RunSettingsTest, ZeroWarmupIsValid) {
 // Verification Settings Tests
 // ============================================================================
 
-TEST(VerificationSettingsTest, DefaultIsStandardTolerance) {
+TEST(VerificationSettingsTest, DefaultTolerances) {
     VerificationSettings settings;
-    EXPECT_FLOAT_EQ(settings.tolerance.rtol, kStandardVerifyTolerance.rtol);
-    EXPECT_FLOAT_EQ(settings.tolerance.atol, kStandardVerifyTolerance.atol);
+    EXPECT_FLOAT_EQ(settings.standard_tolerance.rtol, kStandardVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(settings.standard_tolerance.atol, kStandardVerifyTolerance.atol);
+    EXPECT_FLOAT_EQ(settings.tensor_core_tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(settings.tensor_core_tolerance.atol, kTensorCoreVerifyTolerance.atol);
 }
 
-TEST(VerificationSettingsTest, TensorCoreToleranceOption) {
-    VerificationSettings settings = VerificationSettings::tensorCore();
-    EXPECT_FLOAT_EQ(settings.tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
-    EXPECT_FLOAT_EQ(settings.tolerance.atol, kTensorCoreVerifyTolerance.atol);
+TEST(VerificationSettingsTest, CustomStandardTolerance) {
+    VerificationSettings settings;
+    settings.standard_tolerance = {0.01f, 0.001f};
+    EXPECT_FLOAT_EQ(settings.standard_tolerance.rtol, 0.01f);
+    EXPECT_FLOAT_EQ(settings.standard_tolerance.atol, 0.001f);
+    // Tensor core tolerance should remain unchanged
+    EXPECT_FLOAT_EQ(settings.tensor_core_tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
 }
 
-TEST(VerificationSettingsTest, CustomTolerance) {
-    VerifyTolerance custom{0.01f, 0.001f};
-    VerificationSettings settings{custom};
-    EXPECT_FLOAT_EQ(settings.tolerance.rtol, 0.01f);
-    EXPECT_FLOAT_EQ(settings.tolerance.atol, 0.001f);
+TEST(VerificationSettingsTest, CustomTensorCoreTolerance) {
+    VerificationSettings settings;
+    settings.tensor_core_tolerance = {0.1f, 0.05f};
+    EXPECT_FLOAT_EQ(settings.tensor_core_tolerance.rtol, 0.1f);
+    EXPECT_FLOAT_EQ(settings.tensor_core_tolerance.atol, 0.05f);
+    // Standard tolerance should remain unchanged
+    EXPECT_FLOAT_EQ(settings.standard_tolerance.rtol, kStandardVerifyTolerance.rtol);
 }
 
 // ============================================================================
@@ -82,6 +89,20 @@ TEST(OutputSettingsTest, CustomFilenamePattern) {
     EXPECT_EQ(filename, "bench_512x768x1024.csv");
 }
 
+TEST(OutputSettingsTest, DuplicateTokenReplacement) {
+    OutputSettings settings;
+    settings.filename_pattern = "{M}x{K}x{N}_again_{M}_{K}_{N}.csv";
+    std::string filename = settings.makeRooflineFilename(256, 384, 512);
+    EXPECT_EQ(filename, "256x384x512_again_256_384_512.csv");
+}
+
+TEST(OutputSettingsTest, ArbitraryTokenOrder) {
+    OutputSettings settings;
+    settings.filename_pattern = "{N}_{K}_{M}_data.csv";
+    std::string filename = settings.makeRooflineFilename(128, 256, 512);
+    EXPECT_EQ(filename, "512_256_128_data.csv");
+}
+
 // ============================================================================
 // Benchmark Settings Tests
 // ============================================================================
@@ -90,7 +111,8 @@ TEST(BenchmarkSettingsTest, DefaultSettings) {
     BenchmarkSettings settings;
     EXPECT_EQ(settings.run.warmup_runs, 5);
     EXPECT_EQ(settings.run.benchmark_runs, 20);
-    EXPECT_FLOAT_EQ(settings.verify.tolerance.rtol, kStandardVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(settings.verify.standard_tolerance.rtol, kStandardVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(settings.verify.tensor_core_tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
     EXPECT_TRUE(settings.output.export_roofline);
 }
 
@@ -104,8 +126,8 @@ TEST(BenchmarkSettingsTest, CustomRunSettings) {
 
 TEST(BenchmarkSettingsTest, CustomVerificationSettings) {
     BenchmarkSettings settings;
-    settings.verify = VerificationSettings::tensorCore();
-    EXPECT_FLOAT_EQ(settings.verify.tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
+    settings.verify.standard_tolerance = {0.01f, 0.001f};
+    EXPECT_FLOAT_EQ(settings.verify.standard_tolerance.rtol, 0.01f);
 }
 
 TEST(BenchmarkSettingsTest, CustomOutputSettings) {
@@ -114,16 +136,35 @@ TEST(BenchmarkSettingsTest, CustomOutputSettings) {
     EXPECT_FALSE(settings.output.export_roofline);
 }
 
-TEST(BenchmarkSettingsTest, ToleranceForKernelType) {
+TEST(BenchmarkSettingsTest, ToleranceForKernelTypeUsesDefaults) {
     BenchmarkSettings settings;
     
     // Standard kernels use standard tolerance
     VerifyTolerance std_tol = settings.toleranceForKernel(KernelType::Standard);
     EXPECT_FLOAT_EQ(std_tol.rtol, kStandardVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(std_tol.atol, kStandardVerifyTolerance.atol);
     
     // Tensor Core kernels use tensor core tolerance
     VerifyTolerance tc_tol = settings.toleranceForKernel(KernelType::TensorCore);
     EXPECT_FLOAT_EQ(tc_tol.rtol, kTensorCoreVerifyTolerance.rtol);
+    EXPECT_FLOAT_EQ(tc_tol.atol, kTensorCoreVerifyTolerance.atol);
+}
+
+TEST(BenchmarkSettingsTest, ToleranceForKernelTypeRespectsCustomSettings) {
+    BenchmarkSettings settings;
+    
+    // Customize both tolerances
+    settings.verify.standard_tolerance = {0.01f, 0.001f};
+    settings.verify.tensor_core_tolerance = {0.1f, 0.05f};
+    
+    // Verify toleranceForKernel returns the custom values
+    VerifyTolerance std_tol = settings.toleranceForKernel(KernelType::Standard);
+    EXPECT_FLOAT_EQ(std_tol.rtol, 0.01f);
+    EXPECT_FLOAT_EQ(std_tol.atol, 0.001f);
+    
+    VerifyTolerance tc_tol = settings.toleranceForKernel(KernelType::TensorCore);
+    EXPECT_FLOAT_EQ(tc_tol.rtol, 0.1f);
+    EXPECT_FLOAT_EQ(tc_tol.atol, 0.05f);
 }
 
 int main(int argc, char **argv) {

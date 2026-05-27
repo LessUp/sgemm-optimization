@@ -35,14 +35,11 @@ struct RunSettings {
 // ============================================================================
 
 struct VerificationSettings {
-    VerifyTolerance tolerance = kStandardVerifyTolerance;
+    VerifyTolerance standard_tolerance = kStandardVerifyTolerance;
+    VerifyTolerance tensor_core_tolerance = kTensorCoreVerifyTolerance;
 
-    static VerificationSettings standard() {
-        return VerificationSettings{kStandardVerifyTolerance};
-    }
-
-    static VerificationSettings tensorCore() {
-        return VerificationSettings{kTensorCoreVerifyTolerance};
+    static VerificationSettings defaults() {
+        return VerificationSettings{};
     }
 };
 
@@ -55,26 +52,20 @@ struct OutputSettings {
     std::string filename_pattern = "roofline_data_{M}_{K}_{N}.csv";
 
     std::string makeRooflineFilename(int M, int K, int N) const {
-        // Simple pattern replacement
         std::string result = filename_pattern;
         
-        // Replace {M}
-        size_t pos = result.find("{M}");
-        if (pos != std::string::npos) {
-            result.replace(pos, 3, std::to_string(M));
-        }
+        // Replace all occurrences of each token
+        auto replaceAll = [](std::string& str, const std::string& from, const std::string& to) {
+            size_t pos = 0;
+            while ((pos = str.find(from, pos)) != std::string::npos) {
+                str.replace(pos, from.length(), to);
+                pos += to.length();
+            }
+        };
         
-        // Replace {K}
-        pos = result.find("{K}");
-        if (pos != std::string::npos) {
-            result.replace(pos, 3, std::to_string(K));
-        }
-        
-        // Replace {N}
-        pos = result.find("{N}");
-        if (pos != std::string::npos) {
-            result.replace(pos, 3, std::to_string(N));
-        }
+        replaceAll(result, "{M}", std::to_string(M));
+        replaceAll(result, "{K}", std::to_string(K));
+        replaceAll(result, "{N}", std::to_string(N));
         
         return result;
     }
@@ -93,11 +84,11 @@ struct BenchmarkSettings {
     VerifyTolerance toleranceForKernel(KernelType type) const {
         switch (type) {
         case KernelType::Standard:
-            return kStandardVerifyTolerance;
+            return verify.standard_tolerance;
         case KernelType::TensorCore:
-            return kTensorCoreVerifyTolerance;
+            return verify.tensor_core_tolerance;
         default:
-            return kStandardVerifyTolerance;
+            return verify.standard_tolerance;
         }
     }
 };
