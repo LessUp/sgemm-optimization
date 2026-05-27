@@ -109,6 +109,17 @@ if(BUILD_TESTS)
         $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
     )
 
+    # Kernel 目录模块测试
+    add_executable(test_kernel_catalog tests/test_kernel_catalog.cu)
+    target_include_directories(test_kernel_catalog PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_kernel_catalog PRIVATE
+        CUDA::cudart
+        CUDA::cublas
+    )
+    target_compile_options(test_kernel_catalog PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+    )
+
     include(GoogleTest)
     gtest_discover_tests(test_sgemm)
     gtest_discover_tests(test_utils)
