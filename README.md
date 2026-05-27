@@ -29,7 +29,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI covers repository integrity, documentation, OpenSpec validation, and Pages buildability.
+Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI validates formatting, CUDA compilation, OpenSpec/governance structure, and Pages buildability.
 
 ## GitHub Pages entry points
 
@@ -50,10 +50,10 @@ The README is the executive summary. The long-form technical narrative lives on 
 
 | Environment | What it can prove |
 |-------------|-------------------|
-| Hosted CI | Docs structure, route integrity, OpenSpec consistency, Pages buildability |
+| Hosted CI | Formatting, CUDA compilation, OpenSpec/governance structure, Pages buildability |
 | Local CUDA GPU | Runtime correctness, fallback behavior, benchmark performance |
 
-This split is deliberate. CI keeps the repository coherent, but only local GPU execution can validate runtime behavior and speed claims.
+This split is deliberate. CI catches build and structure issues early, but only local GPU execution can validate runtime behavior and speed claims.
 
 ## Source map
 

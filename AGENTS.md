@@ -66,7 +66,7 @@ ctest --test-dir build
 openspec validate --all
 ```
 
-- Hosted CI is compile-time and structure validation only
+- Hosted CI validates formatting, CUDA compilation, OpenSpec/governance structure, and Pages buildability
 - GPU runtime verification and benchmarking are local-only
 
 ## Tooling Preferences

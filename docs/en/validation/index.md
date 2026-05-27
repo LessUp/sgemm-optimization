@@ -12,7 +12,7 @@ Optimization methodology answers: "how do we improve performance?" Validation an
 
 | Evidence surface | What it proves | What it does not prove |
 |---|---|---|
-| Hosted CI + local structural checks | Docs/spec structure, Pages fitness, formatting/governance workflows, and repository health checks | GPU runtime correctness, CUDA benchmark numbers, or hardware-specific speedups |
+| Hosted CI + local structural checks | Formatting, CUDA compilation, docs/spec structure, Pages fitness, OpenSpec/governance workflows | GPU runtime correctness, CUDA benchmark numbers, or hardware-specific speedups |
 | Local `ctest --test-dir build` on a GPU machine | Runtime correctness against the project's cuBLAS oracle, under the project's numerical tolerance policy | Universal performance claims or GPU model independence |
 | Local benchmark execution | Performance behavior on a named GPU, under a named command and scope label | Results on other GPUs, other CUDA stacks, or unlabeled workloads |
 
@@ -28,7 +28,7 @@ Optimization methodology answers: "how do we improve performance?" Validation an
 
 ## What hosted CI proves
 
-Hosted CI is trusted to prove repository health: documentation structure, Pages buildability, formatting checks, and OpenSpec/governance alignment. It keeps the public surface coherent.
+Hosted CI is trusted to prove repository health: formatting, CUDA compilation, documentation structure, Pages buildability, and OpenSpec/governance alignment. It keeps the public surface coherent.
 
 Hosted CI is **not** trusted to prove CUDA runtime behavior or benchmark performance. Those claims require a real GPU machine.
 
@@ -67,7 +67,7 @@ Most trustworthy
   │
   ▼  [Local GPU] cuBLAS oracle + ctest correctness suite
   ▼  [Local GPU] Benchmark with named hardware, shape, and label
-  ▼  [Hosted CI] Structure, docs, build, and governance checks
+  ▼  [Hosted CI] Formatting, CUDA compilation, structure, docs, and governance checks
   ▼  [Analytical] Performance model (roofline, cost model)
   ▼  [Qualitative] Architecture rationale and design arguments
   │

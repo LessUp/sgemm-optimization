@@ -41,8 +41,8 @@ ctest --test-dir build
 openspec validate --all
 ```
 
-- Hosted CI covers formatting, CUDA compile validation, OpenSpec/repository checks, and Pages.
-- Runtime verification and benchmarking still require a local GPU-capable machine.
+- Hosted CI validates formatting, CUDA compilation, OpenSpec/governance structure, and Pages buildability.
+- Runtime verification and benchmarking require a local GPU-capable machine.
 
 ## Code and doc expectations
 

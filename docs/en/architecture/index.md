@@ -91,7 +91,7 @@ The project separates what two different environments can prove:
 
 | Claim | Local CUDA GPU | Hosted CI |
 |-------|----------------|-----------|
-| Compilation succeeds | ✓ | ✗ |
+| Compilation succeeds | ✓ | ✓ |
 | Output correctness vs. cuBLAS | ✓ | ✗ |
 | Benchmark performance claims | ✓ | ✗ |
 | Repository structure and docs | ✓ | ✓ |

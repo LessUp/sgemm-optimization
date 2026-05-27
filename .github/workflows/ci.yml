@@ -1,5 +1,5 @@
 # Continuous Integration
-# Validates code formatting
+# Validates code formatting and CUDA compilation
 
 name: CI
 
@@ -42,3 +42,26 @@ jobs:
         with:
           clang-format-version: '17'
           fallback-style: 'LLVM'
+
+  cuda-build:
+    name: CUDA Build
+    runs-on: ubuntu-latest
+    container:
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+    steps:
+      - name: Install dependencies
+        run: apt-get update && apt-get install -y cmake git build-essential
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --target sgemm_benchmark -j2
+
+      - name: Info
+        run: |
+          echo "✅ CUDA compilation successful"
+          echo "ℹ️  GPU runtime tests require a CUDA-capable machine"
