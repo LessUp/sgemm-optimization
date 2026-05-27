@@ -155,7 +155,8 @@ class BenchmarkRunner {
             
             VerifyTolerance tolerance = config_.settings.toleranceForKernel(entry.type);
             
-            printf("Running %s (includes FP32->FP16 conversion/fallback)...\n", entry.name.c_str());
+            printf("Running %s, includes FP32->FP16 "
+                   "conversion/fallback)...\n", entry.name.c_str());
             benchmark.run(
                 entry.name,
                 entry.launcher,
