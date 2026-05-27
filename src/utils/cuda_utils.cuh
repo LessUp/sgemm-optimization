@@ -7,6 +7,8 @@
 #include <curand.h>
 #include <random>
 
+#include "device_info_provider.cuh"
+
 // ============================================================================
 // 命名常量
 // ============================================================================
@@ -247,3 +249,26 @@ class DeviceInfoCache {
     int coresPerSM_;
     float clockGHz_;
 };
+
+// ============================================================================
+// Device Info Provider Implementation
+// ============================================================================
+
+/**
+ * Production adapter implementation: queries from DeviceInfoCache
+ */
+inline DeviceInfoProvider ProductionDeviceInfoProvider::get() const {
+    DeviceInfoCache &cache = DeviceInfoCache::instance();
+    return DeviceInfoProvider{
+        &cache.prop(),
+        cache.coresPerSM(),
+        cache.clockGHz(),
+    };
+}
+
+/**
+ * Convenience function: get production device info
+ */
+inline DeviceInfoProvider getProductionDeviceInfo() {
+    return ProductionDeviceInfoProvider{}.get();
+}

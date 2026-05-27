@@ -121,10 +121,23 @@ if(BUILD_TESTS)
         $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
     )
 
+    # Device info seam test
+    add_executable(test_device_info_seam tests/test_device_info_seam.cu)
+    target_include_directories(test_device_info_seam PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_device_info_seam PRIVATE
+        GTest::gtest_main
+        CUDA::cudart
+        CUDA::cublas
+    )
+    target_compile_options(test_device_info_seam PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+    )
+
     include(GoogleTest)
     gtest_discover_tests(test_sgemm)
     gtest_discover_tests(test_utils)
     gtest_discover_tests(test_performance)
     gtest_discover_tests(test_benchmark_settings)
     gtest_discover_tests(test_kernel_catalog)
+    gtest_discover_tests(test_device_info_seam)
 endif()

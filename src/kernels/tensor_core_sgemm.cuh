@@ -46,8 +46,19 @@ using tensor_core::WMMA_N;
 
 /**
  * 检查当前设备是否支持 Tensor Core (sm_70+)
+ *
+ * 提供重载版本以支持可注入的 device info provider。
  */
-inline bool tensorCoresAvailable() { return DeviceInfoCache::instance().hasTensorCores(); }
+inline bool tensorCoresAvailable(const DeviceInfoProvider &provider) {
+    return provider.hasTensorCores();
+}
+
+/**
+ * 检查当前设备是否支持 Tensor Core (默认使用生产环境设备)
+ */
+inline bool tensorCoresAvailable() {
+    return tensorCoresAvailable(getProductionDeviceInfo());
+}
 
 /**
  * 检查给定维度是否适合 Tensor Core 加速
@@ -59,18 +70,28 @@ inline bool tensorCoreDimensionsSupported(int M, int K, int N) {
 
 /**
  * 获取当前设备的 Tensor Core 信息字符串
+ *
+ * 提供重载版本以支持可注入的 device info provider。
  */
-inline const char *getTensorCoreArchName() {
-    const cudaDeviceProp &prop = DeviceInfoCache::instance().prop();
+inline const char *getTensorCoreArchName(const DeviceInfoProvider &provider) {
+    int major = provider.computeMajor();
+    int minor = provider.computeMinor();
 
-    if (prop.major == 7) {
-        return (prop.minor == 0) ? "Volta" : (prop.minor == 5) ? "Turing" : "Unknown sm_7x";
-    } else if (prop.major == 8) {
-        return (prop.minor == 0 || prop.minor == 6) ? "Ampere" : "Ampere/Ada";
-    } else if (prop.major == 9) {
+    if (major == 7) {
+        return (minor == 0) ? "Volta" : (minor == 5) ? "Turing" : "Unknown sm_7x";
+    } else if (major == 8) {
+        return (minor == 0 || minor == 6) ? "Ampere" : "Ampere/Ada";
+    } else if (major == 9) {
         return "Hopper";
     }
     return "Unknown";
+}
+
+/**
+ * 获取当前设备的 Tensor Core 信息字符串（默认使用生产环境设备）
+ */
+inline const char *getTensorCoreArchName() {
+    return getTensorCoreArchName(getProductionDeviceInfo());
 }
 
 // ============================================================================

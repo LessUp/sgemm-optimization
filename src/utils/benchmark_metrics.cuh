@@ -55,15 +55,20 @@ inline PerformanceMetrics calculateSgemmMetrics(int M, int K, int N, float time_
  * - SM 数量
  * - 每 SM 的 CUDA 核心数
  * - 时钟频率
+ *
+ * 提供重载版本以支持可注入的 device info provider。
+ */
+inline float getTheoreticalPeakGflops(const DeviceInfoProvider &provider) {
+    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
+    float peakGflops = provider.smCount() * provider.cores_per_sm * 2 * provider.clock_ghz * 1000;
+    return peakGflops;
+}
+
+/**
+ * 获取 GPU 理论峰值 GFLOPS（默认使用生产环境设备）
  */
 inline float getTheoreticalPeakGflops() {
-    DeviceInfoCache &cache = DeviceInfoCache::instance();
-    const cudaDeviceProp &prop = cache.prop();
-
-    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
-    float peakGflops = prop.multiProcessorCount * cache.coresPerSM() * 2 * cache.clockGHz() * 1000;
-
-    return peakGflops;
+    return getTheoreticalPeakGflops(getProductionDeviceInfo());
 }
 
 /**
@@ -73,21 +78,23 @@ inline float getTheoreticalPeakGflops() {
  * - DDR 倍率 (2x)
  * - 内存时钟频率
  * - 内存总线宽度
+ *
+ * 提供重载版本以支持可注入的 device info provider。
  */
-inline float getTheoreticalPeakBandwidth() {
-    const cudaDeviceProp &prop = DeviceInfoCache::instance().prop();
-
+inline float getTheoreticalPeakBandwidth(const DeviceInfoProvider &provider) {
     // 内存时钟频率 (Hz -> MHz)
-    float memoryClockMHz = static_cast<float>(prop.memoryClockRate) / 1000.0f;
+    float memoryClockMHz = static_cast<float>(provider.memoryClockRate()) / 1000.0f;
 
     // 如果 memoryClockRate 不可用，使用架构默认值
     if (memoryClockMHz <= 0) {
-        switch (prop.major) {
+        int major = provider.computeMajor();
+        int minor = provider.computeMinor();
+        switch (major) {
         case 7:
-            memoryClockMHz = (prop.minor == 5) ? 1750.0f : 877.0f; // Turing vs Volta
+            memoryClockMHz = (minor == 5) ? 1750.0f : 877.0f; // Turing vs Volta
             break;
         case 8:
-            memoryClockMHz = (prop.minor == 6) ? 1215.0f : 1593.0f; // A100 vs RTX 30
+            memoryClockMHz = (minor == 6) ? 1215.0f : 1593.0f; // A100 vs RTX 30
             break;
         case 9:
             memoryClockMHz = 2619.0f; // H100 HBM3
@@ -98,9 +105,16 @@ inline float getTheoreticalPeakBandwidth() {
     }
 
     // 峰值带宽 = 2 (DDR) * clock (MHz) * bus width (bits) / 8 (bytes)
-    float peakBandwidth = 2 * memoryClockMHz * (prop.memoryBusWidth / 8) / 1000.0f;
+    float peakBandwidth = 2 * memoryClockMHz * (provider.memoryBusWidth() / 8) / 1000.0f;
 
     return peakBandwidth; // GB/s
+}
+
+/**
+ * 获取 GPU 理论峰值带宽（默认使用生产环境设备）
+ */
+inline float getTheoreticalPeakBandwidth() {
+    return getTheoreticalPeakBandwidth(getProductionDeviceInfo());
 }
 
 /**
