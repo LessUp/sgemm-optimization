@@ -29,7 +29,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 主要负责仓库完整性、文档结构、OpenSpec 校验，以及 Pages 可构建性。
+运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 负责验证代码格式、CUDA 编译、OpenSpec / 治理结构，以及 Pages 可构建性。
 
 ## GitHub Pages 入口
 
@@ -50,7 +50,7 @@ README 是执行摘要，长篇技术叙事在 GitHub Pages 上。
 
 | 环境 | 能证明什么 |
 |------|------------|
-| 托管 CI | 文档结构、路由完整性、OpenSpec 一致性、Pages 可构建性 |
+| 托管 CI | 代码格式、CUDA 编译、OpenSpec / 治理结构、Pages 可构建性 |
 | 本地 CUDA GPU | 运行时正确性、fallback 行为、benchmark 性能 |
 
 这种拆分是刻意设计。CI 负责让仓库保持连贯，只有本地 GPU 执行才能验证运行时行为和速度结论。
