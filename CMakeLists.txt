@@ -109,10 +109,11 @@ if(BUILD_TESTS)
         $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
     )
 
-    # Kernel 目录模块测试
+    # Kernel catalog module test
     add_executable(test_kernel_catalog tests/test_kernel_catalog.cu)
     target_include_directories(test_kernel_catalog PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
     target_link_libraries(test_kernel_catalog PRIVATE
+        GTest::gtest_main
         CUDA::cudart
         CUDA::cublas
     )
@@ -125,4 +126,5 @@ if(BUILD_TESTS)
     gtest_discover_tests(test_utils)
     gtest_discover_tests(test_performance)
     gtest_discover_tests(test_benchmark_settings)
+    gtest_discover_tests(test_kernel_catalog)
 endif()

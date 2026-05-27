@@ -1,57 +1,70 @@
-#include "../src/kernels/kernel_catalog.cuh"
-#include "../src/utils/cuda_utils.cuh"
-#include "../src/utils/benchmark_settings.cuh"
-#include <cassert>
-#include <cstdio>
+/**
+ * Kernel catalog module test suite
+ *
+ * Tests the kernel catalog registration system:
+ * - Catalog contains expected kernels
+ * - Entries have valid names and launchers
+ * - Launch functions are callable without crashes
+ * - Order preservation of kernel entries
+ */
 
-void test_catalog_not_empty() {
-    const auto& catalog = getKernelCatalog();
-    assert(catalog.size() > 0 && "Catalog should contain at least one kernel");
-    printf("✓ Catalog contains %zu kernels\n", catalog.size());
+#include <gtest/gtest.h>
+#include "kernels/kernel_catalog.cuh"
+#include "utils/cuda_utils.cuh"
+#include "utils/benchmark_settings.cuh"
+
+// ============================================================================
+// Kernel Catalog Tests
+// ============================================================================
+
+class KernelCatalogTest : public ::testing::Test {
+  protected:
+    void SetUp() override {
+        catalog_ = &getKernelCatalog();
+    }
+
+    const std::vector<KernelEntry>* catalog_;
+};
+
+TEST_F(KernelCatalogTest, CatalogNotEmpty) {
+    EXPECT_GT(catalog_->size(), 0u) << "Catalog should contain at least one kernel";
 }
 
-void test_catalog_has_standard_kernels() {
-    const auto& catalog = getKernelCatalog();
+TEST_F(KernelCatalogTest, CatalogHasStandardKernels) {
     int standard_count = 0;
-    for (const auto& entry : catalog) {
+    for (const auto& entry : *catalog_) {
         if (entry.type == KernelType::Standard) {
             standard_count++;
         }
     }
-    assert(standard_count >= 4 && "Should have at least 4 standard kernels (Naive, Tiled, BankConflictFree, DoubleBuffer)");
-    printf("✓ Catalog contains %d standard kernels\n", standard_count);
+    EXPECT_GE(standard_count, 4)
+        << "Should have at least 4 standard kernels (Naive, Tiled, BankConflictFree, DoubleBuffer)";
 }
 
-void test_catalog_has_tensor_core_kernels() {
-    const auto& catalog = getKernelCatalog();
+TEST_F(KernelCatalogTest, CatalogHasTensorCoreKernels) {
     int tc_count = 0;
-    for (const auto& entry : catalog) {
+    for (const auto& entry : *catalog_) {
         if (entry.type == KernelType::TensorCore) {
             tc_count++;
         }
     }
-    assert(tc_count >= 1 && "Should have at least 1 tensor core kernel (end-to-end)");
-    printf("✓ Catalog contains %d tensor core kernels\n", tc_count);
+    EXPECT_GE(tc_count, 1)
+        << "Should have at least 1 tensor core kernel (end-to-end)";
 }
 
-void test_catalog_entries_have_names() {
-    const auto& catalog = getKernelCatalog();
-    for (const auto& entry : catalog) {
-        assert(!entry.name.empty() && "All entries should have non-empty names");
-        assert(entry.launcher != nullptr && "All entries should have valid launchers");
+TEST_F(KernelCatalogTest, CatalogEntriesHaveNamesAndLaunchers) {
+    for (const auto& entry : *catalog_) {
+        EXPECT_FALSE(entry.name.empty()) << "All entries should have non-empty names";
+        EXPECT_TRUE(static_cast<bool>(entry.launcher))
+            << "Entry '" << entry.name << "' should have a valid launcher";
     }
-    printf("✓ All catalog entries have names and launchers\n");
 }
 
-void test_catalog_launch_callable() {
-    const auto& catalog = getKernelCatalog();
-    if (catalog.empty()) {
-        printf("⚠ Catalog is empty, skipping launch test\n");
-        return;
-    }
+TEST_F(KernelCatalogTest, CatalogLaunchCallable) {
+    ASSERT_FALSE(catalog_->empty()) << "Catalog is empty, cannot test launch";
     
     // Small test: verify we can call the launcher without crashing
-    const auto& entry = catalog[0];
+    const auto& entry = (*catalog_)[0];
     const int M = 64, K = 64, N = 64;
     
     DeviceMemory<float> d_A(M * K);
@@ -64,41 +77,20 @@ void test_catalog_launch_callable() {
     CUDA_CHECK(cudaMemset(d_C.get(), 0, M * N * sizeof(float)));
     
     // Launch should not crash
-    entry.launcher(d_A.get(), d_B.get(), d_C.get(), M, K, N);
-    CUDA_CHECK(cudaDeviceSynchronize());
-    
-    printf("✓ Can launch catalog entry '%s'\n", entry.name.c_str());
+    EXPECT_NO_THROW({
+        entry.launcher(d_A.get(), d_B.get(), d_C.get(), M, K, N);
+        CUDA_CHECK(cudaDeviceSynchronize());
+    });
 }
 
-void test_catalog_preserves_order() {
-    const auto& catalog = getKernelCatalog();
-    assert(catalog.size() >= 5 && "Expected at least 5 kernels");
+TEST_F(KernelCatalogTest, CatalogPreservesOrder) {
+    ASSERT_GE(catalog_->size(), 5u) << "Expected at least 5 kernels";
     
     // Verify the expected order: Naive, Tiled, BankConflictFree, DoubleBuffer, TensorCore end-to-end
-    assert(catalog[0].name == "Naive" && "First kernel should be Naive");
-    assert(catalog[1].name == "Tiled (32x32)" && "Second kernel should be Tiled");
-    assert(catalog[2].name == "Bank Conflict Free" && "Third kernel should be BankConflictFree");
-    assert(catalog[3].name == "Double Buffer" && "Fourth kernel should be DoubleBuffer");
-    assert(catalog[4].name == "Tensor Core (WMMA end-to-end)" && "Fifth kernel should be Tensor Core end-to-end");
-    
-    printf("✓ Catalog preserves expected kernel order\n");
+    EXPECT_EQ((*catalog_)[0].name, "Naive") << "First kernel should be Naive";
+    EXPECT_EQ((*catalog_)[1].name, "Tiled (32x32)") << "Second kernel should be Tiled";
+    EXPECT_EQ((*catalog_)[2].name, "Bank Conflict Free") << "Third kernel should be BankConflictFree";
+    EXPECT_EQ((*catalog_)[3].name, "Double Buffer") << "Fourth kernel should be DoubleBuffer";
+    EXPECT_EQ((*catalog_)[4].name, "Tensor Core (WMMA end-to-end)") << "Fifth kernel should be Tensor Core end-to-end";
 }
 
-int main() {
-    printf("Running Kernel Catalog Tests...\n\n");
-    
-    try {
-        test_catalog_not_empty();
-        test_catalog_has_standard_kernels();
-        test_catalog_has_tensor_core_kernels();
-        test_catalog_entries_have_names();
-        test_catalog_launch_callable();
-        test_catalog_preserves_order();
-        
-        printf("\n✅ All kernel catalog tests passed!\n");
-        return 0;
-    } catch (const std::exception& e) {
-        printf("\n❌ Test failed with exception: %s\n", e.what());
-        return 1;
-    }
-}
