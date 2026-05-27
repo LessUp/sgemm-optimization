@@ -7,6 +7,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include "utils/benchmark_settings.cuh"
 
 // ============================================================================
 // Benchmark 配置
@@ -16,8 +17,7 @@
  * Benchmark 运行配置
  */
 struct BenchmarkConfig {
-    int warmup_runs = 5;
-    int benchmark_runs = 20;
+    BenchmarkSettings settings;
     std::vector<std::tuple<int, int, int>> dimensions;
 
     // 默认测试用例
@@ -229,7 +229,7 @@ class CliParser {
             return false;
         }
 
-        config.warmup_runs = warmup;
+        config.settings.run.warmup_runs = warmup;
         return true;
     }
 
@@ -248,7 +248,7 @@ class CliParser {
             return false;
         }
 
-        config.benchmark_runs = bench;
+        config.settings.run.benchmark_runs = bench;
         return true;
     }
 

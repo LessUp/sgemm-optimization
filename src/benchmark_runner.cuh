@@ -88,8 +88,8 @@ class BenchmarkRunner {
 
         // cuBLAS 参考
         printf("\nRunning cuBLAS (reference)...\n");
-        BenchmarkResult cublas_result =
-            benchmark.runCublas(M, K, N, config_.warmup_runs, config_.benchmark_runs);
+        BenchmarkResult cublas_result = benchmark.runCublas(
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs);
         float cublas_gflops = cublas_result.gflops;
 
         // 标准内核
@@ -102,20 +102,24 @@ class BenchmarkRunner {
         benchmark.printSummary();
         printPerformanceComparison(benchmark.getResults(), cublas_gflops);
 
-        // 导出 roofline 数据
-        char filename[kFilenameBufferSize];
-        snprintf(filename, sizeof(filename), "roofline_data_%d_%d_%d.csv", M, K, N);
-        benchmark.exportRooflineData(filename);
+        // 导出 roofline 数据 (仅当设置启用时)
+        if (config_.settings.output.export_roofline) {
+            std::string filename = config_.settings.output.makeRooflineFilename(M, K, N);
+            benchmark.exportRooflineData(filename);
+        }
     }
 
     void runStandardKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
+        VerifyTolerance tolerance = config_.settings.toleranceForKernel(KernelType::Standard);
+
         printf("Running Naive SGEMM...\n");
         benchmark.run(
             "Naive",
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_naive_sgemm<32>(A, B, C, M, K, N);
             },
-            M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs,
+            tolerance);
 
         printf("Running Tiled SGEMM...\n");
         benchmark.run(
@@ -123,7 +127,8 @@ class BenchmarkRunner {
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_tiled_sgemm<32>(A, B, C, M, K, N);
             },
-            M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs,
+            tolerance);
 
         printf("Running Bank Conflict Free SGEMM...\n");
         benchmark.run(
@@ -131,7 +136,8 @@ class BenchmarkRunner {
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_bank_conflict_free_sgemm<32>(A, B, C, M, K, N);
             },
-            M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs,
+            tolerance);
 
         printf("Running Double Buffer SGEMM...\n");
         benchmark.run(
@@ -139,7 +145,8 @@ class BenchmarkRunner {
             [](const float *A, const float *B, float *C, int M, int K, int N) {
                 launch_double_buffer_sgemm<32>(A, B, C, M, K, N);
             },
-            M, K, N, config_.warmup_runs, config_.benchmark_runs, kStandardVerifyTolerance);
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs,
+            tolerance);
     }
 
     void runTensorCoreKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
@@ -160,6 +167,8 @@ class BenchmarkRunner {
             return;
         }
 
+        VerifyTolerance tolerance = config_.settings.toleranceForKernel(KernelType::TensorCore);
+
         printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
                "conversion/fallback)...\n");
         benchmark.run(
@@ -168,12 +177,13 @@ class BenchmarkRunner {
                 launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N,
                                                        defaultTensorCoreFallback());
             },
-            M, K, N, config_.warmup_runs, config_.benchmark_runs, kTensorCoreVerifyTolerance);
+            M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs,
+            tolerance);
 
         printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
         BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
-            benchmark.getCublasHandle(), M, K, N, config_.warmup_runs, config_.benchmark_runs,
-            kTensorCoreVerifyTolerance);
+            benchmark.getCublasHandle(), M, K, N, config_.settings.run.warmup_runs,
+            config_.settings.run.benchmark_runs, tolerance);
         tc_result.print();
     }
 

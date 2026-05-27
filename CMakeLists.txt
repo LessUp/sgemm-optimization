@@ -97,8 +97,21 @@ if(BUILD_TESTS)
         $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
     )
 
+    # Benchmark 设置模块测试
+    add_executable(test_benchmark_settings tests/test_benchmark_settings.cu)
+    target_include_directories(test_benchmark_settings PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(test_benchmark_settings PRIVATE
+        GTest::gtest_main
+        CUDA::cudart
+        CUDA::cublas
+    )
+    target_compile_options(test_benchmark_settings PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
+    )
+
     include(GoogleTest)
     gtest_discover_tests(test_sgemm)
     gtest_discover_tests(test_utils)
     gtest_discover_tests(test_performance)
+    gtest_discover_tests(test_benchmark_settings)
 endif()
