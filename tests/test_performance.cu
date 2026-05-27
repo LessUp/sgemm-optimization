@@ -1,15 +1,12 @@
 /**
  * 性能回归测试框架
  *
- * 为每个 SGEMM 内核记录性能基线，检测性能退化。
- * 基线数据存储在 tests/baselines/ 目录中。
+ * 为每个 SGEMM 内核定义最小性能阈值，检测性能退化。
+ * 阈值基于理论峰值的百分比，保证各内核达到预期效率。
  */
 
 #include <cuda_runtime.h>
-#include <fstream>
 #include <gtest/gtest.h>
-#include <memory>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -23,109 +20,6 @@
 #include "utils/benchmark_core.cuh"
 #include "utils/benchmark_metrics.cuh"
 #include "utils/cuda_utils.cuh"
-
-// ============================================================================
-// 性能基线结构
-// ============================================================================
-
-struct PerformanceBaseline {
-    std::string kernel_name;
-    int M, K, N;
-    float min_gflops; // 最小可接受的 GFLOPS
-    float max_gflops; // 记录的最大 GFLOPS（参考）
-    std::string gpu_name;
-
-    std::string key() const {
-        return kernel_name + "_" + std::to_string(M) + "x" + std::to_string(K) + "x" +
-               std::to_string(N);
-    }
-};
-
-// ============================================================================
-// 基线管理器
-// ============================================================================
-
-class BaselineManager {
-  public:
-    explicit BaselineManager(const std::string &baseline_file) : baseline_file_(baseline_file) {
-        loadBaselines();
-    }
-
-    ~BaselineManager() { saveBaselines(); }
-
-    // 获取基线（如果存在）
-    bool hasBaseline(const std::string &key) const { return baselines_.count(key) > 0; }
-
-    const PerformanceBaseline &getBaseline(const std::string &key) const {
-        return baselines_.at(key);
-    }
-
-    // 更新或添加基线
-    void updateBaseline(const PerformanceBaseline &baseline) {
-        baselines_[baseline.key()] = baseline;
-    }
-
-    // 获取当前 GPU 名称
-    static std::string getCurrentGpuName() {
-        int device;
-        CUDA_CHECK(cudaGetDevice(&device));
-        cudaDeviceProp prop;
-        CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-        return prop.name;
-    }
-
-    // 计算可接受的性能范围（相对于峰值的百分比）
-    static float calculateMinGflops(float peak_gflops, float efficiency_threshold) {
-        return peak_gflops * efficiency_threshold;
-    }
-
-  private:
-    void loadBaselines() {
-        std::ifstream file(baseline_file_);
-        if (!file.is_open()) {
-            return; // 文件不存在，使用空基线
-        }
-
-        std::string line;
-        while (std::getline(file, line)) {
-            if (line.empty() || line[0] == '#') {
-                continue;
-            }
-
-            std::istringstream iss(line);
-            PerformanceBaseline baseline;
-            char delim;
-
-            // 格式: kernel_name,M,K,N,min_gflops,max_gflops,gpu_name
-            if (std::getline(iss, baseline.kernel_name, ',') &&
-                (iss >> baseline.M >> delim >> baseline.K >> delim >> baseline.N >> delim >>
-                 baseline.min_gflops >> delim >> baseline.max_gflops >> delim) &&
-                std::getline(iss, baseline.gpu_name)) {
-                baselines_[baseline.key()] = baseline;
-            }
-        }
-    }
-
-    void saveBaselines() {
-        std::ofstream file(baseline_file_);
-        if (!file.is_open()) {
-            fprintf(stderr, "Warning: Could not save baselines to %s\n", baseline_file_.c_str());
-            return;
-        }
-
-        file << "# Performance Baselines (auto-generated)\n";
-        file << "# Format: kernel_name,M,K,N,min_gflops,max_gflops,gpu_name\n";
-
-        for (const auto &[key, baseline] : baselines_) {
-            file << baseline.kernel_name << "," << baseline.M << "," << baseline.K << ","
-                 << baseline.N << "," << baseline.min_gflops << "," << baseline.max_gflops << ","
-                 << baseline.gpu_name << "\n";
-        }
-    }
-
-    std::string baseline_file_;
-    std::unordered_map<std::string, PerformanceBaseline> baselines_;
-};
 
 // ============================================================================
 // 性能回归测试
