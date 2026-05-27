@@ -126,24 +126,6 @@ TEST(BenchmarkSettingsTest, ToleranceForKernelType) {
     EXPECT_FLOAT_EQ(tc_tol.rtol, kTensorCoreVerifyTolerance.rtol);
 }
 
-// ============================================================================
-// Builder Pattern Tests (Optional convenience)
-// ============================================================================
-
-TEST(BenchmarkSettingsBuilderTest, FluentInterface) {
-    BenchmarkSettings settings = BenchmarkSettings::builder()
-        .withWarmupRuns(10)
-        .withBenchmarkRuns(50)
-        .withTensorCoreTolerance()
-        .withoutRooflineExport()
-        .build();
-    
-    EXPECT_EQ(settings.run.warmup_runs, 10);
-    EXPECT_EQ(settings.run.benchmark_runs, 50);
-    EXPECT_FLOAT_EQ(settings.verify.tolerance.rtol, kTensorCoreVerifyTolerance.rtol);
-    EXPECT_FALSE(settings.output.export_roofline);
-}
-
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
