@@ -87,7 +87,7 @@ The blueprint explicitly separates compile-time-verifiable invariants from runti
 
 | Invariant class | Verifiable where |
 |---|---|
-| File structure, docs, OpenSpec alignment | Hosted CI |
+| File structure, docs, and workflow health | Hosted CI |
 | CUDA code compiles and runs on a real CUDA toolchain | Local GPU-capable machine |
 | Correctness under cuBLAS oracle | Local GPU run |
 | Benchmark numbers and speedup ratios | Local GPU run with named hardware |

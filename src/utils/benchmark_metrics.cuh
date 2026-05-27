@@ -57,6 +57,10 @@ inline PerformanceMetrics calculateSgemmMetrics(int M, int K, int N, float time_
  * - 时钟频率
  */
 inline float getTheoreticalPeakGflops() {
+    if (!cudaDeviceAvailable()) {
+        return 0.0f;
+    }
+
     DeviceInfoCache &cache = DeviceInfoCache::instance();
     const cudaDeviceProp &prop = cache.prop();
 
@@ -75,6 +79,10 @@ inline float getTheoreticalPeakGflops() {
  * - 内存总线宽度
  */
 inline float getTheoreticalPeakBandwidth() {
+    if (!cudaDeviceAvailable()) {
+        return 0.0f;
+    }
+
     const cudaDeviceProp &prop = DeviceInfoCache::instance().prop();
 
     // 内存时钟频率 (Hz -> MHz)
@@ -110,43 +118,4 @@ inline float calculateEfficiency(float actual_gflops, float peak_gflops) {
     if (peak_gflops <= 0)
         return 0.0f;
     return (actual_gflops / peak_gflops) * 100.0f;
-}
-
-/**
- * 计算带宽利用率（相对于理论峰值的百分比）
- *
- * 注意：此函数为工具函数，供外部调用者使用。
- * 内部 benchmark 流程使用 calculateEfficiency。
- */
-[[maybe_unused]] inline float
-calculateBandwidthUtilization(float actual_bandwidth, float peak_bandwidth) {
-    if (peak_bandwidth <= 0)
-        return 0.0f;
-    return (actual_bandwidth / peak_bandwidth) * 100.0f;
-}
-
-// ============================================================================
-// 性能比较工具
-// ============================================================================
-
-/**
- * 打印性能比较报告
- *
- * 注意：此函数为工具函数，供外部调用者打印格式化报告。
- * 内部 benchmark 流程使用 SGEMMBenchmark::printSummary。
- *
- * @param kernel_name 内核名称
- * @param metrics 性能指标
- * @param baseline_gflops 基线 GFLOPS（如 cuBLAS）
- */
-[[maybe_unused]] inline void
-printPerformanceReport(const char *kernel_name, const PerformanceMetrics &metrics,
-                       float baseline_gflops = 0.0f) {
-    printf("  %-30s | %8.3f ms | %10.2f GFLOPS | %8.2f GB/s | AI: %.1f\n", kernel_name,
-           metrics.time_ms, metrics.gflops, metrics.bandwidth_gb_s, metrics.arithmetic_intensity);
-
-    if (baseline_gflops > 0.0f) {
-        float percentage = (metrics.gflops / baseline_gflops) * 100.0f;
-        printf("    -> %.1f%% of baseline (%.2f GFLOPS)\n", percentage, baseline_gflops);
-    }
 }

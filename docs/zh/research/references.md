@@ -92,8 +92,8 @@ title: 参考资料清单
   对理解本地正确性 harness 与容差测试话语体系最有帮助。
 - [CMake Documentation](https://cmake.org/documentation/)  
   对构建系统预期、generator 行为和可复现本地环境最有帮助。
-- [OpenSpec documentation](https://openspec.dev/)  
-  对理解本仓库采用的 spec 驱动文档与变更流程最有帮助。
+- [GitHub Actions Documentation](https://docs.github.com/actions)  
+  对理解托管自动化如何稳定执行格式检查、文档检查和 Pages 部署最有帮助。
 
 为什么这组重要：
 
