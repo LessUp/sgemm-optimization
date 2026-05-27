@@ -23,7 +23,7 @@ class KernelCatalogTest : public ::testing::Test {
         catalog_ = &getKernelCatalog();
     }
 
-    const std::vector<KernelEntry>* catalog_;
+    const std::vector<KernelCatalogEntry>* catalog_;
 };
 
 TEST_F(KernelCatalogTest, CatalogNotEmpty) {
