@@ -47,7 +47,7 @@ title: SGEMM Whitepaper
     <div class="signal-card">
       <div class="signal-title">Trust model</div>
       <div class="signal-value">CI is structural, GPU is empirical</div>
-      <div class="signal-note">Repository health, Pages fitness, and OpenSpec live in automation. Runtime correctness and performance still belong to real hardware.</div>
+      <div class="signal-note">Repository health, docs checks, and Pages fitness live in automation. Runtime correctness and performance still belong to real hardware.</div>
     </div>
   </div>
 </div>
@@ -119,4 +119,4 @@ title: SGEMM Whitepaper
 
 - Repository executive summary: [README](https://github.com/LessUp/sgemm-optimization/blob/master/README.md)
 - Chinese repository entry: [README.zh-CN](https://github.com/LessUp/sgemm-optimization/blob/master/README.zh-CN.md)
-- Stable requirements: [OpenSpec project presentation spec](https://github.com/LessUp/sgemm-optimization/blob/master/openspec/specs/project-presentation/spec.md)
+- Build and validation guide: [CONTRIBUTING](https://github.com/LessUp/sgemm-optimization/blob/master/CONTRIBUTING.md)

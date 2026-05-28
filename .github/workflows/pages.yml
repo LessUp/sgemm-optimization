@@ -7,8 +7,6 @@ on:
   push:
     branches: [master]
     paths: &pages_paths
-      - 'CHANGELOG.md'
-      - 'CONTRIBUTING.md'
       - 'docs/**'
       - '.github/workflows/pages.yml'
   pull_request:

@@ -26,6 +26,10 @@
 #include <cuda_runtime.h>
 #include <functional>
 
+#ifndef SGEMM_HAS_WMMA_TARGET
+#define SGEMM_HAS_WMMA_TARGET 0
+#endif
+
 // ============================================================================
 // WMMA Tile Dimensions
 // ============================================================================
@@ -59,6 +63,7 @@ inline bool tensorCoresAvailable(const DeviceInfoProvider &provider) {
 inline bool tensorCoresAvailable() {
     return tensorCoresAvailable(getProductionDeviceInfo());
 }
+inline constexpr bool tensorCoreFastPathCompiled() { return SGEMM_HAS_WMMA_TARGET != 0; }
 
 /**
  * 检查给定维度是否适合 Tensor Core 加速
@@ -121,24 +126,9 @@ nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t 
 // Tensor Core Compute - 纯 WMMA 计算路径
 // ============================================================================
 
-// WMMA is only available on sm_70+
-#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
+// WMMA is only emitted when the configured target architectures include sm_70+.
+#if SGEMM_HAS_WMMA_TARGET
 #include <mma.h>
-#endif
-
-/**
- * FP32 → FP16 转换内核
- */
-__global__ void float_to_half_kernel(const float *__restrict__ input, half *__restrict__ output,
-                                     int size) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < size) {
-        output[idx] = __float2half(input[idx]);
-    }
-}
-
-// WMMA kernel is only available on sm_70+
-#if !defined(__CUDA_ARCH__) || __CUDA_ARCH__ >= 700
 
 /**
  * 纯 Tensor Core WMMA 计算内核
@@ -153,6 +143,7 @@ __global__ void float_to_half_kernel(const float *__restrict__ input, half *__re
 __global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
                                               const half *__restrict__ B, float *__restrict__ C,
                                               int M, int K, int N) {
+#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700
     int warpM = blockIdx.y;
     int warpN = blockIdx.x;
 
@@ -180,6 +171,14 @@ __global__ void tensor_core_sgemm_kernel_fp16(const half *__restrict__ A,
     }
 
     nvcuda::wmma::store_matrix_sync(C + aRow * N + bCol, c_frag, N, nvcuda::wmma::mem_row_major);
+#else
+    (void)A;
+    (void)B;
+    (void)C;
+    (void)M;
+    (void)K;
+    (void)N;
+#endif
 }
 
 /**
@@ -200,12 +199,23 @@ inline void launch_tensor_core_sgemm_fp16_fast_path(const half *A, const half *B
 }
 
 #else
-// Stub implementations for older architectures (will not be called)
+// Stub implementations when no WMMA-capable target was configured.
 inline void launch_tensor_core_sgemm_fp16_fast_path(const half *, const half *, float *, int, int,
                                                     int, cudaStream_t) {
-    // This function should never be called on pre-sm_70 GPUs
+    throw CudaError("Tensor Core fast path was not compiled for the configured CUDA architectures");
 }
 #endif
+
+/**
+ * FP32 → FP16 转换内核
+ */
+__global__ void float_to_half_kernel(const float *__restrict__ input, half *__restrict__ output,
+                                     int size) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+        output[idx] = __float2half(input[idx]);
+    }
+}
 
 /**
  * 纯 WMMA 计算路径入口（FP16 输入）
@@ -219,9 +229,13 @@ inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C
         return;
     }
 
+    if (!tensorCoreFastPathCompiled()) {
+        throw CudaError("launch_tensor_core_sgemm_fp16 requires a build that targets sm_70+");
+    }
+
     if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-        throw CudaError("launch_tensor_core_sgemm_fp16 requires sm_70+ and dimensions aligned "
-                        "to 16");
+        throw CudaError(
+            "launch_tensor_core_sgemm_fp16 requires runtime sm_70+ support and dimensions aligned to 16");
     }
 
     launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
@@ -256,7 +270,8 @@ inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *
     }
 
     // Fallback 路径：设备或维度不支持 Tensor Core
-    if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
+    if (!tensorCoreFastPathCompiled() || !tensorCoresAvailable() ||
+        !tensorCoreDimensionsSupported(M, K, N)) {
         fallback(A, B, C, M, K, N, stream);
         return;
     }
@@ -304,7 +319,8 @@ inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *
 inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *B, float *C, int M,
                                                    int K, int N, const FallbackKernel &fallback,
                                                    cudaStream_t stream = 0) {
-    launch_tensor_core_sgemm_with_fallback(A, B, C, M, K, N, fallback, stream);
+    launch_tensor_core_sgemm_with_fallback<const FallbackKernel &>(A, B, C, M, K, N, fallback,
+                                                                   stream);
 }
 
 // ============================================================================

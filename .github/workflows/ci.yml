@@ -3,9 +3,7 @@
 #
 # Workflow separation:
 # - This workflow: formatting + CUDA compile-time checks (no GPU runtime)
-# - openspec-validation.yml: OpenSpec governance structure validation
-# - pages.yml: GitHub Pages buildability + Markdown formatting
-
+# - pages.yml: docs tests/build and GitHub Pages buildability
 name: CI
 
 on:
@@ -14,17 +12,11 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
-      - 'index.md'
-      - '_config.yml'
-      - 'openspec/**'
   pull_request:
     branches: [master]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
-      - 'index.md'
-      - '_config.yml'
-      - 'openspec/**'
   workflow_dispatch:
 
 permissions:

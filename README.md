@@ -29,7 +29,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI validates formatting, CUDA compilation, OpenSpec/governance structure, and Pages buildability.
+Runtime tests and benchmarks require a local CUDA-capable machine. Hosted CI validates formatting, CUDA compilation, docs-site checks, route integrity, and Pages buildability.
 
 ## GitHub Pages entry points
 
@@ -44,16 +44,16 @@ The README is the executive summary. The long-form technical narrative lives on 
 | Study the kernel ladder | [Academy](https://lessup.github.io/sgemm-optimization/en/academy/) |
 | Check what the evidence proves | [Validation](https://lessup.github.io/sgemm-optimization/en/validation/) |
 | Trace papers and related repos | [Research Desk](https://lessup.github.io/sgemm-optimization/en/research/) |
-| Read normative repository requirements | [OpenSpec Specs](openspec/specs/) |
+| Read contributor workflow and validation commands | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ## Validation boundary
 
 | Environment | What it can prove |
 |-------------|-------------------|
-| Hosted CI | Formatting, CUDA compilation, OpenSpec/governance structure, Pages buildability |
+| Hosted CI | Formatting, CUDA compilation, docs structure, route integrity, Pages buildability |
 | Local CUDA GPU | Runtime correctness, fallback behavior, benchmark performance |
 
-This split is deliberate. CI catches build and structure issues early, but only local GPU execution can validate runtime behavior and speed claims.
+This split is deliberate. CI catches build and repository-surface issues early, but only local GPU execution can validate runtime behavior and speed claims.
 
 ## Source map
 
@@ -63,7 +63,6 @@ src/utils/     CUDA RAII, verification, benchmark helpers
 src/main.cu    benchmark CLI
 tests/         Google Test coverage against cuBLAS
 docs/          VitePress whitepaper and academy, mirrored under /en and /zh
-openspec/      stable specs and change workflow
 ```
 
 ## License

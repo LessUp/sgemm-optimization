@@ -12,7 +12,7 @@ title: 验证
 
 | 证据层次 | 能证明什么 | 不能证明什么 |
 |---|---|---|
-| 托管 CI + 本地结构检查 | 格式化、CUDA 编译、文档与规范结构、Pages 可构建性、OpenSpec/治理工作流 | GPU 运行时正确性、CUDA benchmark 数字或特定硬件加速比 |
+| 托管 CI + 仓库检查 | 格式检查、CUDA 编译、文档结构、Pages 可构建性，以及路由/工作流健康检查 | GPU 运行时正确性、CUDA benchmark 数字或特定硬件加速比 |
 | GPU 机器上的本地 `ctest --test-dir build` | 在项目数值容差策略下，相对 cuBLAS oracle 的运行时正确性 | 普遍性的性能主张或 GPU 型号无关性 |
 | 本地 benchmark 执行 | 在命名 GPU 上、使用命名命令和范围标签下的性能行为 | 其他 GPU、其他 CUDA 版本，或无标签工作负载的结果 |
 
@@ -28,7 +28,7 @@ title: 验证
 
 ## 托管 CI 能证明什么
 
-托管 CI 被信任来证明仓库健康：格式化、CUDA 编译、文档结构、Pages 可构建性以及 OpenSpec/治理对齐。它保持公共界面的一致性。
+托管 CI 被信任来证明仓库健康：CUDA 编译、文档结构、Pages 可构建性、格式检查以及文档测试/构建健康度。它保持公共界面的一致性。
 
 托管 CI **不被信任**来证明 CUDA 运行时行为或 benchmark 性能。这些主张需要真实的 GPU 机器。
 
@@ -67,7 +67,7 @@ title: 验证
   │
   ▼  [本地 GPU] cuBLAS oracle + ctest 正确性套件
   ▼  [本地 GPU] 带命名硬件、shape 和标签的 benchmark
-  ▼  [托管 CI] 格式化、CUDA 编译、结构、文档与治理检查
+  ▼  [托管 CI] 格式检查、CUDA 编译、结构、文档与工作流检查
   ▼  [分析性] 性能模型（roofline、代价模型）
   ▼  [定性] 架构原理与设计论证
   │

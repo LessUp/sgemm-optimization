@@ -28,14 +28,22 @@ class BenchmarkRunner {
     /**
      * 运行所有配置的 benchmark
      */
-    void runAll() {
+    bool runAll() {
         printHeader();
+
+        if (!cudaDeviceAvailable()) {
+            fprintf(stderr,
+                    "No CUDA-capable device detected. Benchmark execution requires a local CUDA "
+                    "environment with a visible GPU.\n");
+            return false;
+        }
 
         for (const auto &[M, K, N] : config_.dimensions) {
             runBenchmarks(M, K, N);
         }
 
         printFooter();
+        return true;
     }
 
   private:
@@ -49,10 +57,15 @@ class BenchmarkRunner {
 
         printGPUInfo();
 
-        float peakGflops = getTheoreticalPeakGflops();
-        float peakBandwidth = getTheoreticalPeakBandwidth();
-        printf("Approximate theoretical peak FP32: %.2f GFLOPS\n", peakGflops);
-        printf("Approximate theoretical peak bandwidth: %.2f GB/s\n", peakBandwidth);
+        if (cudaDeviceAvailable()) {
+            float peakGflops = getTheoreticalPeakGflops();
+            float peakBandwidth = getTheoreticalPeakBandwidth();
+            printf("Approximate theoretical peak FP32: %.2f GFLOPS\n", peakGflops);
+            printf("Approximate theoretical peak bandwidth: %.2f GB/s\n", peakBandwidth);
+        } else {
+            printf("Approximate theoretical peak FP32: unavailable without a CUDA device\n");
+            printf("Approximate theoretical peak bandwidth: unavailable without a CUDA device\n");
+        }
         printf("\n");
     }
 
@@ -180,7 +193,7 @@ class BenchmarkRunner {
         BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
             benchmark.getCublasHandle(), M, K, N, config_.settings.run.warmup_runs,
             config_.settings.run.benchmark_runs, tolerance);
-        tc_result.print();
+        benchmark.addResult(tc_result);
     }
 
     BenchmarkConfig config_;

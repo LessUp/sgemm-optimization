@@ -92,8 +92,8 @@ Open this shelf when the question is about proving correctness, structuring buil
   Best for understanding the local correctness harness and tolerance-oriented testing vocabulary.
 - [CMake Documentation](https://cmake.org/documentation/)  
   Best for build-system expectations, generator behavior, and reproducible local setup.
-- [OpenSpec documentation](https://openspec.dev/)  
-  Best for understanding the spec-governed documentation and change workflow used in this repository.
+- [GitHub Actions Documentation](https://docs.github.com/actions)  
+  Best for understanding the hosted automation surfaces that keep formatting, docs checks, and Pages deployment reproducible.
 
 Why this shelf matters:
 

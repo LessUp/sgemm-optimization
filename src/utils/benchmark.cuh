@@ -217,6 +217,7 @@ class SGEMMBenchmark {
     const std::vector<BenchmarkResult> &getResults() const { return results_; }
     void clearResults() { results_.clear(); }
     cublasHandle_t getCublasHandle() const { return cublas_handle_; }
+    void addResult(const BenchmarkResult &result) { results_.push_back(result); }
 
   private:
     cublasHandle_t cublas_handle_;

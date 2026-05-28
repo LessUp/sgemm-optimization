@@ -1,6 +1,5 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
-import llmstxt from 'vitepress-plugin-llms'
 
 const rawBase = process.env.VITEPRESS_BASE
 const base = rawBase
@@ -232,7 +231,6 @@ export default withMermaid(defineConfig({
   },
 
   vite: {
-    plugins: [llmstxt()],
     build: {
       rollupOptions: {
         output: {
@@ -254,7 +252,6 @@ export default withMermaid(defineConfig({
       },
     },
   },
-
   // Mermaid 配置 - 通过 withMermaid 传入
   mermaid: {
     startOnLoad: true,

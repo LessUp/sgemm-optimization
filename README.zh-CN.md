@@ -29,7 +29,7 @@ cmake --build build -j$(nproc)
 ctest --test-dir build
 ```
 
-运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 负责验证代码格式、CUDA 编译、OpenSpec / 治理结构，以及 Pages 可构建性。
+运行时测试和 benchmark 需要本地 CUDA GPU。托管 CI 负责验证格式检查、CUDA 编译、文档站点检查、路由完整性，以及 Pages 可构建性。
 
 ## GitHub Pages 入口
 
@@ -44,16 +44,16 @@ README 是执行摘要，长篇技术叙事在 GitHub Pages 上。
 | 系统学习 kernel 阶梯 | [学院](https://lessup.github.io/sgemm-optimization/zh/academy/) |
 | 核对证据到底证明什么 | [验证](https://lessup.github.io/sgemm-optimization/zh/validation/) |
 | 追溯论文和相关仓库 | [研究资料台](https://lessup.github.io/sgemm-optimization/zh/research/) |
-| 阅读仓库规范来源 | [OpenSpec 规范](openspec/specs/) |
+| 查看贡献流程与验证命令 | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 ## 验证边界
 
 | 环境 | 能证明什么 |
 |------|------------|
-| 托管 CI | 代码格式、CUDA 编译、OpenSpec / 治理结构、Pages 可构建性 |
+| 托管 CI | 格式检查、CUDA 编译、文档结构、路由完整性、Pages 可构建性 |
 | 本地 CUDA GPU | 运行时正确性、fallback 行为、benchmark 性能 |
 
-这种拆分是刻意设计。CI 负责让仓库保持连贯，只有本地 GPU 执行才能验证运行时行为和速度结论。
+这种拆分是刻意设计。CI 负责让仓库表面保持连贯，只有本地 CUDA 环境才能验证可执行文件、运行时行为和速度结论。
 
 ## 源码地图
 
@@ -63,7 +63,6 @@ src/utils/     CUDA RAII、验证与 benchmark 工具
 src/main.cu    benchmark CLI
 tests/         基于 cuBLAS 的 Google Test 覆盖
 docs/          VitePress 白皮书与学院，公开镜像位于 /en 和 /zh
-openspec/      稳定 specs 与变更工作流
 ```
 
 ## 许可证

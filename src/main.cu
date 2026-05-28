@@ -28,7 +28,5 @@ int main(int argc, char **argv) {
     }
 
     BenchmarkRunner runner(config);
-    runner.runAll();
-
-    return 0;
+    return runner.runAll() ? 0 : 1;
 }
