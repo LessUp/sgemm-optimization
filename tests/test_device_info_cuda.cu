@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "gtest_cuda_environment.cuh"
+#include "kernels/tensor_core_sgemm.cuh"
 #include "utils/benchmark_metrics.cuh"
 #include "utils/cuda_utils.cuh"
 #include "utils/device_info_provider.cuh"
