@@ -8,9 +8,9 @@
  * - 容差配置和边界条件
  */
 
+#include <cmath>
 #include <cuda_runtime.h>
 #include <gtest/gtest.h>
-#include <cmath>
 #include <limits>
 #include <memory>
 #include <vector>
@@ -402,6 +402,4 @@ TEST_F(UtilsIntegrationTest, FullWorkflowWithDeviceMemory) {
     EXPECT_TRUE(has_nonzero);
 }
 
-int main(int argc, char **argv) {
-    return runCudaAwareTests(argc, argv);
-}
+int main(int argc, char **argv) { return runCudaAwareTests(argc, argv); }

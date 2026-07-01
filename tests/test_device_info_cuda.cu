@@ -43,6 +43,4 @@ TEST(DeviceInfoSeam, ProductionAdapterWorks) {
 
 } // namespace
 
-int main(int argc, char **argv) {
-    return runCudaAwareTests(argc, argv);
-}
+int main(int argc, char **argv) { return runCudaAwareTests(argc, argv); }

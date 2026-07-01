@@ -96,6 +96,8 @@ if(BUILD_TESTS)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
+    include(GoogleTest)
+
     # Include test helper functions
     include(cmake/SgemmTestHelpers.cmake)
 
