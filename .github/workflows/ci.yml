@@ -1,8 +1,8 @@
 # Continuous Integration
-# Validates code formatting and CUDA compilation of all targets (benchmark + tests)
+# Validates code formatting, CUDA compilation, and CPU-only test execution
 #
 # Workflow separation:
-# - This workflow: formatting + CUDA compile-time checks (no GPU runtime)
+# - This workflow: formatting + CUDA compile-time checks + CPU tests (no GPU runtime)
 # - pages.yml: docs tests/build and GitHub Pages buildability
 name: CI
 
@@ -58,7 +58,11 @@ jobs:
       - name: Build
         run: cmake --build build -j2
 
+      - name: Run CPU tests
+        run: ctest --test-dir build -L cpu --output-on-failure
+
       - name: Info
         run: |
           echo "✅ CUDA compilation successful for all targets (benchmark + tests)"
+          echo "✅ CPU-only tests passed"
           echo "ℹ️  GPU runtime tests require a CUDA-capable machine"

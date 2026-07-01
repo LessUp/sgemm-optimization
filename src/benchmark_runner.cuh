@@ -20,6 +20,11 @@
  *
  * 负责调度所有内核 benchmark 并生成报告。
  * 与 CLI 解析分离，可被测试或脚本直接调用。
+ *
+ * 设计：
+ * - 使用 KernelCatalog 作为内核阶梯的唯一事实来源
+ * - Catalog 条目包含所有约束和默认容差
+ * - BenchmarkRunner 只负责编排流程，不包含内核特定逻辑
  */
 class BenchmarkRunner {
   public:
@@ -96,6 +101,7 @@ class BenchmarkRunner {
                "===========\n");
 
         SGEMMBenchmark benchmark;
+        bool has_tensor_cores = tensorCoresAvailable();
 
         // cuBLAS 参考
         printf("\nRunning cuBLAS (reference)...\n");
@@ -103,11 +109,11 @@ class BenchmarkRunner {
             M, K, N, config_.settings.run.warmup_runs, config_.settings.run.benchmark_runs);
         float cublas_gflops = cublas_result.gflops;
 
-        // 标准内核
-        runStandardKernels(benchmark, M, K, N);
+        // 使用 Catalog 驱动的内核调度
+        runCatalogKernels(benchmark, M, K, N, has_tensor_cores);
 
-        // Tensor Core 内核
-        runTensorCoreKernels(benchmark, M, K, N);
+        // Tensor Core compute-only 是特殊情况（需要 cublas handle）
+        runTensorCoreComputeOnly(benchmark, M, K, N, has_tensor_cores);
 
         // 报告
         benchmark.printSummary();
@@ -120,80 +126,71 @@ class BenchmarkRunner {
         }
     }
 
-    void runStandardKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
-        const auto& catalog = getKernelCatalog();
-        
-        for (const auto& entry : catalog) {
-            if (entry.type != KernelType::Standard) {
+    void runCatalogKernels(SGEMMBenchmark &benchmark, int M, int K, int N, bool has_tensor_cores) {
+        const auto &catalog = getKernelCatalog();
+
+        for (const auto &entry : catalog) {
+            // Check runtime constraints from catalog
+            if (!entry.canRun(M, K, N, has_tensor_cores)) {
+                printSkipReason(entry, M, K, N, has_tensor_cores);
                 continue;
             }
-            
+
+            // Use tolerance from settings (which may override defaults)
             VerifyTolerance tolerance = config_.settings.toleranceForKernel(entry.type);
-            
-            // Strip tile size annotation for console message (keep result name as-is)
-            std::string console_name = entry.name;
-            size_t paren_pos = console_name.find(" (");
-            if (paren_pos != std::string::npos) {
-                console_name = console_name.substr(0, paren_pos);
-            }
-            
-            printf("Running %s SGEMM...\n", console_name.c_str());
-            benchmark.run(
-                entry.name,
-                entry.launcher,
-                M, K, N,
-                config_.settings.run.warmup_runs,
-                config_.settings.run.benchmark_runs,
-                tolerance);
+
+            printf("Running %s SGEMM...\n", formatConsoleName(entry.name).c_str());
+            benchmark.run(entry.name, entry.launcher, M, K, N, config_.settings.run.warmup_runs,
+                          config_.settings.run.benchmark_runs, tolerance);
         }
     }
 
-    void runTensorCoreKernels(SGEMMBenchmark &benchmark, int M, int K, int N) {
-        if (!tensorCoresAvailable()) {
-            int device;
-            CUDA_CHECK(cudaGetDevice(&device));
-            cudaDeviceProp prop;
-            CUDA_CHECK(cudaGetDeviceProperties(&prop, device));
-            printf("Skipping Tensor Core benchmarks (requires sm_70+, current: sm_%d%d)\n",
-                   prop.major, prop.minor);
-            return;
+    void runTensorCoreComputeOnly(SGEMMBenchmark &benchmark, int M, int K, int N,
+                                  bool has_tensor_cores) {
+        auto tc_entry = getTensorCoreComputeOnlyEntry();
+
+        if (!tc_entry.canRun(M, K, N, has_tensor_cores)) {
+            return; // Skip silently - already reported by catalog kernels
         }
 
-        if (!tensorCoreDimensionsSupported(M, K, N)) {
-            printf("Skipping Tensor Core benchmarks for %d x %d x %d "
-                   "(requires positive dimensions aligned to 16, fallback would mislabel FP32 as WMMA).\n",
-                   M, K, N);
-            return;
-        }
-
-        // Run catalog-based tensor core kernels
-        const auto& catalog = getKernelCatalog();
-        for (const auto& entry : catalog) {
-            if (entry.type != KernelType::TensorCore) {
-                continue;
-            }
-            
-            VerifyTolerance tolerance = config_.settings.toleranceForKernel(entry.type);
-            
-            printf("Running Tensor Core SGEMM (end-to-end, includes FP32->FP16 "
-                   "conversion/fallback)...\n");
-            benchmark.run(
-                entry.name,
-                entry.launcher,
-                M, K, N,
-                config_.settings.run.warmup_runs,
-                config_.settings.run.benchmark_runs,
-                tolerance);
-        }
-
-        // Tensor Core compute-only benchmark remains special-cased
-        // (requires cublas handle, different interface)
         VerifyTolerance tolerance = config_.settings.toleranceForKernel(KernelType::TensorCore);
         printf("Running Tensor Core SGEMM (compute-only WMMA path)...\n");
+
         BenchmarkResult tc_result = runTensorCoreComputeOnlyBenchmark(
             benchmark.getCublasHandle(), M, K, N, config_.settings.run.warmup_runs,
             config_.settings.run.benchmark_runs, tolerance);
         benchmark.addResult(tc_result);
+    }
+
+    void printSkipReason(const KernelCatalogEntry &entry, int M, int K, int N,
+                         bool has_tensor_cores) const {
+        if (entry.constraints.requires_tensor_cores && !has_tensor_cores) {
+            // Use non-throwing error handling for diagnostic output
+            int device = 0;
+            cudaDeviceProp prop{};
+            if (cudaGetDevice(&device) == cudaSuccess &&
+                cudaGetDeviceProperties(&prop, device) == cudaSuccess) {
+                printf("Skipping %s (requires sm_70+, current: sm_%d%d)\n", entry.name.c_str(),
+                       prop.major, prop.minor);
+            } else {
+                printf("Skipping %s (requires sm_70+, current device unavailable)\n",
+                       entry.name.c_str());
+            }
+        } else if (entry.constraints.dimension_alignment > 0) {
+            printf("Skipping %s for %d x %d x %d "
+                   "(requires dimensions aligned to %d)\n",
+                   entry.name.c_str(), M, K, N, entry.constraints.dimension_alignment);
+        }
+    }
+
+    std::string formatConsoleName(const std::string &name) const {
+        // Strip tile size annotation for console message
+        std::string result = name;
+        size_t paren_pos = result.find(" (");
+        if (paren_pos != std::string::npos) {
+            result = result.substr(0, paren_pos);
+        }
+        return result;
     }
 
     BenchmarkConfig config_;

@@ -60,9 +60,7 @@ inline bool tensorCoresAvailable(const DeviceInfoProvider &provider) {
 /**
  * 检查当前设备是否支持 Tensor Core (默认使用生产环境设备)
  */
-inline bool tensorCoresAvailable() {
-    return tensorCoresAvailable(getProductionDeviceInfo());
-}
+inline bool tensorCoresAvailable() { return tensorCoresAvailable(getProductionDeviceInfo()); }
 inline constexpr bool tensorCoreFastPathCompiled() { return SGEMM_HAS_WMMA_TARGET != 0; }
 
 /**
@@ -117,8 +115,8 @@ using FallbackKernel =
  *
  * 提供一个空的 fallback（用于测试或显式配置场景）
  */
-[[maybe_unused]] inline void
-nullFallback(const float *, const float *, float *, int, int, int, cudaStream_t = 0) {
+[[maybe_unused]] inline void nullFallback(const float *, const float *, float *, int, int, int,
+                                          cudaStream_t = 0) {
     // 空实现 - 用于测试
 }
 
@@ -234,8 +232,8 @@ inline void launch_tensor_core_sgemm_fp16(const half *A, const half *B, float *C
     }
 
     if (!tensorCoresAvailable() || !tensorCoreDimensionsSupported(M, K, N)) {
-        throw CudaError(
-            "launch_tensor_core_sgemm_fp16 requires runtime sm_70+ support and dimensions aligned to 16");
+        throw CudaError("launch_tensor_core_sgemm_fp16 requires runtime sm_70+ support and "
+                        "dimensions aligned to 16");
     }
 
     launch_tensor_core_sgemm_fp16_fast_path(A, B, C, M, K, N, stream);
@@ -283,24 +281,10 @@ inline void launch_tensor_core_sgemm_with_fallback(const float *A, const float *
     DeviceMemory<half> d_B_fp16(num_B);
 
     int blockSize = kDefaultBlockSize;
-    // 安全计算 gridSize，检查溢出
-    auto safeGridSize = [](size_t num, int blk) -> int {
-        size_t grid = (num + blk - 1) / blk;
-        if (grid > static_cast<size_t>(INT_MAX)) {
-            throw CudaError("Grid size overflow: matrix too large for kernel launch");
-        }
-        return static_cast<int>(grid);
-    };
+    checkMatrixElementCount(num_A, "A");
+    checkMatrixElementCount(num_B, "B");
     int gridSizeA = safeGridSize(num_A, blockSize);
     int gridSizeB = safeGridSize(num_B, blockSize);
-
-    // 检查矩阵元素数量是否超过 int 最大值
-    if (num_A > static_cast<size_t>(INT_MAX)) {
-        throw CudaError("Matrix A size overflow: too many elements for int parameter");
-    }
-    if (num_B > static_cast<size_t>(INT_MAX)) {
-        throw CudaError("Matrix B size overflow: too many elements for int parameter");
-    }
 
     float_to_half_kernel<<<gridSizeA, blockSize, 0, stream>>>(A, d_A_fp16.get(),
                                                               static_cast<int>(num_A));

@@ -96,91 +96,71 @@ if(BUILD_TESTS)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    add_executable(test_sgemm tests/test_sgemm.cu)
-    target_include_directories(test_sgemm PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_compile_definitions(test_sgemm PRIVATE SGEMM_HAS_WMMA_TARGET=${SGEMM_HAS_WMMA_TARGET})
-    target_link_options(test_sgemm PRIVATE -L${SGEMM_CUDA_LIBRARY_DIR})
-    target_link_libraries(test_sgemm PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-        CUDA::curand
-    )
-    target_compile_options(test_sgemm PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
-    # 工具层测试
-    add_executable(test_utils tests/test_utils.cu)
-    target_include_directories(test_utils PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_compile_definitions(test_utils PRIVATE SGEMM_HAS_WMMA_TARGET=${SGEMM_HAS_WMMA_TARGET})
-    target_link_options(test_utils PRIVATE -L${SGEMM_CUDA_LIBRARY_DIR})
-    target_link_libraries(test_utils PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-        CUDA::curand
-    )
-    target_compile_options(test_utils PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
-    # 性能回归测试
-    add_executable(test_performance tests/test_performance.cu)
-    target_include_directories(test_performance PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_compile_definitions(test_performance PRIVATE SGEMM_HAS_WMMA_TARGET=${SGEMM_HAS_WMMA_TARGET})
-    target_link_options(test_performance PRIVATE -L${SGEMM_CUDA_LIBRARY_DIR})
-    target_link_libraries(test_performance PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-        CUDA::curand
-    )
-    target_compile_options(test_performance PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
-    # Benchmark 设置模块测试
-    add_executable(test_benchmark_settings tests/test_benchmark_settings.cu)
-    target_include_directories(test_benchmark_settings PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(test_benchmark_settings PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-    )
-    target_compile_options(test_benchmark_settings PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
-    # Kernel catalog module test
-    add_executable(test_kernel_catalog tests/test_kernel_catalog.cu)
-    target_include_directories(test_kernel_catalog PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(test_kernel_catalog PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-    )
-    target_compile_options(test_kernel_catalog PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
-    # Device info seam test
-    add_executable(test_device_info_seam tests/test_device_info_seam.cu)
-    target_include_directories(test_device_info_seam PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    target_link_libraries(test_device_info_seam PRIVATE
-        GTest::gtest_main
-        CUDA::cudart
-        CUDA::cublas
-    )
-    target_compile_options(test_device_info_seam PRIVATE
-        $<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>
-    )
-
     include(GoogleTest)
-    gtest_discover_tests(test_sgemm)
-    gtest_discover_tests(test_utils)
-    gtest_discover_tests(test_performance)
-    gtest_discover_tests(test_benchmark_settings)
-    gtest_discover_tests(test_kernel_catalog)
-    gtest_discover_tests(test_device_info_seam)
+
+    # Include test helper functions
+    include(cmake/SgemmTestHelpers.cmake)
+
+    # ═══════════════════════════════════════════════════════════════
+    # CPU-only Tests (no CUDA required)
+    # ═══════════════════════════════════════════════════════════════
+
+    # Benchmark settings module test - pure C++, no CUDA dependencies
+    sgemm_add_cpu_test(
+        NAME test_benchmark_settings
+        SOURCES tests/test_benchmark_settings.cpp
+    )
+
+    # Device info provider CPU tests - uses fake device properties
+    # Compiled as .cu because it includes kernel headers with CUDA launch syntax
+    sgemm_add_cpu_test(
+        NAME test_device_info_cpu
+        SOURCES tests/test_device_info_cpu.cu
+    )
+
+    # ═══════════════════════════════════════════════════════════════
+    # CUDA Tests (requires CUDA device, skipped if unavailable)
+    # ═══════════════════════════════════════════════════════════════
+
+    # Kernel correctness tests with property-based testing
+    sgemm_add_cuda_test(
+        NAME test_sgemm
+        SOURCES tests/test_sgemm.cu
+        CUDA_LIBRARIES CUDA::curand
+        REQUIRES_WMMA
+    )
+
+    # Utility layer tests (DeviceMemory, verifier RAII, etc.)
+    sgemm_add_cuda_test(
+        NAME test_utils
+        SOURCES tests/test_utils.cu
+        CUDA_LIBRARIES CUDA::curand
+        REQUIRES_WMMA
+    )
+
+    # Kernel catalog module test - requires device memory and kernel launch
+    sgemm_add_cuda_test(
+        NAME test_kernel_catalog
+        SOURCES tests/test_kernel_catalog.cu
+        REQUIRES_WMMA
+    )
+
+    # Device info provider CUDA tests - requires real GPU for production adapter
+    sgemm_add_cuda_test(
+        NAME test_device_info_cuda
+        SOURCES tests/test_device_info_cuda.cu
+    )
+
+    # ═══════════════════════════════════════════════════════════════
+    # Performance Tests (CUDA + performance label)
+    # ═══════════════════════════════════════════════════════════════
+
+    # Performance regression tests
+    sgemm_add_cuda_perf_test(
+        NAME test_performance
+        SOURCES tests/test_performance.cu
+        CUDA_LIBRARIES CUDA::curand
+        REQUIRES_WMMA
+    )
+
 endif()

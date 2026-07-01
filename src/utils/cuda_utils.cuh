@@ -170,6 +170,29 @@ inline void initRandomMatrix(float *data, int rows, int cols, float min_val = -1
 // Utility Functions
 // ============================================================================
 
+/**
+ * Safely compute grid size from element count and block size.
+ * Throws CudaError if the grid size would overflow int.
+ */
+inline int safeGridSize(size_t num, int blk) {
+    size_t grid = (num + blk - 1) / blk;
+    if (grid > static_cast<size_t>(INT_MAX)) {
+        throw CudaError("Grid size overflow: matrix too large for kernel launch");
+    }
+    return static_cast<int>(grid);
+}
+
+/**
+ * Check that a matrix element count fits in int (for kernel parameters).
+ * Throws CudaError if it doesn't.
+ */
+inline void checkMatrixElementCount(size_t count, const char *name) {
+    if (count > static_cast<size_t>(INT_MAX)) {
+        throw CudaError(std::string("Matrix ") + name +
+                        " size overflow: too many elements for int parameter");
+    }
+}
+
 inline bool cudaDeviceAvailable() {
     int device_count = 0;
     cudaError_t status = cudaGetDeviceCount(&device_count);
@@ -255,7 +278,8 @@ class DeviceInfoCache {
     }
 
     int computeCoresPerSM() const {
-        // 参考: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
+        // 参考:
+        // https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
         if (prop_.major == 7) {
             return 64; // Volta (sm_70, sm_72), Turing (sm_75)
         } else if (prop_.major == 8) {
@@ -291,6 +315,4 @@ inline DeviceInfoProvider ProductionDeviceInfoProvider::get() const {
 /**
  * Convenience function: get production device info
  */
-inline DeviceInfoProvider getProductionDeviceInfo() {
-    return ProductionDeviceInfoProvider{}.get();
-}
+inline DeviceInfoProvider getProductionDeviceInfo() { return ProductionDeviceInfoProvider{}.get(); }

@@ -94,8 +94,9 @@ class SGEMMBenchmark {
                                  d_B.get(), N, d_A.get(), K, &beta, d_C_ref.get(), N));
 
         // 使用统一的 measureGpuTime 计时
-        float time_ms = measureGpuTime([&]() { kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N); },
-                                       warmup_runs, benchmark_runs);
+        float time_ms =
+            measureGpuTime([&]() { kernel_func(d_A.get(), d_B.get(), d_C.get(), M, K, N); },
+                           warmup_runs, benchmark_runs);
 
         // 计算指标
         PerformanceMetrics metrics = calculateSgemmMetrics(M, K, N, time_ms);
@@ -210,6 +211,9 @@ class SGEMMBenchmark {
                  << "," << ai << "\n";
         }
 
+        if (file.fail()) {
+            fprintf(stderr, "Warning: errors occurred while writing %s\n", filename.c_str());
+        }
         file.close();
         printf("Approximate roofline data exported to: %s\n", filename.c_str());
     }

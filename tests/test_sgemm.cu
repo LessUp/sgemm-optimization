@@ -344,13 +344,9 @@ TEST_F(DimensionInvarianceTest, AllStandardKernelsWorkWithVariousDimensions) {
                    [](const float *A, const float *B, float *C, int m, int k, int n) {
                        launch_bank_conflict_free_sgemm<32>(A, B, C, m, k, n);
                    });
-        testKernel("DoubleBuffer",
-                   [](const float *A, const float *B, float *C, int m, int k, int n) {
-                       launch_double_buffer_sgemm<32>(A, B, C, m, k, n);
-                   });
+        testKernel("DoubleBuffer", [](const float *A, const float *B, float *C, int m, int k,
+                                      int n) { launch_double_buffer_sgemm<32>(A, B, C, m, k, n); });
     }
 }
 
-int main(int argc, char **argv) {
-    return runCudaAwareTests(argc, argv);
-}
+int main(int argc, char **argv) { return runCudaAwareTests(argc, argv); }

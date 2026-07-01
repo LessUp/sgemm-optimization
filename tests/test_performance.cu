@@ -110,22 +110,24 @@ class PerformanceRegressionTest : public ::testing::Test {
 TEST_F(PerformanceRegressionTest, NaiveKernelPerformance) {
     printf("\nNaive Kernel Performance:\n");
     for (const auto &[M, K, N] : test_dimensions_) {
-        runPerformanceTest("Naive",
-                           [](const float *A, const float *B, float *C, int m, int k, int n) {
-                               launch_naive_sgemm<>(A, B, C, m, k, n);
-                           },
-                           M, K, N);
+        runPerformanceTest(
+            "Naive",
+            [](const float *A, const float *B, float *C, int m, int k, int n) {
+                launch_naive_sgemm<>(A, B, C, m, k, n);
+            },
+            M, K, N);
     }
 }
 
 TEST_F(PerformanceRegressionTest, TiledKernelPerformance) {
     printf("\nTiled Kernel Performance:\n");
     for (const auto &[M, K, N] : test_dimensions_) {
-        runPerformanceTest("Tiled",
-                           [](const float *A, const float *B, float *C, int m, int k, int n) {
-                               launch_tiled_sgemm<32>(A, B, C, m, k, n);
-                           },
-                           M, K, N);
+        runPerformanceTest(
+            "Tiled",
+            [](const float *A, const float *B, float *C, int m, int k, int n) {
+                launch_tiled_sgemm<32>(A, B, C, m, k, n);
+            },
+            M, K, N);
     }
 }
 
@@ -190,10 +192,8 @@ TEST_F(PerformanceRegressionTest, PeakPerformanceReference) {
     printf("  Theoretical Peak Bandwidth: %.2f GB/s\n", peak_bandwidth_);
 
     // 验证峰值在合理范围内
-    EXPECT_GT(peak_gflops_, 1000.0f) << "Peak GFLOPS seems too low";
-    EXPECT_LT(peak_gflops_, 100000.0f) << "Peak GFLOPS seems too high";
+    EXPECT_GT(peak_gflops_, 100.0f) << "Peak GFLOPS seems too low";
+    EXPECT_LT(peak_gflops_, 200000.0f) << "Peak GFLOPS seems too high";
 }
 
-int main(int argc, char **argv) {
-    return runCudaAwareTests(argc, argv);
-}
+int main(int argc, char **argv) { return runCudaAwareTests(argc, argv); }

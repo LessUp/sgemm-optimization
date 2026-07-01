@@ -59,8 +59,10 @@ inline PerformanceMetrics calculateSgemmMetrics(int M, int K, int N, float time_
  * 提供重载版本以支持可注入的 device info provider。
  */
 inline float getTheoreticalPeakGflops(const DeviceInfoProvider &provider) {
-    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz) * 1000 (MHz factor)
-    float peakGflops = provider.smCount() * provider.cores_per_sm * 2 * provider.clock_ghz * 1000;
+    // 峰值 GFLOPS = SMs * cores/SM * 2 (FMA) * clock (GHz)
+    // clock_ghz 已经是 GHz 单位，GFLOPS = FLOPS / 1e9 = cores * 2 * clock_GHz
+    float peakGflops =
+        static_cast<float>(provider.smCount()) * provider.cores_per_sm * 2.0f * provider.clock_ghz;
     return peakGflops;
 }
 
