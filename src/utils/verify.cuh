@@ -270,6 +270,13 @@ class SGEMMVerifier {
      */
     cublasHandle_t getHandle() { return handle_; }
 
+    /**
+     * Legacy compatibility: check if verification result indicates failure.
+     *
+     * @deprecated Use result.passed or result.shouldFlagAsIncorrect() directly.
+     */
+    static bool shouldFlagAsIncorrect(const VerifyResult &result) { return !result.passed; }
+
   private:
     cublasHandle_t handle_;
 };
