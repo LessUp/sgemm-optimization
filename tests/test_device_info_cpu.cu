@@ -106,10 +106,10 @@ TEST_F(FakeDeviceProvider, VoltaPeakGflopsCalculation) {
 }
 
 TEST_F(FakeDeviceProvider, AmperePeakGflopsCalculation) {
-    // A100: 108 SMs * 64 cores/SM * 2 (FMA) * 1.41 GHz * 1000
-    // Expected: ~19.481 TFLOPS
+    // A100: 108 SMs * 64 cores/SM * 2 (FMA) * 1.41 GHz
+    // Expected: ~19.492 TFLOPS
     float peak_gflops = getTheoreticalPeakGflops(ampere_provider_);
-    EXPECT_NEAR(peak_gflops, 19481.0f, 0.1f);
+    EXPECT_NEAR(peak_gflops, 19491.84f, 0.1f);
 }
 
 TEST_F(FakeDeviceProvider, VoltaPeakBandwidthCalculation) {
