@@ -5,10 +5,12 @@
  * - Run configuration (warmup, benchmark iterations)
  * - Verification tolerance policy
  * - Output/export options
+ *
+ * This is a CPU-only test file that does not require CUDA.
  */
 
-#include <gtest/gtest.h>
 #include "utils/benchmark_settings.cuh"
+#include <gtest/gtest.h>
 
 // ============================================================================
 // Run Settings Tests
@@ -138,12 +140,12 @@ TEST(BenchmarkSettingsTest, CustomOutputSettings) {
 
 TEST(BenchmarkSettingsTest, ToleranceForKernelTypeUsesDefaults) {
     BenchmarkSettings settings;
-    
+
     // Standard kernels use standard tolerance
     VerifyTolerance std_tol = settings.toleranceForKernel(KernelType::Standard);
     EXPECT_FLOAT_EQ(std_tol.rtol, kStandardVerifyTolerance.rtol);
     EXPECT_FLOAT_EQ(std_tol.atol, kStandardVerifyTolerance.atol);
-    
+
     // Tensor Core kernels use tensor core tolerance
     VerifyTolerance tc_tol = settings.toleranceForKernel(KernelType::TensorCore);
     EXPECT_FLOAT_EQ(tc_tol.rtol, kTensorCoreVerifyTolerance.rtol);
@@ -152,22 +154,17 @@ TEST(BenchmarkSettingsTest, ToleranceForKernelTypeUsesDefaults) {
 
 TEST(BenchmarkSettingsTest, ToleranceForKernelTypeRespectsCustomSettings) {
     BenchmarkSettings settings;
-    
+
     // Customize both tolerances
     settings.verify.standard_tolerance = {0.01f, 0.001f};
     settings.verify.tensor_core_tolerance = {0.1f, 0.05f};
-    
+
     // Verify toleranceForKernel returns the custom values
     VerifyTolerance std_tol = settings.toleranceForKernel(KernelType::Standard);
     EXPECT_FLOAT_EQ(std_tol.rtol, 0.01f);
     EXPECT_FLOAT_EQ(std_tol.atol, 0.001f);
-    
+
     VerifyTolerance tc_tol = settings.toleranceForKernel(KernelType::TensorCore);
     EXPECT_FLOAT_EQ(tc_tol.rtol, 0.1f);
     EXPECT_FLOAT_EQ(tc_tol.atol, 0.05f);
-}
-
-int main(int argc, char **argv) {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }

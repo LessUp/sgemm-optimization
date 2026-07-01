@@ -90,6 +90,10 @@ class CudaTimer {
  */
 template <typename RunFunc>
 float measureGpuTime(RunFunc func, int warmup_runs = 5, int benchmark_runs = 20) {
+    if (benchmark_runs <= 0) {
+        throw CudaError("measureGpuTime: benchmark_runs must be positive");
+    }
+
     // 预热运行
     for (int i = 0; i < warmup_runs; ++i) {
         func();

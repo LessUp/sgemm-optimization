@@ -1,15 +1,15 @@
 /**
- * Device Info Provider Seam Tests
+ * Device Info Provider CPU-only Tests
  *
- * Tests for the device capability query seam, demonstrating that tests can
- * inject fake device info without relying on real GPU hardware capabilities.
+ * Tests for the device capability query seam, using fake device properties
+ * without requiring any CUDA device. These tests can run on any system
+ * with a C++17 compiler.
  */
 
 #include <gtest/gtest.h>
 
 #include "kernels/tensor_core_sgemm.cuh"
 #include "utils/benchmark_metrics.cuh"
-#include "utils/cuda_utils.cuh"
 #include "utils/device_info_provider.cuh"
 
 namespace {
@@ -25,9 +25,9 @@ class FakeDeviceProvider : public ::testing::Test {
         volta_prop_.major = 7;
         volta_prop_.minor = 0;
         volta_prop_.multiProcessorCount = 80;
-        volta_prop_.clockRate = 1530000; // 1.53 GHz in kHz
+        volta_prop_.clockRate = 1530000;      // 1.53 GHz in kHz
         volta_prop_.memoryClockRate = 877000; // 877 MHz in kHz
-        volta_prop_.memoryBusWidth = 4096; // HBM2
+        volta_prop_.memoryBusWidth = 4096;    // HBM2
 
         volta_provider_ = DeviceInfoProvider{
             &volta_prop_,
@@ -163,33 +163,6 @@ TEST_F(FakeDeviceProvider, ArchitectureNamingUnknown) {
     DeviceInfoProvider unknown_provider{&unknown_prop, 128, 1.0f};
 
     EXPECT_STREQ(getTensorCoreArchName(unknown_provider), "Unknown");
-}
-
-// ============================================================================
-// Production Adapter Integration Test
-// ============================================================================
-
-TEST(DeviceInfoSeam, ProductionAdapterWorks) {
-    // This test validates that the production adapter can successfully query
-    // real device info. It should pass on any CUDA-capable device.
-    DeviceInfoProvider prod = getProductionDeviceInfo();
-
-    // Basic sanity checks
-    EXPECT_NE(prod.prop, nullptr);
-    EXPECT_GT(prod.cores_per_sm, 0);
-    EXPECT_GT(prod.clock_ghz, 0.0f);
-
-    // Check that overloaded functions work without provider parameter
-    float peak_gflops = getTheoreticalPeakGflops();
-    EXPECT_GT(peak_gflops, 0.0f);
-
-    float peak_bandwidth = getTheoreticalPeakBandwidth();
-    EXPECT_GT(peak_bandwidth, 0.0f);
-
-    // Tensor core availability should be consistent
-    bool has_tc_explicit = tensorCoresAvailable(prod);
-    bool has_tc_default = tensorCoresAvailable();
-    EXPECT_EQ(has_tc_explicit, has_tc_default);
 }
 
 // ============================================================================
